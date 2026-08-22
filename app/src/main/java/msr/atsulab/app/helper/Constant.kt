@@ -10,7 +10,7 @@ object Constant {
     const val ANILIST_WEBSITE_URL = "https://anilist.co"
 
     private const val ANILIST_CLIENT_ID = 49180
-    const val ANILIST_LOGIN_URL = "$ANILIST_WEBSITE_URL/api/v2/oauth/authorize?client_id=$ANILIST_CLIENT_ID&response_type=token&redirect_uri=msr.atsulab.app://anilist"
+    const val ANILIST_LOGIN_URL = "$ANILIST_WEBSITE_URL/api/v2/oauth/authorize?client_id=$ANILIST_CLIENT_ID&response_type=token"
     const val ANILIST_REGISTER_URL = "$ANILIST_WEBSITE_URL/signup"
     const val ANILIST_PROFILE_SETTINGS_URL = "$ANILIST_WEBSITE_URL/settings"
     const val ANILIST_ACCOUNT_SETTINGS_URL = "$ANILIST_PROFILE_SETTINGS_URL/account"
