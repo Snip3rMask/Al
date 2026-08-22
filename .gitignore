@@ -88,3 +88,6 @@ lint/reports/
 
 .DS_Store
 .kotlin
+
+# Keep fixed debug keystore for CI reproducible debug builds
+!debug.keystore
