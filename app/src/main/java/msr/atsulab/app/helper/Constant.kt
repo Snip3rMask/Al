@@ -9,8 +9,11 @@ object Constant {
     const val ANILIST_API_RELATION_TYPE_VERSION = 2
     const val ANILIST_WEBSITE_URL = "https://anilist.co"
 
-    private const val ANILIST_CLIENT_ID = 49180
-    val ANILIST_LOGIN_URL = "$ANILIST_WEBSITE_URL/api/v2/oauth/authorize?client_id=$ANILIST_CLIENT_ID&response_type=token&redirect_uri=${BuildConfig.APPLICATION_ID}://anilist"
+    const val ANILIST_CLIENT_ID = 49180
+    const val ANILIST_CLIENT_SECRET = "9jh9iRaraXXFPlgae5OYzPNyMJJVMld1nPhHvVWg"
+    const val ANILIST_REDIRECT_URI = "msr.atsulab.app://anilist" // debug uses msr.atsulab.app.debug://anilist (match panel)
+    val ANILIST_LOGIN_URL = "$ANILIST_WEBSITE_URL/api/v2/oauth/authorize?client_id=$ANILIST_CLIENT_ID&response_type=code&redirect_uri=${BuildConfig.APPLICATION_ID}://anilist"
+    const val ANILIST_TOKEN_URL = "$ANILIST_WEBSITE_URL/api/v2/oauth/token"
     const val ANILIST_REGISTER_URL = "$ANILIST_WEBSITE_URL/signup"
     const val ANILIST_PROFILE_SETTINGS_URL = "$ANILIST_WEBSITE_URL/settings"
     const val ANILIST_ACCOUNT_SETTINGS_URL = "$ANILIST_PROFILE_SETTINGS_URL/account"

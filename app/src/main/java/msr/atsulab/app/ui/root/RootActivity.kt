@@ -85,9 +85,15 @@ class RootActivity : BaseActivity<ActivityRootBinding>() {
             }
             navigationManager.isAtPreLoginScreen() -> {
                 if (deepLink.isLogin()) {
-                    val fullDeepLink = deepLink.uri?.encodedFragment
-                    val accessToken = fullDeepLink?.substring("access_token=".length, fullDeepLink.indexOf("&"))
-                    navigationManager.navigateToLogin(accessToken, true)
+                    val uri = deepLink.uri
+                    val code = uri?.getQueryParameter("code")
+                    if (code != null) {
+                        exchangeCodeForToken(code)
+                    } else {
+                        val fullDeepLink = uri?.encodedFragment
+                        val accessToken = fullDeepLink?.substring("access_token=".length, fullDeepLink.indexOf("&"))
+                        navigationManager.navigateToLogin(accessToken, true)
+                    }
                 } else {
                     navigationManager.navigateToMain(deepLink)
                 }
@@ -98,6 +104,33 @@ class RootActivity : BaseActivity<ActivityRootBinding>() {
                 intent.data = null
             }
         }
+    }
+
+    private fun exchangeCodeForToken(code: String) {
+        Thread {
+            try {
+                val client = okhttp3.OkHttpClient()
+                val form = okhttp3.FormBody.Builder()
+                    .add("grant_type", "authorization_code")
+                    .add("client_id", msr.atsulab.app.helper.Constant.ANILIST_CLIENT_ID.toString())
+                    .add("client_secret", msr.atsulab.app.helper.Constant.ANILIST_CLIENT_SECRET)
+                    .add("redirect_uri", applicationContext.packageName + "://anilist")
+                    .add("code", code)
+                    .build()
+                val req = okhttp3.Request.Builder().url(msr.atsulab.app.helper.Constant.ANILIST_TOKEN_URL).post(form).build()
+                client.newCall(req).execute().use { resp ->
+                    val body = resp.body?.string() ?: ""
+                    val token = org.json.JSONObject(body).optString("access_token")
+                    if (token.isNotEmpty()) {
+                        runOnUiThread { navigationManager.navigateToLogin(token, true) }
+                    } else {
+                        runOnUiThread { android.widget.Toast.makeText(this, "Login failed: ${{body.take(200)}", android.widget.Toast.LENGTH_LONG).show() }
+                    }
+                }
+            } catch (e: Exception) {
+                runOnUiThread { android.widget.Toast.makeText(this, "Login error: ${{e.message}", android.widget.Toast.LENGTH_LONG).show() }
+            }
+        }.start()
     }
 
     private fun requestNotificationPermission() {
