@@ -124,11 +124,11 @@ class RootActivity : BaseActivity<ActivityRootBinding>() {
                     if (token.isNotEmpty()) {
                         runOnUiThread { navigationManager.navigateToLogin(token, true) }
                     } else {
-                        runOnUiThread { android.widget.Toast.makeText(this, "Login failed: ${{body.take(200)}", android.widget.Toast.LENGTH_LONG).show() }
+                        runOnUiThread { android.widget.Toast.makeText(this, "Login failed: " + body.take(200), android.widget.Toast.LENGTH_LONG).show() }
                     }
                 }
             } catch (e: Exception) {
-                runOnUiThread { android.widget.Toast.makeText(this, "Login error: ${{e.message}", android.widget.Toast.LENGTH_LONG).show() }
+                runOnUiThread { android.widget.Toast.makeText(this, "Login error: " + (e.message ?: ""), android.widget.Toast.LENGTH_LONG).show() }
             }
         }.start()
     }
