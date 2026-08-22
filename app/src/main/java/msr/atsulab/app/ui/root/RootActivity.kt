@@ -98,6 +98,14 @@ class RootActivity : BaseActivity<ActivityRootBinding>() {
                 intent.data = null
             }
         }
+    } else {
+                        runOnUiThread { android.widget.Toast.makeText(this, "Login failed: ${{body.take(200)}", android.widget.Toast.LENGTH_LONG).show() }
+                    }
+                }
+            } catch (e: Exception) {
+                runOnUiThread { android.widget.Toast.makeText(this, "Login error: ${{e.message}", android.widget.Toast.LENGTH_LONG).show() }
+            }
+        }.start()
     }
 
     private fun requestNotificationPermission() {
