@@ -46,6 +46,7 @@
 
                 <data android:scheme="alchan" />
                 <data android:scheme="msr.atsulab.app" />
+                <data android:scheme="msr.atsulab.app.debug" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />

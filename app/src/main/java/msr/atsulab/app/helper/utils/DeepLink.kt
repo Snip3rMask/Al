@@ -25,9 +25,9 @@ class DeepLink(
         return uri?.getQueryParameter(key)
     }
 
-    private fun isAlChanScheme() = getScheme() == SCHEME || getScheme() == SCHEME_NEW
+    private fun isAlChanScheme() = getScheme() == SCHEME || getScheme() == SCHEME_NEW || getScheme() == SCHEME_DEBUG
 
-    fun isLogin() = (isAlChanScheme() && getAuthority() == LOGIN) || (getScheme() == SCHEME_NEW && getAuthority() == "anilist")
+    fun isLogin() = (isAlChanScheme() && getAuthority() == LOGIN) || (getScheme() == SCHEME_NEW && getAuthority() == "anilist") || (getScheme() == SCHEME_DEBUG && getAuthority() == "anilist")
     fun isHome() = isAlChanScheme() && getAuthority() == HOME
     fun isAnimeList() = isAlChanScheme() && getAuthority() == ANIME_LIST
     fun isMangaList() = isAlChanScheme() && getAuthority() == MANGA_LIST
@@ -57,6 +57,7 @@ class DeepLink(
         // region AL-chan
         private const val SCHEME = "alchan"
         private const val SCHEME_NEW = "msr.atsulab.app"
+        private const val SCHEME_DEBUG = "msr.atsulab.app.debug"
 
         private const val LOGIN = "login"
         private const val HOME = "home"
