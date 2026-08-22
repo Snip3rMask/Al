@@ -27,7 +27,7 @@ class DeepLink(
 
     private fun isAlChanScheme() = getScheme() == SCHEME || getScheme() == SCHEME_NEW
 
-    fun isLogin() = isAlChanScheme() && getAuthority() == LOGIN
+    fun isLogin() = (isAlChanScheme() && getAuthority() == LOGIN) || (getScheme() == SCHEME_NEW && getAuthority() == "anilist")
     fun isHome() = isAlChanScheme() && getAuthority() == HOME
     fun isAnimeList() = isAlChanScheme() && getAuthority() == ANIME_LIST
     fun isMangaList() = isAlChanScheme() && getAuthority() == MANGA_LIST
