@@ -105,9 +105,36 @@
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content">
 
+                                <androidx.appcompat.widget.LinearLayoutCompat
+                                    android:id="@+id/mediaStatsLayout"
+                                    android:orientation="horizontal"
+                                    android:gravity="center_vertical"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content">
+
+                                    <com.google.android.material.textview.MaterialTextView
+                                        android:id="@+id/mediaScoreText"
+                                        style="?themeSmallFont"
+                                        android:maxLines="1"
+                                        android:ellipsize="end"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"/>
+
+                                    <com.google.android.material.textview.MaterialTextView
+                                        android:id="@+id/mediaFavoritesText"
+                                        style="?themeSmallFont"
+                                        android:layout_marginStart="@dimen/marginNormal"
+                                        android:maxLines="1"
+                                        android:ellipsize="end"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"/>
+
+                                </androidx.appcompat.widget.LinearLayoutCompat>
+
                                 <com.google.android.material.textview.MaterialTextView
                                     android:id="@+id/mediaTitleText"
                                     style="?themeTitleFont"
+                                    android:layout_marginTop="@dimen/marginClose"
                                     android:maxLines="3"
                                     android:ellipsize="end"
                                     android:layout_width="match_parent"
@@ -207,80 +234,64 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content">
 
-                    <LinearLayout
-                        android:id="@+id/mediaScoreLayout"
-                        android:orientation="vertical"
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/mediaDownloadButton"
+                        style="?themePrimaryButton"
+                        android:text="@string/download"
+                        app:icon="@drawable/ic_download"
+                        app:iconGravity="textStart"
+                        app:iconPadding="@dimen/marginSmall"
+                        app:iconTint="?themeBackgroundColor"
                         android:layout_weight="1"
                         android:layout_width="0dp"
-                        android:layout_height="wrap_content">
+                        android:layout_height="wrap_content"/>
+
+                    <FrameLayout
+                        android:id="@+id/mediaAddToListLayout"
+                        android:layout_marginHorizontal="@dimen/marginSmall"
+                        android:layout_width="@dimen/iconActionSize"
+                        android:layout_height="@dimen/iconActionSize">
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/mediaAddToListButton"
+                            style="?themePrimaryButton"
+                            android:contentDescription="@string/add_to_list"
+                            app:cornerRadius="@dimen/iconActionSize"
+                            app:icon="@drawable/ic_bookmark_add"
+                            app:iconGravity="textStart"
+                            app:iconPadding="0dp"
+                            app:iconSize="@dimen/iconSize"
+                            app:iconTint="?themeBackgroundColor"
+                            android:insetTop="0dp"
+                            android:insetBottom="0dp"
+                            android:insetLeft="0dp"
+                            android:insetRight="0dp"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"/>
 
                         <com.google.android.material.textview.MaterialTextView
-                            android:id="@+id/mediaScoreText"
-                            style="?themeRegularBoldFont"
-                            android:text="0"
-                            android:textAlignment="center"
-                            android:maxLines="1"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"/>
+                            android:id="@+id/mediaListStatusBadge"
+                            android:background="@drawable/shape_oval_solid"
+                            android:backgroundTint="#02A9FF"
+                            android:gravity="center"
+                            android:textSize="@dimen/fontTiny"
+                            android:textColor="@color/white"
+                            android:visibility="gone"
+                            android:layout_gravity="bottom|end"
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"/>
 
-                        <com.google.android.material.textview.MaterialTextView
-                            style="?themeSmallFont"
-                            android:text="@string/score"
-                            android:textAlignment="center"
-                            android:maxLines="1"
-                            android:ellipsize="end"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"/>
-
-                    </LinearLayout>
-
-                    <View
-                        android:id="@+id/mediaBarDivider1"
-                        android:background="?themeDividerColor"
-                        android:layout_marginHorizontal="@dimen/marginClose"
-                        android:layout_width="@dimen/lineWidth"
-                        android:layout_height="match_parent"/>
-
-                    <LinearLayout
-                        android:id="@+id/mediaFavoritesLayout"
-                        android:orientation="vertical"
-                        android:layout_weight="1"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content">
-
-                        <com.google.android.material.textview.MaterialTextView
-                            android:id="@+id/mediaFavoritesText"
-                            style="?themeRegularBoldFont"
-                            android:text="0"
-                            android:textAlignment="center"
-                            android:maxLines="1"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"/>
-
-                        <com.google.android.material.textview.MaterialTextView
-                            style="?themeSmallFont"
-                            android:text="@string/favorites"
-                            android:textAlignment="center"
-                            android:maxLines="1"
-                            android:ellipsize="end"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"/>
-
-                    </LinearLayout>
-
-                    <View
-                        android:id="@+id/mediaBarDivider2"
-                        android:background="?themeDividerColor"
-                        android:layout_marginHorizontal="@dimen/marginClose"
-                        android:layout_width="@dimen/lineWidth"
-                        android:layout_height="match_parent"/>
+                    </FrameLayout>
 
                     <com.google.android.material.button.MaterialButton
-                        android:id="@+id/mediaAddToListButton"
+                        android:id="@+id/mediaPlayButton"
                         style="?themePrimaryButton"
-                        android:text="@string/add_to_list"
-                        android:layout_marginStart="@dimen/marginSmall"
-                        android:layout_weight="2"
+                        android:text="@string/play"
+                        app:icon="@drawable/ic_play_button"
+                        app:iconGravity="textStart"
+                        app:iconPadding="@dimen/marginSmall"
+                        app:iconTint="?themeBackgroundColor"
+                        android:layout_weight="1"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"/>
 

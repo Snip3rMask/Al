@@ -30,6 +30,7 @@ import msr.atsulab.app.helper.utils.ImageUtil
 import msr.atsulab.app.helper.utils.SpaceItemDecoration
 import msr.atsulab.app.helper.utils.TimeUtil
 import msr.atsulab.app.type.MediaSeason
+import msr.atsulab.app.type.MediaListStatus
 import msr.atsulab.app.ui.base.BaseFragment
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import kotlin.math.abs
@@ -111,6 +112,14 @@ class MediaFragment : BaseFragment<FragmentMediaBinding, MediaViewModel>() {
                 viewModel.loadBannerImage()
             }
 
+            mediaDownloadButton.clicks {
+                dialog.showToast(getString(R.string.coming_soon))
+            }
+
+            mediaPlayButton.clicks {
+                dialog.showToast(getString(R.string.coming_soon))
+            }
+
             mediaAddToListButton.clicks {
                 arguments?.getInt(MEDIA_ID)?.let { mediaId ->
                     navigation.navigateToEditor(mediaId, false) {
@@ -134,16 +143,7 @@ class MediaFragment : BaseFragment<FragmentMediaBinding, MediaViewModel>() {
         disposables.addAll(
             viewModel.isAuthenticated.subscribe {
                 binding.mediaAddToListButton.isEnabled = it
-
-                if (!it) {
-                    binding.mediaAddToListButton.apply {
-                        text = getString(R.string.please_login)
-                        strokeWidth = 0
-                        strokeColor = ColorStateList.valueOf(Color.TRANSPARENT)
-                        backgroundTintList = ColorStateList.valueOf(context.getAttrValue(R.attr.themeContentTransparentColor))
-                        setTextColor(context.getAttrValue(R.attr.themeContentColor))
-                    }
-                }
+                if (!it) renderAddToListState(MediaType.ANIME, null)
             },
             viewModel.loading.subscribe {
                 binding.mediaSwipeRefresh.isRefreshing = it
@@ -194,29 +194,13 @@ class MediaFragment : BaseFragment<FragmentMediaBinding, MediaViewModel>() {
                 }
             },
             viewModel.averageScore.subscribe {
-                binding.mediaScoreText.text = it.getNumberFormatting()
+                binding.mediaScoreText.text = getString(R.string.score) + ": " + it.getNumberFormatting()
             },
             viewModel.favorites.subscribe {
-                binding.mediaFavoritesText.text = it.getNumberFormatting()
+                binding.mediaFavoritesText.text = getString(R.string.favorites) + ": " + it.getNumberFormatting()
             },
-            viewModel.addToListButtonText.subscribe {
-                if (it.isNotBlank()) {
-                    binding.mediaAddToListButton.apply {
-                        text = it
-                        strokeWidth = context.resources.getDimensionPixelSize(R.dimen.lineWidth)
-                        strokeColor = ColorStateList.valueOf(context.getAttrValue(R.attr.themePrimaryColor))
-                        backgroundTintList = ColorStateList.valueOf(Color.TRANSPARENT)
-                        setTextColor(context.getAttrValue(R.attr.themePrimaryColor))
-                    }
-                } else {
-                    binding.mediaAddToListButton.apply {
-                        text = getString(R.string.add_to_list)
-                        strokeWidth = 0
-                        strokeColor = ColorStateList.valueOf(Color.TRANSPARENT)
-                        backgroundTintList = ColorStateList.valueOf(context.getAttrValue(R.attr.themePrimaryColor))
-                        setTextColor(context.getAttrValue(R.attr.themeBackgroundColor))
-                    }
-                }
+            viewModel.addToListState.subscribe { (mediaType, status) ->
+                renderAddToListState(mediaType, status)
             },
             viewModel.mediaItemList.subscribe {
                 currentMedia = it.firstOrNull()?.media
@@ -406,6 +390,44 @@ class MediaFragment : BaseFragment<FragmentMediaBinding, MediaViewModel>() {
         menuItemMediaStats = null
         menuItemSocial = null
         menuItemReview = null
+    }
+
+    private fun renderAddToListState(mediaType: MediaType, status: MediaListStatus?) {
+        binding.mediaAddToListButton.apply {
+            if (status == null) {
+                icon = ContextCompat.getDrawable(context, R.drawable.ic_bookmark_add)
+                strokeWidth = 0
+                strokeColor = ColorStateList.valueOf(Color.TRANSPARENT)
+                backgroundTintList = ColorStateList.valueOf(context.getAttrValue(R.attr.themePrimaryColor))
+                iconTintList = ColorStateList.valueOf(context.getAttrValue(R.attr.themeBackgroundColor))
+                contentDescription = getString(R.string.add_to_list)
+            } else {
+                icon = ContextCompat.getDrawable(context, R.drawable.ic_bookmark)
+                strokeWidth = context.resources.getDimensionPixelSize(R.dimen.lineWidth)
+                strokeColor = ColorStateList.valueOf(context.getAttrValue(R.attr.themePrimaryColor))
+                backgroundTintList = ColorStateList.valueOf(Color.TRANSPARENT)
+                iconTintList = ColorStateList.valueOf(context.getAttrValue(R.attr.themePrimaryColor))
+                contentDescription = status.getString(mediaType)
+            }
+        }
+
+        binding.mediaListStatusBadge.apply {
+            if (status == null) {
+                show(false)
+            } else {
+                text = when (status) {
+                    MediaListStatus.CURRENT -> if (mediaType == MediaType.ANIME) "W" else "R"
+                    MediaListStatus.PLANNING -> "P"
+                    MediaListStatus.COMPLETED -> "C"
+                    MediaListStatus.DROPPED -> "D"
+                    MediaListStatus.PAUSED -> "H"
+                    MediaListStatus.REPEATING -> "↻"
+                    else -> status.name.first().toString()
+                }
+                backgroundTintList = ColorStateList.valueOf(Color.parseColor(status.getColor()))
+                show(true)
+            }
+        }
     }
 
     companion object {

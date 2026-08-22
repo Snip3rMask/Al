@@ -87,6 +87,11 @@ class MediaViewModel(
     val addToListButtonText: Observable<String>
         get() = _addToListButtonText
 
+    private val _addToListState =
+        BehaviorSubject.createDefault(MediaType.ANIME to null as MediaListStatus?)
+    val addToListState: Observable<Pair<MediaType, MediaListStatus?>>
+        get() = _addToListState
+
     private val _mediaItemList = BehaviorSubject.createDefault(listOf<MediaItem>())
     val mediaItemList: Observable<List<MediaItem>>
         get() = _mediaItemList
@@ -145,6 +150,7 @@ class MediaViewModel(
                     .applyScheduler()
                     .subscribe { (mediaType, mediaList) ->
                         _addToListButtonText.onNext(mediaList?.status?.getString(mediaType) ?: "")
+                        _addToListState.onNext(mediaType to mediaList?.status)
                     }
             )
         }
@@ -176,7 +182,9 @@ class MediaViewModel(
                         mediaListCollection.lists.forEach collection@{ mediaListGroup ->
                             mediaListGroup.entries.forEach { mediaList ->
                                 if (mediaList.media.getId() == mediaId) {
-                                    _addToListButtonText.onNext(mediaList.status?.getString(media.type?.getMediaType() ?: MediaType.ANIME) ?: "")
+                                    val mediaType = media.type?.getMediaType() ?: MediaType.ANIME
+                                    _addToListButtonText.onNext(mediaList.status?.getString(mediaType) ?: "")
+                                    _addToListState.onNext(mediaType to mediaList.status)
                                     itemFound = true
                                     return@collection
                                 }
@@ -185,6 +193,9 @@ class MediaViewModel(
 
                         if (!itemFound) {
                             _addToListButtonText.onNext("")
+                            _addToListState.onNext(
+                                (media.type?.getMediaType() ?: MediaType.ANIME) to null
+                            )
                         }
                     },
                     {

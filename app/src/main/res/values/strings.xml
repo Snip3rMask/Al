@@ -342,6 +342,9 @@
     <string name="volumes_read">Volumes Read</string>
     <string name="view_detail_statistics">View Detail Statistics</string>
     <string name="add_to_list">Add to List</string>
+    <string name="download">Download</string>
+    <string name="play">Play</string>
+    <string name="coming_soon">Coming soon</string>
     <string name="synopsis">Synopsis</string>
     <string name="characters">Characters</string>
     <string name="media">Media</string>
