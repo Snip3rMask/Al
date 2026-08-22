@@ -45,6 +45,7 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data android:scheme="alchan" />
+                <data android:scheme="msr.atsulab.app" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
@@ -80,6 +81,12 @@
                     android:host="anilist.co"
                     android:pathPattern="/activity/.*"
                     android:scheme="https" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" android:host="msr.atsulab.app" />
             </intent-filter>
         </activity>
         <activity
