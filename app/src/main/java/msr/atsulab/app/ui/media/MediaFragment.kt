@@ -399,14 +399,14 @@ class MediaFragment : BaseFragment<FragmentMediaBinding, MediaViewModel>() {
                 strokeWidth = 0
                 strokeColor = ColorStateList.valueOf(Color.TRANSPARENT)
                 backgroundTintList = ColorStateList.valueOf(context.getAttrValue(R.attr.themePrimaryColor))
-                iconTintList = ColorStateList.valueOf(context.getAttrValue(R.attr.themeBackgroundColor))
+                iconTint = ColorStateList.valueOf(context.getAttrValue(R.attr.themeBackgroundColor))
                 contentDescription = getString(R.string.add_to_list)
             } else {
                 icon = ContextCompat.getDrawable(context, R.drawable.ic_bookmark)
                 strokeWidth = context.resources.getDimensionPixelSize(R.dimen.lineWidth)
                 strokeColor = ColorStateList.valueOf(context.getAttrValue(R.attr.themePrimaryColor))
                 backgroundTintList = ColorStateList.valueOf(Color.TRANSPARENT)
-                iconTintList = ColorStateList.valueOf(context.getAttrValue(R.attr.themePrimaryColor))
+                iconTint = ColorStateList.valueOf(context.getAttrValue(R.attr.themePrimaryColor))
                 contentDescription = status.getString(mediaType)
             }
         }
