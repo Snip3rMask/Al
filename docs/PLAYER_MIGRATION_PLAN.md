@@ -160,7 +160,8 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 **Goal:** Define playback models and repository interfaces without touching UI.
 
 - [x] Create `msr.atsulab.app.player.domain.model`.
-- [ ] Port the concepts behind Anifux `AnimeItem`, `EpisodeItem`, `VideoSource`, `SkipInterval`, and `SourceCandidate`.
+- [~] Port the concepts behind Anifux `AnimeItem`, `EpisodeItem`, `VideoSource`, `SkipInterval`, and `SourceCandidate`.
+  - [x] Port `AnimeItem` concept to `PlaybackAnime`.
 - [ ] Define `PlaybackAnime`, `PlaybackEpisode`, `PlaybackProgress`.
 - [ ] Define `EpisodeRepository`, `VideoSourceRepository`, `SkipTimeRepository`, and `PlaybackProgressRepository`.
 - [ ] Define `SourceProvider`.
@@ -470,6 +471,8 @@ Append dated entries here. Do not delete history.
 - Completed repository-side Part 0 checks: branch sync, green CI, Release `21` integrity, package metadata, APK size, and signing compatibility.
 - Marked real-device installation, screenshots, and cold-start timing as blocked because device automation was unavailable.
 - Created `msr.atsulab.app.player.domain.model` package marker as the first Part 1 task.
+- Added `PlaybackAnime` as the first real domain model. Provider-specific IDs use `externalIds`; list/tracking and continue-watching fields are deferred to their own domains.
+- Replaced the temporary package marker with `PlaybackAnime`.
 
 ## Next Action
 
