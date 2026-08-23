@@ -50,7 +50,7 @@ class DefaultSkipTimeRepositoryTest {
         assertEquals(10500L to 120000L, intervals.single().startMs to intervals.single().endMs)
         val request = server.takeRequest()
         assertEquals(
-            "/v2/skip-times/12345/2?types=op&types=ed&episodeLength=1425",
+            "/aniskip/v2/skip-times/12345/2?types=op&types=ed&episodeLength=1425",
             request.path
         )
         assertEquals("Mozilla/5.0 (WATCH_APP) Chrome/120.0", request.getHeader("User-Agent"))
@@ -71,7 +71,7 @@ class DefaultSkipTimeRepositoryTest {
         val graphqlRequest = server.takeRequest()
         val skipRequest = server.takeRequest()
         assertEquals("/graphql", graphqlRequest.path)
-        assertTrue(graphqlRequest.body.readUtf8().contains("\"search\":\"atsulab anime\""))
+        assertTrue(graphqlRequest.body.readUtf8().contains("\"search\":\"atsulab anime (tv)\""))
         assertEquals("/aniskip/v2/skip-times/987/1?types=op&types=ed&episodeLength=1440", skipRequest.path)
 
         server.enqueue(MockResponse().setBody("""{"found":false}"""))
