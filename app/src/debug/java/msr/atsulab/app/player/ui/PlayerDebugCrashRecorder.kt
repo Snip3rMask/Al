@@ -49,20 +49,26 @@ object PlayerDebugCrashRecorder {
 
     fun readReport(context: Context): String? {
         return reportFiles(context)
-            .filter { it.isFile && it.length() > 0L }
-            .maxByOrNull { it.lastModified() }
+            .filter { it.name == REPORT_FILE && it.isFile && it.length() > 0L }
+            .firstOrNull()
             ?.readText()
     }
 
     fun readTrace(context: Context): String? {
         return reportFiles(context)
-            .filter { it.name == TRACE_FILE && it.isFile }
-            .maxByOrNull { it.lastModified() }
+            .filter { it.name == TRACE_FILE && it.isFile && it.length() > 0L }
+            .firstOrNull()
             ?.readText()
     }
 
     fun clear(context: Context) {
-        reportFiles(context).forEach(File::delete)
+        reportFiles(context).forEach { file ->
+            runCatching {
+                if (file.exists() && !file.delete()) {
+                    file.writeText("")
+                }
+            }
+        }
     }
 
     fun storagePaths(context: Context): List<String> {

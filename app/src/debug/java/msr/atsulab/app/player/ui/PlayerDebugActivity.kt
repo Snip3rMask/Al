@@ -202,7 +202,9 @@ class PlayerDebugActivity : AppCompatActivity() {
                 addView(Button(this@PlayerDebugActivity).apply {
                     text = getString(msr.atsulab.app.R.string.player_debug_retry)
                     setOnClickListener {
+                        PlayerDebugCrashRecorder.breadcrumb(this@PlayerDebugActivity, "retry_clear_started")
                         PlayerDebugCrashRecorder.clear(this@PlayerDebugActivity)
+                        PlayerDebugCrashRecorder.breadcrumb(this@PlayerDebugActivity, "retry_clear_finished")
                         recreate()
                     }
                 })
