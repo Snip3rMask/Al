@@ -2,7 +2,7 @@ package msr.atsulab.app.player.di
 
 import okhttp3.OkHttpClient
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertSame
 import org.junit.jupiter.api.Test
 import org.koin.core.context.GlobalContext
 import org.koin.core.context.startKoin
@@ -19,10 +19,9 @@ class PlaybackNetworkModuleTest {
     fun `playback http client is a qualified singleton`() {
         startKoin { modules(playbackNetworkModule) }
         val koin = GlobalContext.get()
+        val firstClient: OkHttpClient = koin.get(qualifier = PlaybackNetworkQualifiers.playbackHttpClient)
+        val secondClient: OkHttpClient = koin.get(qualifier = PlaybackNetworkQualifiers.playbackHttpClient)
 
-        assertEquals(
-            koin.get(qualifier = PlaybackNetworkQualifiers.playbackHttpClient),
-            koin.get(qualifier = PlaybackNetworkQualifiers.playbackHttpClient)
-        )
+        assertSame(firstClient, secondClient)
     }
 }
