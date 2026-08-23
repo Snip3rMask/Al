@@ -26,12 +26,24 @@ class DefaultEpisodeRepository(
             .flatMap { candidates ->
                 val candidate = selectCandidate(provider.id, candidates)
                 if (candidate == null) {
+                    diagnostics.onEpisodeProviderSkipped(
+                        providerId = provider.id,
+                        providerIndex = index,
+                        aniListId = anime.aniListId,
+                        reason = "no-compatible-candidate"
+                    )
                     loadFromProvider(index + 1, anime)
                 } else {
                     provider.getEpisodes(candidate)
                         .map { episodes -> normalizeEpisodes(provider.id, anime, episodes) }
                         .flatMap { episodes ->
                             if (episodes.isEmpty()) {
+                                diagnostics.onEpisodeProviderSkipped(
+                                    providerId = provider.id,
+                                    providerIndex = index,
+                                    aniListId = anime.aniListId,
+                                    reason = "no-episodes"
+                                )
                                 loadFromProvider(index + 1, anime)
                             } else {
                                 Single.just(episodes)
@@ -40,6 +52,9 @@ class DefaultEpisodeRepository(
                 }
             }
             .onErrorResumeNext { error ->
+                diagnostics.onEpisodeProviderFailed(provider.id, index, anime.aniListId, error)
+                loadFromProvider(index + 1, anime)
+            }
     }
 
     private fun selectCandidate(

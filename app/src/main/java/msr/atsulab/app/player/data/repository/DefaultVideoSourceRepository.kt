@@ -49,12 +49,26 @@ class DefaultVideoSourceRepository(
             .map { sources -> sources.map { it.copy(providerId = provider.id) } }
             .flatMap { sources ->
                 if (sources.isEmpty()) {
+                    diagnostics.onSourceProviderSkipped(
+                        providerId = provider.id,
+                        providerIndex = index,
+                        playbackId = episode.playbackId.ifBlank { anime.aniListId.toString() },
+                        reason = "no-sources"
+                    )
                     resolveFromProviders(providers, anime, episode, index + 1)
                 } else {
                     Single.just(sources)
                 }
             }
             .onErrorResumeNext { error ->
+                diagnostics.onSourceProviderFailed(
+                    providerId = provider.id,
+                    providerIndex = index,
+                    playbackId = episode.playbackId.ifBlank { anime.aniListId.toString() },
+                    error = error
+                )
+                resolveFromProviders(providers, anime, episode, index + 1)
+            }
     }
 
     private fun sortByPreferences(
