@@ -267,14 +267,24 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 
 **Goal:** Prove playback before adding heavy custom UI.
 
-- [ ] Add `media3-exoplayer`, `media3-exoplayer-hls`, and `media3-ui`.
-- [ ] Create `PlaybackEngine`.
-- [ ] Support HLS playback, play/pause, seek, speed, and resume position.
-- [ ] Add playback error mapping and subtitle attachment.
-- [ ] Handle audio focus and foreground/background lifecycle safely.
-- [ ] Release the player cleanly.
+- [x] Add `media3-exoplayer`, `media3-exoplayer-hls`, and `media3-ui`.
+- [x] Create `PlaybackEngine`.
+- [x] Support HLS playback, play/pause, seek, speed, and resume position.
+- [x] Add playback error mapping and subtitle attachment.
+- [x] Handle audio focus and foreground/background lifecycle safely.
+- [x] Release the player cleanly.
 
 **Exit gate:** A temporary debug activity plays HLS video; resume/background transitions work without leaking or crashing.
+
+### Part 3 Progress — 2026-08-23
+
+- Added Media3 ExoPlayer, HLS, and UI dependencies in isolation behind an AtsuLab-owned playback engine contract.
+- Implemented HLS preparation with explicit resume position, autoplay, play/pause, seek, speed changes, and surface attachment.
+- Merged optional external VTT/SRT subtitles into the primary HLS source while preserving provider referer headers.
+- Configured network wake mode, audio-focus handling, and noisy-device pause behavior through Media3.
+- Mapped fatal playback errors into network, content, decoding, audio-track, DRM, and unknown categories without leaking URLs into diagnostics.
+- Made foreground/background transitions restore prior play intent exactly once and made release idempotent.
+- Added a debug-only temporary HLS activity using a public test stream; it is non-exported and does not alter production navigation.
 
 ## Part 4 — AtsuLab Entry Point
 
@@ -561,5 +571,6 @@ Append dated entries here. Do not delete history.
 
 ## Next Action
 
-1. Confirm the diagnostics push passes end-to-end and publishes directly to GitHub Releases.
-2. Begin Part 3 — Headless ExoPlayer Engine with Media3 dependencies and `PlaybackEngine`.
+1. Confirm the Media3 engine push passes end-to-end and publishes directly to GitHub Releases.
+2. Install Release `50` (or newer), launch the non-exported debug HLS activity, and validate play/background/resume/release behavior.
+3. On successful device proof, close Part 3 and begin Part 4 — AtsuLab Entry Point.

@@ -20,6 +20,7 @@ import msr.atsulab.app.helper.service.clipboard.DefaultClipboardService
 import msr.atsulab.app.helper.service.pushnotification.DefaultPushNotificationService
 import msr.atsulab.app.helper.service.pushnotification.PushNotificationService
 import msr.atsulab.app.player.di.playbackNetworkModule
+import msr.atsulab.app.player.di.playbackEngineModule
 import msr.atsulab.app.player.di.playbackProviderModule
 import msr.atsulab.app.player.di.playbackRepositoryModule
 import msr.atsulab.app.player.di.playbackStorageModule
@@ -226,6 +227,7 @@ class ALchanApplication : Application() {
             androidContext(this@ALchanApplication)
             modules(
                 appModules,
+                playbackEngineModule,
                 playbackNetworkModule,
                 playbackProviderModule,
                 playbackStorageModule,

@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">(D)AtsuLab</string>
+    <string name="player_debug_loading">Loading HLS…</string>
+    <string name="player_debug_buffering">Buffering…</string>
+    <string name="player_debug_ended">Playback ended</string>
+    <string name="player_debug_error_format">Playback error: %1$s — %2$s</string>
 </resources>

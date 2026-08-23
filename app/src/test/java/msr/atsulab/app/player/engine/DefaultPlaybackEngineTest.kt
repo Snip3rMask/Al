@@ -1,0 +1,103 @@
+package msr.atsulab.app.player.engine
+
+import msr.atsulab.app.player.domain.model.VideoSource
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertThrows
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Test
+
+class DefaultPlaybackEngineTest {
+
+    private val source = VideoSource(quality = "1080p", url = "https://example.test/video.m3u8")
+
+    @Test
+    fun `prepare validates input and delegates to media player`() {
+        val mediaPlayer = FakeEngineMediaPlayer()
+        val states = mutableListOf<PlaybackState>()
+        val engine = DefaultPlaybackEngine(mediaPlayer)
+        engine.listener = object : PlaybackEngineListener {
+            override fun onStateChanged(state: PlaybackState) {
+                states += state
+            }
+
+            override fun onError(error: PlaybackError) = Unit
+        }
+
+        engine.prepare(source, startPositionMs = 1_250L)
+
+        assertEquals(listOf(source to 1_250L), mediaPlayer.preparedSources)
+        assertEquals(1, states.size)
+        assertThrows(IllegalArgumentException::class.java) { engine.prepare(source.copy(url = " ")) }
+        assertThrows(IllegalArgumentException::class.java) { engine.prepare(source, -1L) }
+    }
+
+    @Test
+    fun `background pauses active playback and foreground resumes once`() {
+        val mediaPlayer = FakeEngineMediaPlayer().apply {
+            currentState = PlaybackState(isPlaying = true, playWhenReady = true)
+        }
+        val engine = DefaultPlaybackEngine(mediaPlayer)
+
+        engine.onBackground()
+        engine.onForeground()
+        engine.onForeground()
+
+        assertEquals(1, mediaPlayer.pauseCount)
+        assertEquals(1, mediaPlayer.playCount)
+    }
+
+    @Test
+    fun `paused playback does not resume after foreground`() {
+        val mediaPlayer = FakeEngineMediaPlayer()
+        val engine = DefaultPlaybackEngine(mediaPlayer)
+
+        engine.onBackground()
+        engine.onForeground()
+
+        assertEquals(0, mediaPlayer.playCount)
+    }
+
+    @Test
+    fun `transport controls validate and delegate commands`() {
+        val mediaPlayer = FakeEngineMediaPlayer()
+        val engine = DefaultPlaybackEngine(mediaPlayer)
+
+        engine.seekTo(2_500L)
+        engine.setSpeed(1.25f)
+
+        assertEquals(listOf(2_500L), mediaPlayer.seekPositions)
+        assertEquals(listOf(1.25f), mediaPlayer.speeds)
+        assertThrows(IllegalArgumentException::class.java) { engine.seekTo(-1L) }
+        assertThrows(IllegalArgumentException::class.java) { engine.setSpeed(0f) }
+    }
+
+    @Test
+    fun `release is idempotent and blocks later commands`() {
+        val mediaPlayer = FakeEngineMediaPlayer()
+        val engine = DefaultPlaybackEngine(mediaPlayer)
+
+        engine.release()
+        engine.release()
+        engine.play()
+        engine.prepare(source)
+
+        assertTrue(mediaPlayer.released)
+        assertEquals(0, mediaPlayer.playCount)
+        assertEquals(0, mediaPlayer.preparedSources.size)
+    }
+
+    @Test
+    fun `surface attachment is delegated before release`() {
+        val mediaPlayer = FakeEngineMediaPlayer()
+        val engine = DefaultPlaybackEngine(mediaPlayer)
+        val surface = Any()
+
+        engine.setSurfaceView(surface)
+        engine.release()
+        engine.setSurfaceView(surface)
+
+        assertEquals(listOf<Any?>(surface), mediaPlayer.surfaces)
+        assertFalse(mediaPlayer.surfaces.size == 2)
+    }
+}
