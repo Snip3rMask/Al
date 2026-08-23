@@ -183,11 +183,11 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 
 **Exit gate:** Build succeeds, existing UI remains unchanged, no Hilt or ExoPlayer dependency is needed yet.
 
-## Part 2 — Source/API Layer
+## Part 2 — Source/API Layer [~]
 
 **Goal:** Port source discovery and video resolution behind clean interfaces.
 
-- [ ] Add shared playback `OkHttpClient` through Koin.
+- [x] Add shared playback `OkHttpClient` through Koin.
 - [ ] Port `DakiApi` to `DakiSourceProvider`.
 - [ ] Port `MkissaApi` to `MkissaSourceProvider`.
 - [ ] Port `AnifuxApi` to `AnifuxSourceProvider`.
@@ -199,6 +199,15 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - [ ] Add debug-only diagnostics/logging where useful.
 
 **Exit gate:** A known anime resolves episodes and playable sources; failed sources trigger typed fallbacks; main AtsuLab UI remains unchanged.
+
+### Part 2 Progress
+
+- [x] Added a dedicated, qualified playback `OkHttpClient` under `player.di`.
+- [x] Preserved Anifux API client behavior: 20s connect timeout, 35s read timeout, connection retry, and HTTP/HTTPS redirects.
+- [x] Kept the client isolated from AtsuLab Apollo/Retrofit clients so player headers cannot leak into tracking APIs.
+- [x] Registered it in Koin as `playbackHttpClient`.
+- [x] Added factory unit tests for timeout, redirect, retry, and instance independence.
+- [x] Added a Koin module test proving the qualified client resolves as a singleton.
 
 ## Part 3 — Headless ExoPlayer Engine
 
@@ -491,10 +500,15 @@ Append dated entries here. Do not delete history.
   - Added episode, video-source, skip-time, playback-progress, and source-provider contracts using Rx3.
   - Enabled JUnit Platform and added pure-domain model tests.
   - Updated GitHub Actions to run unit tests before building and releasing the debug APK.
+- Started Part 2 with the shared playback HTTP foundation:
+  - Added `playbackHttpClient` as a singleton qualifier in Koin.
+  - Used a dedicated factory so provider APIs share one connection core without touching existing AtsuLab network clients.
+  - Preserved Anifux timeouts and redirect behavior while keeping logging disabled until debug diagnostics are intentionally introduced.
+  - Added `koin-test-junit5` for direct module-resolution coverage.
 
 ## Next Action
 
 1. User installs/tests Release `21`, confirms it opens, and captures baseline screenshots if possible.
 2. Record cold-start time manually or enable Shizuku/wireless ADB for automation.
 3. Complete the remaining real-device items in **Part 0 — Baseline Freeze**.
-4. Start **Part 2 — Source/API Layer** after Part 1 CI is green.
+4. Continue **Part 2 — Source/API Layer**, starting with `DakiSourceProvider`.
