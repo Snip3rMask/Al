@@ -226,6 +226,7 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
   - Mapped results to pure AtsuLab playback episode models without exposing Anifux types.
   - Returned no direct playback sources because Anifux used backend source resolution for Mkissa episodes; this lets the later repository fallback chain continue safely.
   - Registered the provider in Koin under a dedicated qualifier and added parser, network, and DI tests.
+  - Corrected test-only wire assertions for Kotlin GraphQL escaping and OkHttp's charset-bearing Content-Type.
 
 ## Part 3 — Headless ExoPlayer Engine
 
@@ -525,7 +526,4 @@ Append dated entries here. Do not delete history.
 
 ## Next Action
 
-1. User installs/tests Release `21`, confirms it opens, and captures baseline screenshots if possible.
-2. Record cold-start time manually or enable Shizuku/wireless ADB for automation.
-3. Complete the remaining real-device items in **Part 0 — Baseline Freeze**.
-4. Continue **Part 2 — Source/API Layer**, starting with `DakiSourceProvider`.
+1. Continue **Part 2 — Source/API Layer** with `AnifuxApi` porting to `AnifuxSourceProvider`.
