@@ -22,6 +22,7 @@ import msr.atsulab.app.helper.service.pushnotification.PushNotificationService
 import msr.atsulab.app.player.di.playbackNetworkModule
 import msr.atsulab.app.player.di.playbackProviderModule
 import msr.atsulab.app.player.di.playbackRepositoryModule
+import msr.atsulab.app.player.di.playbackStorageModule
 import msr.atsulab.app.ui.activity.ActivityDetailViewModel
 import msr.atsulab.app.ui.activity.ActivityListViewModel
 import msr.atsulab.app.ui.base.BaseActivityViewModel
@@ -223,7 +224,13 @@ class ALchanApplication : Application() {
         startKoin {
             androidLogger(Level.ERROR)
             androidContext(this@ALchanApplication)
-            modules(appModules, playbackNetworkModule, playbackProviderModule, playbackRepositoryModule)
+            modules(
+                appModules,
+                playbackNetworkModule,
+                playbackProviderModule,
+                playbackStorageModule,
+                playbackRepositoryModule
+            )
         }
     }
 }

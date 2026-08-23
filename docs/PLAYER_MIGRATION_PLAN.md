@@ -194,8 +194,8 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - [x] Port `AniSkipService` to `SkipTimeRepository`.
 - [x] Implement `DefaultEpisodeRepository` and `DefaultVideoSourceRepository`.
 - [x] Implement source fallback ordering and SUB/DUB preference handling.
-- [ ] Port `SourceMappingStore` behavior.
-- [ ] Register playback repositories in Koin.
+- [x] Port `SourceMappingStore` behavior.
+- [x] Register playback repositories in Koin.
 - [ ] Add debug-only diagnostics/logging where useful.
 
 **Exit gate:** A known anime resolves episodes and playable sources; failed sources trigger typed fallbacks; main AtsuLab UI remains unchanged.
@@ -248,6 +248,12 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
   - Normalized episode metadata with anime title, cover image, AniList ID, and provider ID.
   - Registered both repositories in Koin using the explicit playback provider order.
   - Added fake-provider tests for deferred failures, empty chains, compatible AniDB candidates, provider routing, fallback, preference sorting, and DI resolution.
+- Completed the source mapping persistence port:
+  - Added immutable provider picks, skipped providers, AniList identity, and confirmation timestamp models.
+  - Preserved merge-on-save behavior while replacing an existing pick for the same provider key.
+  - Stored mappings in app-private SharedPreferences under a dedicated AtsuLab preference file.
+  - Sanitized incomplete or malformed JSON and removed unreadable legacy entries on read.
+  - Registered the storage contract in Koin and added codec, merge, corruption, blank-input, and round-trip tests.
 
 ## Part 3 — Headless ExoPlayer Engine
 
@@ -547,5 +553,5 @@ Append dated entries here. Do not delete history.
 
 ## Next Action
 
-1. Push the completed episode/source repositories and confirm GitHub Actions passes end-to-end.
-2. Port `SourceMappingStore` behavior so confirmed provider picks survive restarts.
+1. Confirm GitHub Actions passes end-to-end and publishes the release asset directly.
+2. Add debug-only diagnostics where useful, then complete the Part 2 exit-gate review.
