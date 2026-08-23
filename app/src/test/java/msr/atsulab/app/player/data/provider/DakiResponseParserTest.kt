@@ -1,6 +1,5 @@
 package msr.atsulab.app.player.data.provider
 
-import msr.atsulab.app.player.domain.model.VideoSource
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
@@ -112,7 +111,7 @@ class DakiResponseParserTest {
         assertEquals(1, sources.size)
         with(sources.first()) {
             assertEquals("Japanese Sub", quality)
-            assertEquals(VideoSource.LANGUAGE_SUB, language)
+            assertEquals("Sub", language)
             assertEquals("Daki • Japanese Sub", server)
             assertEquals("Daki", displayName)
             assertEquals("https://hls.anidb.app/stream/video/master.m3u8", url)
