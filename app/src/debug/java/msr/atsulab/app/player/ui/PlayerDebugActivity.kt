@@ -5,7 +5,6 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
-import android.os.Build
 import android.os.Bundle
 import android.view.Gravity
 import android.view.SurfaceView
@@ -26,35 +25,45 @@ import org.koin.core.context.GlobalContext
 class PlayerDebugActivity : AppCompatActivity() {
 
     private var engine: PlaybackEngine? = null
+    private var rootView: FrameLayout? = null
     private var statusView: TextView? = null
+    private var startButton: Button? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         PlayerDebugCrashRecorder.install(this)
+        PlayerDebugCrashRecorder.breadcrumb(this, "activity_on_create")
         super.onCreate(savedInstanceState)
 
-        PlayerDebugCrashRecorder.read(this)?.let { savedReport ->
-            showReport(savedReport, showRetry = true)
+        PlayerDebugCrashRecorder.readReport(this)?.let { report ->
+            PlayerDebugCrashRecorder.breadcrumb(this, "saved_report_found")
+            showReport(report, showRetry = true)
             return
         }
 
-        val surfaceView = SurfaceView(this)
         val statusTextView = TextView(this).apply {
             setTextColor(Color.WHITE)
-            setShadowLayer(4f, 0f, 0f, Color.BLACK)
             gravity = Gravity.CENTER
-            text = getString(msr.atsulab.app.R.string.player_debug_loading)
+            setPadding(48, 48, 48, 48)
+            text = buildString {
+                appendLine(getString(msr.atsulab.app.R.string.player_debug_ready))
+                appendLine()
+                appendLine("Internal log:")
+                appendLine("${filesDir.absolutePath}/atsu_player_debug_crash.txt")
+                appendLine()
+                appendLine("External log:")
+                appendLine("${getExternalFilesDir(null)?.absolutePath}/atsu_player_debug_crash.txt")
+            }
         }
         statusView = statusTextView
 
+        val playButton = Button(this).apply {
+            text = getString(msr.atsulab.app.R.string.player_debug_start)
+            setOnClickListener { startStagedPlayback() }
+        }
+        startButton = playButton
+
         val root = FrameLayout(this).apply {
             setBackgroundColor(Color.BLACK)
-            addView(
-                surfaceView,
-                FrameLayout.LayoutParams(
-                    FrameLayout.LayoutParams.MATCH_PARENT,
-                    FrameLayout.LayoutParams.MATCH_PARENT
-                )
-            )
             addView(
                 statusTextView,
                 FrameLayout.LayoutParams(
@@ -63,87 +72,103 @@ class PlayerDebugActivity : AppCompatActivity() {
                     Gravity.CENTER
                 )
             )
-        }
-        setContentView(root)
-
-        try {
-            startPlayback(surfaceView)
-        } catch (throwable: Throwable) {
-            PlayerDebugCrashRecorder.persist(
-                context = this,
-                thread = Thread.currentThread(),
-                throwable = throwable
+            addView(
+                playButton,
+                FrameLayout.LayoutParams(
+                    FrameLayout.LayoutParams.WRAP_CONTENT,
+                    FrameLayout.LayoutParams.WRAP_CONTENT,
+                    Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL
+                ).apply { setMargins(0, 0, 0, 80) }
             )
-            showCrashReport(throwable)
         }
+        rootView = root
+        setContentView(root)
+        PlayerDebugCrashRecorder.breadcrumb(this, "activity_ui_ready")
     }
 
-    override fun onStop() {
-        super.onStop()
+    private fun startStagedPlayback() {
         try {
-            engine?.onBackground()
+            PlayerDebugCrashRecorder.breadcrumb(this, "start_tapped")
+            startButton?.visibility = android.view.View.GONE
+
+            val surfaceView = SurfaceView(this)
+            PlayerDebugCrashRecorder.breadcrumb(this, "surface_created")
+            rootView?.addView(
+                surfaceView,
+                0,
+                FrameLayout.LayoutParams(
+                    FrameLayout.LayoutParams.MATCH_PARENT,
+                    FrameLayout.LayoutParams.MATCH_PARENT
+                )
+            )
+
+            PlayerDebugCrashRecorder.breadcrumb(this, "resolving_engine")
+            val playbackEngine = GlobalContext.get().get<PlaybackEngine>()
+            engine = playbackEngine
+            PlayerDebugCrashRecorder.breadcrumb(this, "engine_resolved")
+
+            playbackEngine.listener = object : PlaybackEngineListener {
+                override fun onStateChanged(state: PlaybackState) {
+                    PlayerDebugCrashRecorder.breadcrumb(
+                        this@PlayerDebugActivity,
+                        "state_${state.readyState.name.lowercase()}_playing_${state.isPlaying}"
+                    )
+                    when {
+                        state.isPlaying -> statusView?.text = ""
+                        state.readyState == PlaybackReadyState.BUFFERING ->
+                            statusView?.text = getString(msr.atsulab.app.R.string.player_debug_buffering)
+
+                        state.readyState == PlaybackReadyState.ENDED ->
+                            statusView?.text = getString(msr.atsulab.app.R.string.player_debug_ended)
+                    }
+                }
+
+                override fun onError(error: msr.atsulab.app.player.engine.PlaybackError) {
+                    PlayerDebugCrashRecorder.breadcrumb(
+                        this@PlayerDebugActivity,
+                        "playback_error_${error.type.name}"
+                    )
+                    statusView?.text = getString(
+                        msr.atsulab.app.R.string.player_debug_error_format,
+                        error.type.name,
+                        error.message
+                    ) + (error.cause?.let { "\n\n${it.stackTraceToString()}" } ?: "")
+                }
+            }
+
+            PlayerDebugCrashRecorder.breadcrumb(this, "attaching_surface")
+            playbackEngine.setSurfaceView(surfaceView)
+            PlayerDebugCrashRecorder.breadcrumb(this, "calling_prepare")
+            playbackEngine.prepare(DEBUG_HLS_SOURCE)
+            PlayerDebugCrashRecorder.breadcrumb(this, "prepare_returned")
         } catch (throwable: Throwable) {
-            if (engine == null) return
+            PlayerDebugCrashRecorder.breadcrumb(this, "caught_java_crash")
             PlayerDebugCrashRecorder.persist(this, Thread.currentThread(), throwable)
-            throw throwable
+            showCrashReport(throwable)
         }
     }
 
     override fun onResume() {
         super.onResume()
-        try {
-            engine?.onForeground()
-        } catch (throwable: Throwable) {
-            if (engine == null) return
-            PlayerDebugCrashRecorder.persist(this, Thread.currentThread(), throwable)
-            throw throwable
-        }
+        PlayerDebugCrashRecorder.breadcrumb(this, "activity_resume")
+        runCatching { engine?.onForeground() }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        PlayerDebugCrashRecorder.breadcrumb(this, "activity_stop")
+        runCatching { engine?.onBackground() }
     }
 
     override fun onDestroy() {
+        PlayerDebugCrashRecorder.breadcrumb(this, "activity_destroy")
         runCatching { engine?.release() }
         super.onDestroy()
     }
 
-    private fun startPlayback(surfaceView: SurfaceView) {
-        val playbackEngine = GlobalContext.get().get<PlaybackEngine>()
-        engine = playbackEngine
-
-        playbackEngine.listener = object : PlaybackEngineListener {
-            override fun onStateChanged(state: PlaybackState) {
-                when {
-                    state.isPlaying -> statusView?.text = ""
-                    state.readyState == PlaybackReadyState.BUFFERING ->
-                        statusView?.text = getString(msr.atsulab.app.R.string.player_debug_buffering)
-
-                    state.readyState == PlaybackReadyState.ENDED ->
-                        statusView?.text = getString(msr.atsulab.app.R.string.player_debug_ended)
-                }
-            }
-
-            override fun onError(error: msr.atsulab.app.player.engine.PlaybackError) {
-                val details = getString(
-                    msr.atsulab.app.R.string.player_debug_error_format,
-                    error.type.name,
-                    error.message
-                )
-                val causeTrace = error.cause?.let { throwable ->
-                    java.io.StringWriter().also { writer ->
-                        throwable.printStackTrace(java.io.PrintWriter(writer))
-                    }.toString()
-                }
-                statusView?.text = listOf(details, causeTrace).filterNotNull().joinToString("\n\n")
-            }
-        }
-
-        playbackEngine.setSurfaceView(surfaceView)
-        playbackEngine.prepare(DEBUG_HLS_SOURCE)
-    }
-
     private fun showCrashReport(throwable: Throwable) {
-        engine?.release()
-        engine = null
-        showReport(PlayerDebugCrashRecorder.read(this).orEmpty(), showRetry = false)
+        releaseEngine()
+        showReport(PlayerDebugCrashRecorder.readReport(this).orEmpty(), showRetry = true)
     }
 
     private fun showReport(report: String, showRetry: Boolean) {
@@ -152,7 +177,15 @@ class PlayerDebugActivity : AppCompatActivity() {
             setTextIsSelectable(true)
             setTextColor(Color.WHITE)
             textSize = 12f
-            text = report.ifBlank { getString(msr.atsulab.app.R.string.player_debug_report_missing) }
+            text = buildString {
+                appendLine(report.ifBlank { getString(msr.atsulab.app.R.string.player_debug_report_missing) })
+                appendLine()
+                appendLine("TRACE")
+                append(PlayerDebugCrashRecorder.readTrace(this@PlayerDebugActivity).orEmpty())
+                appendLine()
+                appendLine("PATHS")
+                appendLine(PlayerDebugCrashRecorder.storagePaths(this@PlayerDebugActivity).joinToString("\n"))
+            }
         }
 
         val controls = LinearLayout(this).apply {
@@ -180,14 +213,8 @@ class PlayerDebugActivity : AppCompatActivity() {
         val content = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             addView(
-                ScrollView(this@PlayerDebugActivity).apply {
-                    addView(reportView)
-                },
-                LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                    0,
-                    1f
-                )
+                ScrollView(this@PlayerDebugActivity).apply { addView(reportView) },
+                LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f)
             )
             addView(controls)
         }
@@ -207,6 +234,11 @@ class PlayerDebugActivity : AppCompatActivity() {
             putExtra(Intent.EXTRA_TEXT, report)
         }
         startActivity(Intent.createChooser(intent, getString(msr.atsulab.app.R.string.player_debug_share_log)))
+    }
+
+    private fun releaseEngine() {
+        runCatching { engine?.release() }
+        engine = null
     }
 
     private companion object {

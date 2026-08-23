@@ -27,13 +27,36 @@ object PlayerDebugCrashRecorder {
         }
     }
 
-    fun persist(context: Context, thread: Thread, throwable: Throwable): File? {
-        return writeReport(context, buildReport(thread, throwable))
+    @Synchronized
+    fun breadcrumb(context: Context, stage: String) {
+        val line = "${SimpleDateFormat("HH:mm:ss.SSS", Locale.US).format(Date())} $stage"
+        writableRoots(context).forEach { directory ->
+            runCatching {
+                val file = File(directory, TRACE_FILE)
+                file.parentFile?.mkdirs()
+                file.appendText(line + "\n")
+            }
+        }
     }
 
-    fun read(context: Context): String? {
+    fun persist(context: Context, thread: Thread, throwable: Throwable): File? {
+        val report = buildReport(thread, throwable)
+        val files = writableRoots(context).mapNotNull { directory ->
+            runCatching { writeText(File(directory, REPORT_FILE), report) }.getOrNull()
+        }
+        return files.maxByOrNull { it.lastModified() }
+    }
+
+    fun readReport(context: Context): String? {
         return reportFiles(context)
             .filter { it.isFile && it.length() > 0L }
+            .maxByOrNull { it.lastModified() }
+            ?.readText()
+    }
+
+    fun readTrace(context: Context): String? {
+        return reportFiles(context)
+            .filter { it.name == TRACE_FILE && it.isFile }
             .maxByOrNull { it.lastModified() }
             ?.readText()
     }
@@ -42,8 +65,10 @@ object PlayerDebugCrashRecorder {
         reportFiles(context).forEach(File::delete)
     }
 
-    fun reportPaths(context: Context): List<String> {
-        return reportFiles(context).map { file -> file.absolutePath }
+    fun storagePaths(context: Context): List<String> {
+        return writableRoots(context).map { directory ->
+            File(directory, REPORT_FILE).absolutePath
+        }
     }
 
     private fun buildReport(thread: Thread, throwable: Throwable): String {
@@ -63,39 +88,31 @@ object PlayerDebugCrashRecorder {
         }
     }
 
-    private fun writeReport(context: Context, report: String): File? {
-        val appContext = context.applicationContext
-        val directories = listOfNotNull(
-            appContext.filesDir,
-            appContext.getExternalFilesDir(null),
-            appContext.getExternalFilesDirs(null).firstOrNull { it != appContext.getExternalFilesDir(null) }
-        )
-
-        return directories.mapNotNull { directory ->
-            runCatching { writeFile(File(directory, FILE_NAME), report) }.getOrNull()
-        }.maxByOrNull { it.lastModified() }
-    }
-
-    private fun writeFile(file: File, report: String): File {
+    private fun writeText(file: File, text: String): File {
         file.parentFile?.mkdirs()
         val temporaryFile = File(file.parentFile, "${file.name}.tmp")
-        temporaryFile.writeText(report)
+        temporaryFile.writeText(text)
         if (file.exists()) file.delete()
         if (!temporaryFile.renameTo(file)) {
-            file.writeText(report)
+            file.writeText(text)
             temporaryFile.delete()
         }
         return file
     }
 
-    private fun reportFiles(context: Context): List<File> {
+    private fun writableRoots(context: Context): List<File> {
         val appContext = context.applicationContext
-        return sequenceOf(appContext.filesDir, *appContext.getExternalFilesDirs(null))
-            .filterNotNull()
-            .map { File(it, FILE_NAME) }
-            .distinct()
-            .toList()
+        return listOfNotNull(appContext.filesDir, appContext.getExternalFilesDir(null))
     }
 
-    private const val FILE_NAME = "atsu_player_debug_crash.txt"
+    private fun reportFiles(context: Context): List<File> {
+        return writableRoots(context).map { directory ->
+            File(directory, REPORT_FILE)
+        } + writableRoots(context).map { directory ->
+            File(directory, TRACE_FILE)
+        }
+    }
+
+    private const val REPORT_FILE = "atsu_player_debug_crash.txt"
+    private const val TRACE_FILE = "atsu_player_debug_trace.txt"
 }

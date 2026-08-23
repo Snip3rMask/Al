@@ -81,7 +81,7 @@ import org.koin.core.logger.Level
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
-open class ALchanApplication : Application() {
+class ALchanApplication : Application() {
 
     private val appModules = module {
         val gson = GsonBuilder()

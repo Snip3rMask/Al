@@ -1,10 +1,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <application
-        android:name="msr.atsulab.app.player.ui.PlayerDebugApplication"
-        tools:node="merge"
-        tools:replace="android:name">
+    <application>
+        <provider
+            android:name="msr.atsulab.app.player.ui.PlayerDebugStartupProvider"
+            android:authorities="${applicationId}.playerdebugstartup"
+            android:exported="false"
+            tools:node="merge" />
         <activity
             android:name="msr.atsulab.app.player.ui.PlayerDebugActivity"
             android:configChanges="orientation|screenSize|keyboardHidden"
