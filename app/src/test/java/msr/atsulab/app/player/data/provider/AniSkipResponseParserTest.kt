@@ -2,6 +2,7 @@ package msr.atsulab.app.player.data.provider
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import msr.atsulab.app.player.domain.model.SkipInterval
 
 class AniSkipResponseParserTest {
 
@@ -36,7 +37,7 @@ class AniSkipResponseParserTest {
 
     @Test
     fun `returns empty intervals when not found or malformed`() {
-import msr.atsulab.app.player.domain.model.SkipInterval
-        assertEquals(emptyList<Any>(), AniSkipResponseParser.parseIntervals("{"))
+        assertEquals(emptyList<SkipInterval>(), AniSkipResponseParser.parseIntervals("""{"found":false}"""))
+        assertEquals(emptyList<SkipInterval>(), AniSkipResponseParser.parseIntervals("{"))
     }
 }
