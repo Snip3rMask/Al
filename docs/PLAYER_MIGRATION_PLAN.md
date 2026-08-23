@@ -192,8 +192,8 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - [x] Port `MkissaApi` to `MkissaSourceProvider`.
 - [x] Port `AnifuxApi` to `AnifuxSourceProvider`.
 - [x] Port `AniSkipService` to `SkipTimeRepository`.
-- [ ] Implement `DefaultEpisodeRepository` and `DefaultVideoSourceRepository`.
-- [ ] Implement source fallback ordering and SUB/DUB preference handling.
+- [x] Implement `DefaultEpisodeRepository` and `DefaultVideoSourceRepository`.
+- [x] Implement source fallback ordering and SUB/DUB preference handling.
 - [ ] Port `SourceMappingStore` behavior.
 - [ ] Register playback repositories in Koin.
 - [ ] Add debug-only diagnostics/logging where useful.
@@ -240,6 +240,14 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
   - Extended `SkipTimeRepository` with explicit playback duration so runtime media duration is used instead of being inferred later.
   - Registered `DefaultSkipTimeRepository` through a dedicated playback repository Koin module.
   - Added parser, network/cache, graceful-failure, invalid-input, and Koin-resolution tests.
+- Completed the default episode and video-source repositories:
+  - Added an ordered Mkissa → Anifux → Daki episode fallback chain that skips failed, candidate-less, and empty providers.
+  - Tagged resolved episodes with their originating provider so source resolution returns to the correct provider first.
+  - Added generic video-source fallback after the tagged provider while preserving provider identity on every result.
+  - Implemented SUB/DUB and server preference ordering without removing alternate choices from the player UI.
+  - Normalized episode metadata with anime title, cover image, AniList ID, and provider ID.
+  - Registered both repositories in Koin using the explicit playback provider order.
+  - Added fake-provider tests for deferred failures, empty chains, compatible AniDB candidates, provider routing, fallback, preference sorting, and DI resolution.
 
 ## Part 3 — Headless ExoPlayer Engine
 
@@ -539,5 +547,5 @@ Append dated entries here. Do not delete history.
 
 ## Next Action
 
-1. Push the completed `DefaultSkipTimeRepository` and confirm GitHub Actions passes end-to-end.
-2. Implement `DefaultEpisodeRepository` and `DefaultVideoSourceRepository`, including provider fallback ordering and SUB/DUB handling.
+1. Push the completed episode/source repositories and confirm GitHub Actions passes end-to-end.
+2. Port `SourceMappingStore` behavior so confirmed provider picks survive restarts.

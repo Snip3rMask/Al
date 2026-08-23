@@ -8,5 +8,6 @@ data class PlaybackEpisode(
     val postTitle: String = "",
     val playbackId: String = "",
     val confirmedSourceSlug: String? = null,
-    val aniListId: Int? = null
+    val aniListId: Int? = null,
+    val providerId: String? = null
 )

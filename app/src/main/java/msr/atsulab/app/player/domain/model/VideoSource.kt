@@ -9,6 +9,7 @@ data class VideoSource(
     val subtitleUrl: String = "",
     val displayName: String = "",
     val referer: String = "",
+    val providerId: String? = null,
     val skipIntervals: List<SkipInterval> = emptyList()
 ) {
     companion object {
