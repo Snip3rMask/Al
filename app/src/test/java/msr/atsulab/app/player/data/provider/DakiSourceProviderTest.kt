@@ -48,7 +48,7 @@ class DakiSourceProviderTest {
 
         val request = server.takeRequest()
         assertEquals("/api/frontend/resolve?anilistId=21", request.path ?: "")
-        assertEquals(DakiSourceProvider.BASE_URL + "/", request.getHeader("Referer") ?: "")
+        assertEquals(providerBaseUrl + "/", request.getHeader("Referer") ?: "")
         assertEquals("text/html,application/json,*/*", request.getHeader("Accept") ?: "")
     }
 
@@ -104,7 +104,7 @@ class DakiSourceProviderTest {
         )
         server.enqueue(
             MockResponse().setBody(
-                """{"languages":[{"name":"Japanese","embed_url":"https://example.test/embed"}]}"""
+                """{"languages":[{"name":"Japanese","embed_url":"$providerBaseUrl/embed"}]}"""
             )
         )
         server.enqueue(
@@ -135,4 +135,7 @@ class DakiSourceProviderTest {
 
         candidates.assertError(IOException::class.java)
     }
+
+    private val providerBaseUrl: String
+        get() = server.url("/").toString().removeSuffix("/")
 }

@@ -72,7 +72,7 @@ class DakiResponseParserTest {
     }
 
     @Test
-    fun `selects exact episode before positional fallback`() {
+    fun `selects exact episode match first`() {
         val episodes = listOf(
             createEpisode(id = "special-zero", number = 0f),
             createEpisode(id = "episode-one", number = 1f),
@@ -80,7 +80,7 @@ class DakiResponseParserTest {
         )
 
         assertEquals("episode-two", DakiResponseParser.selectEpisode(episodes, requestedNumber = 2).url)
-        assertEquals("special-zero", DakiResponseParser.selectEpisode(episodes, requestedNumber = 1).url)
+        assertEquals("episode-one", DakiResponseParser.selectEpisode(episodes, requestedNumber = 1).url)
     }
 
     @Test
