@@ -68,7 +68,7 @@ class MkissaSourceProvider(
         episode: PlaybackEpisode,
         preferredLanguage: String?
     ): Single<List<VideoSource>> {
-        return Single.just(emptyList()).subscribeOn(ioScheduler)
+        return Single.just(emptyList<VideoSource>()).subscribeOn(ioScheduler)
     }
 
     companion object {
@@ -84,7 +84,7 @@ class MkissaSourceProvider(
         private const val USER_AGENT_HEADER = "User-Agent"
         private const val CONTENT_TYPE_VALUE = "application/json"
         private const val USER_AGENT = "Mozilla/5.0"
-        private const val EPISODES_QUERY =
-            "query ($_id: String!) { show(_id: \$_id) { _id name aniListId malId availableEpisodes availableEpisodesDetail } }"
+        private val EPISODES_QUERY =
+            "query (${'$'}_id: String!) { show(_id: ${'$'}_id) { _id name aniListId malId availableEpisodes availableEpisodesDetail } }"
     }
 }
