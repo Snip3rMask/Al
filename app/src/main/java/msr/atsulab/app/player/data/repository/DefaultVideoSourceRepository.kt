@@ -51,7 +51,7 @@ class DefaultVideoSourceRepository(
                     Single.just(sources)
                 }
             }
-            .onErrorResumeNext(resolveFromProviders(providers, anime, episode, index + 1))
+            .onErrorResumeNext { resolveFromProviders(providers, anime, episode, index + 1) }
     }
 
     private fun sortByPreferences(
@@ -60,7 +60,7 @@ class DefaultVideoSourceRepository(
         preferredServer: String?
     ): List<VideoSource> {
         return sources.sortedWith(
-            compareByDescending({ source -> serverScore(source, preferredServer) }, { source -> languageScore(source, preferredLanguage) })
+            compareByDescending<VideoSource> { source -> serverScore(source, preferredServer) }.thenByDescending { source -> languageScore(source, preferredLanguage) }
         )
     }
 

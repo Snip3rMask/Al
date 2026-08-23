@@ -36,7 +36,7 @@ class DefaultEpisodeRepository(
                         }
                 }
             }
-            .onErrorResumeNext(loadFromProvider(index + 1, anime))
+            .onErrorResumeNext { loadFromProvider(index + 1, anime) }
     }
 
     private fun selectCandidate(
