@@ -142,7 +142,6 @@ dependencies {
     // Koin DI
     def koin_version = "3.2.0"
     implementation "io.insert-koin:koin-android:$koin_version"
-    testImplementation "io.insert-koin:koin-test-junit5:$koin_version"
 
     // Others
     implementation 'com.jaredrummler:colorpicker:1.1.0'

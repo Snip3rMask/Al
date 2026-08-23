@@ -504,7 +504,6 @@ Append dated entries here. Do not delete history.
   - Added `playbackHttpClient` as a singleton qualifier in Koin.
   - Used a dedicated factory so provider APIs share one connection core without touching existing AtsuLab network clients.
   - Preserved Anifux timeouts and redirect behavior while keeping logging disabled until debug diagnostics are intentionally introduced.
-  - Added `koin-test-junit5` for direct module-resolution coverage.
 
 ## Next Action
 

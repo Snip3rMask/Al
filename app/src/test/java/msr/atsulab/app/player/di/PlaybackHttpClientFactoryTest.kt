@@ -14,7 +14,7 @@ class PlaybackHttpClientFactoryTest {
 
         assertEquals(20L, client.connectTimeoutMillis / TimeUnit.SECONDS.toMillis(1))
         assertEquals(35L, client.readTimeoutMillis / TimeUnit.SECONDS.toMillis(1))
-        assertTrue(client.retryOnConnectionFailure())
+        assertTrue(client.retryOnConnectionFailure)
         assertTrue(client.followRedirects)
         assertTrue(client.followSslRedirects)
     }
