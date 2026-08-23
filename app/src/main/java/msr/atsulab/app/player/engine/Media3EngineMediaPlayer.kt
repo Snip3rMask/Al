@@ -18,7 +18,7 @@ import androidx.media3.exoplayer.source.SingleSampleMediaSource
 import msr.atsulab.app.player.domain.model.VideoSource
 
 internal class Media3EngineMediaPlayer(
-    context: Context,
+    private val context: Context,
     private val errorMapper: PlaybackErrorMapper = PlaybackErrorMapper()
 ) : EngineMediaPlayer {
 
@@ -45,7 +45,7 @@ internal class Media3EngineMediaPlayer(
             )
         }
 
-    private val player: Player = ExoPlayer.Builder(context.applicationContext)
+    private val player: ExoPlayer = ExoPlayer.Builder(context.applicationContext)
         .setAudioAttributes(AudioAttributes.DEFAULT, true)
         .setHandleAudioBecomingNoisy(true)
         .setWakeMode(C.WAKE_MODE_NETWORK)

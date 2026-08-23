@@ -41,6 +41,8 @@ interface PlaybackEngineListener {
 }
 
 interface PlaybackEngine {
+    var listener: PlaybackEngineListener?
+
     fun prepare(source: VideoSource, startPositionMs: Long = 0L)
 
     fun play()

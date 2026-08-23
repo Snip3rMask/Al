@@ -2,7 +2,7 @@ package msr.atsulab.app.player.engine
 
 import msr.atsulab.app.player.domain.model.VideoSource
 
-class DefaultPlaybackEngine(
+internal class DefaultPlaybackEngine(
     private val mediaPlayer: EngineMediaPlayer
 ) : PlaybackEngine {
 
@@ -21,7 +21,7 @@ class DefaultPlaybackEngine(
         }
     }
 
-    var listener: PlaybackEngineListener? = null
+    override var listener: PlaybackEngineListener? = null
 
     override fun prepare(source: VideoSource, startPositionMs: Long) {
         if (released) return
