@@ -47,11 +47,11 @@ class PlayerDebugActivity : AppCompatActivity() {
             text = buildString {
                 appendLine(getString(msr.atsulab.app.R.string.player_debug_ready))
                 appendLine()
-                appendLine("Internal log:")
-                appendLine("${filesDir.absolutePath}/atsu_player_debug_crash.txt")
+                appendLine("LAST TRACE")
+                append(PlayerDebugCrashRecorder.readTrace(this@PlayerDebugActivity).orEmpty())
                 appendLine()
-                appendLine("External log:")
-                appendLine("${getExternalFilesDir(null)?.absolutePath}/atsu_player_debug_crash.txt")
+                appendLine("LOG PATHS")
+                appendLine(PlayerDebugCrashRecorder.storagePaths(this@PlayerDebugActivity).joinToString("\n"))
             }
         }
         statusView = statusTextView
@@ -65,11 +65,10 @@ class PlayerDebugActivity : AppCompatActivity() {
         val root = FrameLayout(this).apply {
             setBackgroundColor(Color.BLACK)
             addView(
-                statusTextView,
+                ScrollView(this@PlayerDebugActivity).apply { addView(statusTextView) },
                 FrameLayout.LayoutParams(
                     FrameLayout.LayoutParams.MATCH_PARENT,
-                    FrameLayout.LayoutParams.WRAP_CONTENT,
-                    Gravity.CENTER
+                    FrameLayout.LayoutParams.MATCH_PARENT
                 )
             )
             addView(
