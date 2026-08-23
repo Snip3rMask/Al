@@ -190,7 +190,7 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - [x] Add shared playback `OkHttpClient` through Koin.
 - [x] Port `DakiApi` to `DakiSourceProvider`.
 - [x] Port `MkissaApi` to `MkissaSourceProvider`.
-- [ ] Port `AnifuxApi` to `AnifuxSourceProvider`.
+- [x] Port `AnifuxApi` to `AnifuxSourceProvider`.
 - [ ] Port `AniSkipService` to `SkipTimeRepository`.
 - [ ] Implement `DefaultEpisodeRepository` and `DefaultVideoSourceRepository`.
 - [ ] Implement source fallback ordering and SUB/DUB preference handling.
@@ -227,6 +227,12 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
   - Returned no direct playback sources because Anifux used backend source resolution for Mkissa episodes; this lets the later repository fallback chain continue safely.
   - Registered the provider in Koin under a dedicated qualifier and added parser, network, and DI tests.
   - Corrected test-only wire assertions for Kotlin GraphQL escaping and OkHttp's charset-bearing Content-Type.
+- Completed the Anifux backend provider port:
+  - Preserved grouped source-candidate discovery, provider display order, candidate filtering, and backend request headers.
+  - Preserved AniDB episode lookup, Java-compatible fallback numbering, AniList resolution, title-search fallback, and primary source resolution.
+  - Preserved source metadata extraction for subtitles, nested captions, referer, display names, intro/outro fields, and skip times.
+  - Added an optional `SourceCandidate.backendProvider` key so flat AtsuLab contracts can retain the backend's incompatible provider IDs safely.
+  - Registered the provider in Koin and added parser, network, fallback, and DI tests.
 
 ## Part 3 — Headless ExoPlayer Engine
 
@@ -526,4 +532,5 @@ Append dated entries here. Do not delete history.
 
 ## Next Action
 
-1. Continue **Part 2 — Source/API Layer** with `AnifuxApi` porting to `AnifuxSourceProvider`.
+1. Push the completed `AnifuxSourceProvider` and confirm GitHub Actions passes end-to-end.
+2. Continue **Part 2 — Source/API Layer** with `AniSkipService` porting to `SkipTimeRepository`.
