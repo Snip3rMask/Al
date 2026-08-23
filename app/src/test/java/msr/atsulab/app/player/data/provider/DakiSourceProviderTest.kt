@@ -84,7 +84,7 @@ class DakiSourceProviderTest {
             .await()
 
         candidates.assertComplete()
-        candidates.assertValue(listOf(SourceCandidate(id = "21")))
+        candidates.assertValue(listOf(SourceCandidate(id = "21", title = "")))
         assertEquals(1, server.requestCount)
     }
 
