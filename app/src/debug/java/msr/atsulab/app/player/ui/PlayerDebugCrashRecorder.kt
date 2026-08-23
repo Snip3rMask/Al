@@ -43,7 +43,7 @@ object PlayerDebugCrashRecorder {
     }
 
     fun reportPaths(context: Context): List<String> {
-        return reportFiles(context).map(File::absolutePath)
+        return reportFiles(context).map { file -> file.absolutePath }
     }
 
     private fun buildReport(thread: Thread, throwable: Throwable): String {
