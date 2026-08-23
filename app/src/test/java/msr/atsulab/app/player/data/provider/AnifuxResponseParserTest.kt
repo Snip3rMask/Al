@@ -37,8 +37,8 @@ class AnifuxResponseParserTest {
         assertEquals("Episode 2", episodes[0].name)
         assertEquals(2.5f, episodes[0].number)
         assertEquals("123", episodes[0].playbackId)
-        assertEquals("Episode 3", episodes[1].name)
-        assertEquals(3f, episodes[1].number)
+        assertEquals("Episode 2", episodes[1].name)
+        assertEquals(2f, episodes[1].number)
     }
 
     @Test

@@ -122,6 +122,7 @@ class AnifuxSourceProviderTest {
             .test().await().values().single()
 
         assertEquals("db9", resolvedId)
+        assertEquals("/api/anime/resolve/aniList/21", server.takeRequest().path)
         assertEquals("/api/anime/search?q=AtsuLab+Anime", server.takeRequest().path)
     }
 
