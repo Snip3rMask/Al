@@ -189,7 +189,7 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 
 - [x] Add shared playback `OkHttpClient` through Koin.
 - [x] Port `DakiApi` to `DakiSourceProvider`.
-- [ ] Port `MkissaApi` to `MkissaSourceProvider`.
+- [x] Port `MkissaApi` to `MkissaSourceProvider`.
 - [ ] Port `AnifuxApi` to `AnifuxSourceProvider`.
 - [ ] Port `AniSkipService` to `SkipTimeRepository`.
 - [ ] Implement `DefaultEpisodeRepository` and `DefaultVideoSourceRepository`.
@@ -220,6 +220,12 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
   - Rejected valid-position episodes with blank IDs exactly like Anifux source resolution did.
   - Preserved AniList-ID fallback when a title is unavailable.
   - Moved candidate validation into Rx callables so failures remain deferred and observable.
+- Completed the Mkissa provider port:
+  - Preserved direct AniList-ID episode lookup and the exact GraphQL query shape.
+  - Preserved Mkissa browser headers, SUB-first selection, raw episode labels/URLs, show-ID fallback, and numeric sorting.
+  - Mapped results to pure AtsuLab playback episode models without exposing Anifux types.
+  - Returned no direct playback sources because Anifux used backend source resolution for Mkissa episodes; this lets the later repository fallback chain continue safely.
+  - Registered the provider in Koin under a dedicated qualifier and added parser, network, and DI tests.
 
 ## Part 3 — Headless ExoPlayer Engine
 

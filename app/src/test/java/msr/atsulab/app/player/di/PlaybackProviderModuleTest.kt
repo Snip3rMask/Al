@@ -1,6 +1,7 @@
 package msr.atsulab.app.player.di
 
 import msr.atsulab.app.player.data.provider.DakiSourceProvider
+import msr.atsulab.app.player.data.provider.MkissaSourceProvider
 import msr.atsulab.app.player.domain.provider.SourceProvider
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -26,5 +27,18 @@ class PlaybackProviderModuleTest {
 
         assertEquals(DakiSourceProvider.PROVIDER_ID, provider.id)
         assertEquals(DakiSourceProvider.DISPLAY_NAME, provider.displayName)
+    }
+
+    @Test
+    fun `mkissa provider is available through its qualified contract`() {
+        startKoin { modules(playbackNetworkModule, playbackProviderModule) }
+        val koin = org.koin.core.context.GlobalContext.get()
+
+        val provider: SourceProvider = koin.get(
+            qualifier = PlaybackProviderQualifiers.mkissaSourceProvider
+        )
+
+        assertEquals(MkissaSourceProvider.PROVIDER_ID, provider.id)
+        assertEquals(MkissaSourceProvider.DISPLAY_NAME, provider.displayName)
     }
 }
