@@ -8,6 +8,7 @@ import msr.atsulab.app.player.domain.model.SkipInterval
 interface SkipTimeRepository {
     fun getSkipIntervals(
         anime: PlaybackAnime,
-        episode: PlaybackEpisode
+        episode: PlaybackEpisode,
+        durationMs: Long = 0L
     ): Single<List<SkipInterval>>
 }

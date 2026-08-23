@@ -191,7 +191,7 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - [x] Port `DakiApi` to `DakiSourceProvider`.
 - [x] Port `MkissaApi` to `MkissaSourceProvider`.
 - [x] Port `AnifuxApi` to `AnifuxSourceProvider`.
-- [ ] Port `AniSkipService` to `SkipTimeRepository`.
+- [x] Port `AniSkipService` to `SkipTimeRepository`.
 - [ ] Implement `DefaultEpisodeRepository` and `DefaultVideoSourceRepository`.
 - [ ] Implement source fallback ordering and SUB/DUB preference handling.
 - [ ] Port `SourceMappingStore` behavior.
@@ -233,6 +233,13 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
   - Preserved source metadata extraction for subtitles, nested captions, referer, display names, intro/outro fields, and skip times.
   - Added an optional `SourceCandidate.backendProvider` key so flat AtsuLab contracts can retain the backend's incompatible provider IDs safely.
   - Registered the provider in Koin and added parser, network, fallback, and DI tests.
+- Completed the AniSkip repository port:
+  - Preserved AniList-to-MAL title resolution, cleaned-title cache behavior, and the exact GraphQL query shape.
+  - Preserved AniSkip v2 request headers, OP/ED type filters, episode length conversion, result validation, and millisecond rounding.
+  - Replaced the legacy mutable HashMap with a thread-safe concurrent MAL-ID cache.
+  - Extended `SkipTimeRepository` with explicit playback duration so runtime media duration is used instead of being inferred later.
+  - Registered `DefaultSkipTimeRepository` through a dedicated playback repository Koin module.
+  - Added parser, network/cache, graceful-failure, invalid-input, and Koin-resolution tests.
 
 ## Part 3 — Headless ExoPlayer Engine
 
@@ -532,5 +539,5 @@ Append dated entries here. Do not delete history.
 
 ## Next Action
 
-1. Push the completed `AnifuxSourceProvider` and confirm GitHub Actions passes end-to-end.
-2. Continue **Part 2 — Source/API Layer** with `AniSkipService` porting to `SkipTimeRepository`.
+1. Push the completed `DefaultSkipTimeRepository` and confirm GitHub Actions passes end-to-end.
+2. Implement `DefaultEpisodeRepository` and `DefaultVideoSourceRepository`, including provider fallback ordering and SUB/DUB handling.
