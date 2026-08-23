@@ -18,9 +18,9 @@ object CrashReporter {
     private const val TRACE_FILE = "atsulab_crash_trace.txt"
     private const val HISTORY_FILE = "atsulab_crash_history.txt"
     private const val MAX_BREADCRUMBS = 250
-    private const val MAX_TRACE_BYTES = 512 * 1024
-    private const val MAX_HISTORY_BYTES = 2 * 1024 * 1024
-    private const val TRIM_KEEP_BYTES = 128 * 1024
+    private const val MAX_TRACE_BYTES = 512L * 1024L
+    private const val MAX_HISTORY_BYTES = 2L * 1024L * 1024L
+    private const val TRIM_KEEP_BYTES = 128L * 1024L
 
     private val lock = Any()
     private val breadcrumbs = ArrayDeque<String>()
