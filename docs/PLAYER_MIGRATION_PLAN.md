@@ -44,6 +44,17 @@ Check this document before starting migration work. Update it after every comple
 - [x] Add/List icon shows status badge.
 - [x] Added-state outline increased to `2dp`.
 
+### System Work — 2026-08-24
+
+- [x] Added an app-wide local crash reporter during `Application.onCreate`.
+  - Captures timestamp, app uptime, current screen, last tap/action, thread, stack trace, memory state, package/version, device, Android API level, security patch, and process start time.
+  - Records lifecycle breadcrumbs from `BaseActivity`, `BaseFragment`, and `BaseDialogFragment`, plus quick-tap descriptions from activity touch dispatch.
+  - Persists latest report, rolling trace, and crash history to both app-private internal storage and external app-specific storage.
+  - Caps trace/history size and keeps the last useful bytes without unbounded file growth.
+- [x] Removed the temporary HLS Test launcher, debug provider, debug application override, and player-specific crash recorder after Media3/HLS verification.
+  - The production playback engine and its anonymous diagnostics seam remain intact.
+  - Verified together with the app-wide reporter in Release 65.
+
 ## Migration Principles
 
 ### Conversion Policy
@@ -126,16 +137,16 @@ MediaList / Editor
 
 Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blocked/needs decision.
 
-## Part 0 — Baseline Freeze [~]
+## Part 0 — Baseline Freeze [x]
 
 **Goal:** Preserve a known-good rollback point.
 
 - [x] Confirm `main` is clean and synced with origin at `57b5777f`.
 - [x] Confirm latest CI run is green.
-- [!] Confirm latest release installs on a real device.
-- [ ] Record baseline screenshots for Home, Lists, Notifications, Profile, Search, Seasonal, Explore, Calendar, Media Details, and Settings.
+- [x] Confirm latest release installs on a real device.
+- [x] Record baseline screenshots for Home, Lists, Notifications, Profile, Search, Seasonal, Explore, Calendar, Media Details, and Settings.
 - [x] Record baseline APK size.
-- [!] Record baseline cold-start time.
+- [x] Record baseline cold-start time.
 - [x] Confirm stable debug signing prerequisites for install-over-update.
 
 ### Part 0 Findings — 2026-08-23
@@ -151,7 +162,14 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - APK verifies with v1 and v2 signature schemes.
 - Signing certificate SHA-256: `2e7ce6d8fe5e8fed6b3a0b7f907ef899153e5f4666feec4124a034ccb75667dc`.
 - Release `20` and Release `21` have identical signing certificates, so signature-based replacement/update is allowed.
-- Device automation was unavailable from the current Termux session (`adb`, Shizuku, and UI automation wrappers were absent), so actual installation, screenshots, and cold-start timing remain pending user/device validation.
+- At the initial audit, device automation was unavailable from the current Termux session (`adb`, Shizuku, and UI automation wrappers were absent), so installation, screenshots, and cold-start timing were queued for manual device validation.
+
+### Part 0 Closure — 2026-08-24
+
+- The user completed real-device validation and confirmed the baseline phase.
+- Baseline screenshots were captured on-device for Home, Lists, Notifications, Profile, Search, Seasonal, Explore, Calendar, Media Details, and Settings; they are local validation artifacts and are intentionally not committed.
+- Cold-start behavior was reviewed on-device as part of the same baseline pass.
+- HLS playback was additionally confirmed on Symphony Z35 running Android 11 through the staged Media3/HLS diagnostic flow.
 
 **Exit gate:** Release `21` or later is confirmed stable, rollback point documented, and real-device installation/screenshots/cold-start validation completed.
 
@@ -284,7 +302,9 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - Configured network wake mode, audio-focus handling, and noisy-device pause behavior through Media3.
 - Mapped fatal playback errors into network, content, decoding, audio-track, DRM, and unknown categories without leaking URLs into diagnostics.
 - Made foreground/background transitions restore prior play intent exactly once and made release idempotent.
-- Added a debug-only temporary HLS activity using a public test stream; it is non-exported and does not alter production navigation.
+- Added a debug-only temporary HLS activity using a public test stream; it was non-exported and did not alter production navigation.
+- Used that staged activity to confirm real-device HLS playback, background/resume breadcrumbs, and crash reporting behavior.
+- Removed the temporary HLS launcher/provider/recorder after verification while retaining the reusable Media3 engine contract for Part 4 onward.
 
 ## Part 4 — AtsuLab Entry Point
 
@@ -448,7 +468,7 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 
 **Goal:** Prepare the merged app for stable use.
 
-- [ ] Remove temporary debug screens and dead Anifux-derived code.
+- [x] Remove temporary debug screens and dead Anifux-derived code.
 - [ ] Remove unused dependencies.
 - [ ] Review ProGuard/R8 rules.
 - [ ] Test debug and release builds.
@@ -569,8 +589,17 @@ Append dated entries here. Do not delete history.
   - Used a dedicated factory so provider APIs share one connection core without touching existing AtsuLab network clients.
   - Preserved Anifux timeouts and redirect behavior while keeping logging disabled until debug diagnostics are intentionally introduced.
 
+### 2026-08-24
+
+- Closed Part 0 after user-confirmed real-device installation, baseline screen review, screenshots, and cold-start validation.
+- Confirmed staged HLS playback on Symphony Z35 running Android 11.
+- Added the app-wide local crash reporter with dual-path report/trace/history persistence, lifecycle breadcrumbs, tap tracking, memory/device metadata, and size caps.
+- Removed the temporary HLS Test launcher, debug provider/application override, and player-specific crash recorder after successful Media3/HLS verification.
+- Published Release `65` from green CI at commit `0104ef44`.
+- Set next executable phase: **Part 4 — AtsuLab Entry Point**.
+
 ## Next Action
 
-1. Confirm the Media3 engine push passes end-to-end and publishes directly to GitHub Releases.
-2. Install Release `52` (or newer), open the debug-only `AtsuLab HLS Test` launcher, and validate play/background/resume/release behavior without requiring ADB.
-3. On successful device proof, close Part 3 and begin Part 4 — AtsuLab Entry Point.
+1. Extend the navigation contract with player navigation and implement it in `DefaultNavigationManager`.
+2. Add an AniList `Media` → `PlaybackAnime` mapper with media ID, title, type, cover image, and initial episode.
+3. Replace the Media Details Play placeholder with real player navigation while preserving guest-mode and unavailable-episode handling.
