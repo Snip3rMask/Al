@@ -1,6 +1,10 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
-    <application>
+    <application
+        android:name="msr.atsulab.app.player.ui.PlayerDebugApplication"
+        tools:node="merge"
+        tools:replace="android:name">
         <activity
             android:name="msr.atsulab.app.player.ui.PlayerDebugActivity"
             android:configChanges="orientation|screenSize|keyboardHidden"

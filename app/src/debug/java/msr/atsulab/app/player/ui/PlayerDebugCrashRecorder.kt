@@ -27,17 +27,23 @@ object PlayerDebugCrashRecorder {
         }
     }
 
-    fun persist(context: Context, thread: Thread, throwable: Throwable): File {
+    fun persist(context: Context, thread: Thread, throwable: Throwable): File? {
         return writeReport(context, buildReport(thread, throwable))
     }
 
     fun read(context: Context): String? {
-        val file = reportFile(context)
-        return if (file.isFile && file.length() > 0L) file.readText() else null
+        return reportFiles(context)
+            .filter { it.isFile && it.length() > 0L }
+            .maxByOrNull { it.lastModified() }
+            ?.readText()
     }
 
     fun clear(context: Context) {
-        reportFile(context).delete()
+        reportFiles(context).forEach(File::delete)
+    }
+
+    fun reportPaths(context: Context): List<String> {
+        return reportFiles(context).map(File::absolutePath)
     }
 
     private fun buildReport(thread: Thread, throwable: Throwable): String {
@@ -57,8 +63,21 @@ object PlayerDebugCrashRecorder {
         }
     }
 
-    private fun writeReport(context: Context, report: String): File {
-        val file = reportFile(context)
+    private fun writeReport(context: Context, report: String): File? {
+        val appContext = context.applicationContext
+        val directories = listOfNotNull(
+            appContext.filesDir,
+            appContext.getExternalFilesDir(null),
+            appContext.getExternalFilesDirs(null).firstOrNull { it != appContext.getExternalFilesDir(null) }
+        )
+
+        return directories.mapNotNull { directory ->
+            runCatching { writeFile(File(directory, FILE_NAME), report) }.getOrNull()
+        }.maxByOrNull { it.lastModified() }
+    }
+
+    private fun writeFile(file: File, report: String): File {
+        file.parentFile?.mkdirs()
         val temporaryFile = File(file.parentFile, "${file.name}.tmp")
         temporaryFile.writeText(report)
         if (file.exists()) file.delete()
@@ -69,8 +88,13 @@ object PlayerDebugCrashRecorder {
         return file
     }
 
-    private fun reportFile(context: Context): File {
-        return File(context.applicationContext.filesDir, FILE_NAME)
+    private fun reportFiles(context: Context): List<File> {
+        val appContext = context.applicationContext
+        return sequenceOf(appContext.filesDir, *appContext.getExternalFilesDirs(null))
+            .filterNotNull()
+            .map { File(it, FILE_NAME) }
+            .distinct()
+            .toList()
     }
 
     private const val FILE_NAME = "atsu_player_debug_crash.txt"
