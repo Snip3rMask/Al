@@ -572,5 +572,5 @@ Append dated entries here. Do not delete history.
 ## Next Action
 
 1. Confirm the Media3 engine push passes end-to-end and publishes directly to GitHub Releases.
-2. Install Release `50` (or newer), launch the non-exported debug HLS activity, and validate play/background/resume/release behavior.
+2. Install Release `52` (or newer), open the debug-only `AtsuLab HLS Test` launcher, and validate play/background/resume/release behavior without requiring ADB.
 3. On successful device proof, close Part 3 and begin Part 4 — AtsuLab Entry Point.
