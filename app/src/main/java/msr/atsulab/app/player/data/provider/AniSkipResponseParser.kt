@@ -65,6 +65,6 @@ internal object AniSkipResponseParser {
     }
 
     private fun JsonObject.optJsonArray(name: String): List<JsonElement> {
-        return get(name)?.takeIf(JsonElement::isJsonArray)?.asJsonArray.orEmpty().toList()
+        return get(name)?.takeIf(JsonElement::isJsonArray)?.asJsonArray?.toList() ?: emptyList()
     }
 }
