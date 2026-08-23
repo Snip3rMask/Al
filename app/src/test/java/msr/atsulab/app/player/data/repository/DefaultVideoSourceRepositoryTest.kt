@@ -48,6 +48,23 @@ class DefaultVideoSourceRepositoryTest {
     }
 
     @Test
+    fun `reports failed and empty source providers during fallback`() {
+        val diagnostics = RecordingPlaybackDiagnostics()
+        val failed = FakeSourceProvider(id = "anifux", sourceError = true)
+        val empty = FakeSourceProvider(id = "mkissa")
+        val daki = FakeSourceProvider(
+            id = "daki",
+            sources = listOf(VideoSource(quality = "HLS", url = "https://cdn.example/daki.m3u8"))
+        )
+        val repository = DefaultVideoSourceRepository(listOf(failed, empty, daki), diagnostics)
+
+        repository.getSources(anime, episode).test().await().values().single()
+
+        assertEquals(listOf("source:anifux:0:21:IllegalStateException"), diagnostics.failures)
+        assertEquals(listOf("source:mkissa:1:21:no-sources"), diagnostics.skipped)
+    }
+
+    @Test
     fun `prioritizes sub preference without removing dub options`() {
         val dub = VideoSource(quality = "Dub 1080p", url = "dub", language = "English Dub")
         val sub = VideoSource(quality = "1080p", url = "sub", language = "Japanese Sub")

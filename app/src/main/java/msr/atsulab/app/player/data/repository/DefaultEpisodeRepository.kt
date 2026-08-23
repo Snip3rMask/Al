@@ -1,6 +1,8 @@
 package msr.atsulab.app.player.data.repository
 
 import io.reactivex.rxjava3.core.Single
+import msr.atsulab.app.player.diagnostics.NoOpPlaybackDiagnostics
+import msr.atsulab.app.player.diagnostics.PlaybackDiagnostics
 import msr.atsulab.app.player.domain.model.PlaybackAnime
 import msr.atsulab.app.player.domain.model.PlaybackEpisode
 import msr.atsulab.app.player.domain.model.SourceCandidate
@@ -8,7 +10,8 @@ import msr.atsulab.app.player.domain.provider.SourceProvider
 import msr.atsulab.app.player.domain.repository.EpisodeRepository
 
 class DefaultEpisodeRepository(
-    private val providers: List<SourceProvider>
+    private val providers: List<SourceProvider>,
+    private val diagnostics: PlaybackDiagnostics = NoOpPlaybackDiagnostics
 ) : EpisodeRepository {
 
     override fun getEpisodes(anime: PlaybackAnime): Single<List<PlaybackEpisode>> {
@@ -36,7 +39,7 @@ class DefaultEpisodeRepository(
                         }
                 }
             }
-            .onErrorResumeNext { loadFromProvider(index + 1, anime) }
+            .onErrorResumeNext { error ->
     }
 
     private fun selectCandidate(

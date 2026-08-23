@@ -1,6 +1,8 @@
 package msr.atsulab.app.player.data.repository
 
 import io.reactivex.rxjava3.core.Single
+import msr.atsulab.app.player.diagnostics.NoOpPlaybackDiagnostics
+import msr.atsulab.app.player.diagnostics.PlaybackDiagnostics
 import msr.atsulab.app.player.domain.model.PlaybackAnime
 import msr.atsulab.app.player.domain.model.PlaybackEpisode
 import msr.atsulab.app.player.domain.model.SourceCandidate
@@ -9,7 +11,8 @@ import msr.atsulab.app.player.domain.provider.SourceProvider
 import msr.atsulab.app.player.domain.repository.VideoSourceRepository
 
 class DefaultVideoSourceRepository(
-    private val providers: List<SourceProvider>
+    private val providers: List<SourceProvider>,
+    private val diagnostics: PlaybackDiagnostics = NoOpPlaybackDiagnostics
 ) : VideoSourceRepository {
 
     override fun getSources(
@@ -51,7 +54,7 @@ class DefaultVideoSourceRepository(
                     Single.just(sources)
                 }
             }
-            .onErrorResumeNext { resolveFromProviders(providers, anime, episode, index + 1) }
+            .onErrorResumeNext { error ->
     }
 
     private fun sortByPreferences(

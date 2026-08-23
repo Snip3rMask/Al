@@ -21,7 +21,14 @@ class PlaybackRepositoryModuleTest {
 
     @Test
     fun `skip time repository resolves as its domain contract`() {
-        startKoin { modules(playbackNetworkModule, playbackProviderModule, playbackRepositoryModule) }
+        startKoin {
+            modules(
+                playbackNetworkModule,
+                playbackProviderModule,
+                playbackStorageModule,
+                playbackRepositoryModule
+            )
+        }
 
         val repository: SkipTimeRepository = org.koin.core.context.GlobalContext.get().get()
 
@@ -30,7 +37,14 @@ class PlaybackRepositoryModuleTest {
 
     @Test
     fun `episode and video repositories resolve through domain contracts`() {
-        startKoin { modules(playbackNetworkModule, playbackProviderModule, playbackRepositoryModule) }
+        startKoin {
+            modules(
+                playbackNetworkModule,
+                playbackProviderModule,
+                playbackStorageModule,
+                playbackRepositoryModule
+            )
+        }
         val koin = org.koin.core.context.GlobalContext.get()
 
         assertEquals(DefaultEpisodeRepository::class, koin.get<EpisodeRepository>()::class)

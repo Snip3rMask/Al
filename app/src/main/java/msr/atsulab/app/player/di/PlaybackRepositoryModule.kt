@@ -16,7 +16,8 @@ val playbackRepositoryModule = module {
                 get<SourceProvider>(qualifier = PlaybackProviderQualifiers.mkissaSourceProvider),
                 get<SourceProvider>(qualifier = PlaybackProviderQualifiers.anifuxSourceProvider),
                 get<SourceProvider>(qualifier = PlaybackProviderQualifiers.dakiSourceProvider)
-            )
+            ),
+            diagnostics = get()
         )
     }
     single<VideoSourceRepository> {
@@ -25,7 +26,8 @@ val playbackRepositoryModule = module {
                 get<SourceProvider>(qualifier = PlaybackProviderQualifiers.mkissaSourceProvider),
                 get<SourceProvider>(qualifier = PlaybackProviderQualifiers.anifuxSourceProvider),
                 get<SourceProvider>(qualifier = PlaybackProviderQualifiers.dakiSourceProvider)
-            )
+            ),
+            diagnostics = get()
         )
     }
     single<SkipTimeRepository> {

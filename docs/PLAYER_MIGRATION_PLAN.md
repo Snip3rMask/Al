@@ -196,7 +196,7 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - [x] Implement source fallback ordering and SUB/DUB preference handling.
 - [x] Port `SourceMappingStore` behavior.
 - [x] Register playback repositories in Koin.
-- [ ] Add debug-only diagnostics/logging where useful.
+- [x] Add debug-only diagnostics/logging where useful.
 
 **Exit gate:** A known anime resolves episodes and playable sources; failed sources trigger typed fallbacks; main AtsuLab UI remains unchanged.
 
@@ -254,6 +254,14 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
   - Stored mappings in app-private SharedPreferences under a dedicated AtsuLab preference file.
   - Sanitized incomplete or malformed JSON and removed unreadable legacy entries on read.
   - Registered the storage contract in Koin and added codec, merge, corruption, blank-input, and round-trip tests.
+- Completed Part 2 debug diagnostics and code-level exit review:
+  - Added a semantic playback diagnostics contract for provider skips, provider failures, fallback indexes, and invalid mapping cleanup.
+  - Logged only anonymous provider/anime/playback identifiers and error details; titles, episode names, URLs, and headers are never logged.
+  - Kept debug logging active for debug builds and replaced the implementation with a no-op for release builds.
+  - Wired diagnostics through Koin into episode/source repositories and source mapping storage.
+  - Added repository tests proving failed and empty providers emit useful fallback diagnostics.
+  - Confirmed no `com.anifux.*` package or Anifux source-path dependency leaked into AtsuLab production code.
+  - Confirmed this phase changed player data/diagnostic seams only; existing AtsuLab screens and resources remain untouched.
 
 ## Part 3 — Headless ExoPlayer Engine
 
@@ -553,5 +561,5 @@ Append dated entries here. Do not delete history.
 
 ## Next Action
 
-1. Confirm GitHub Actions passes end-to-end and publishes the release asset directly.
-2. Add debug-only diagnostics where useful, then complete the Part 2 exit-gate review.
+1. Confirm the diagnostics push passes end-to-end and publishes directly to GitHub Releases.
+2. Begin Part 3 — Headless ExoPlayer Engine with Media3 dependencies and `PlaybackEngine`.

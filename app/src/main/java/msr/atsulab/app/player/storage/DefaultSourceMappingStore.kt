@@ -2,10 +2,13 @@ package msr.atsulab.app.player.storage
 
 import android.content.Context
 import com.google.gson.Gson
+import msr.atsulab.app.player.diagnostics.NoOpPlaybackDiagnostics
+import msr.atsulab.app.player.diagnostics.PlaybackDiagnostics
 
 class DefaultSourceMappingStore(
     context: Context,
     gson: Gson = Gson(),
+    private val diagnostics: PlaybackDiagnostics = NoOpPlaybackDiagnostics,
     private val currentTimeMillis: () -> Long = System::currentTimeMillis
 ) : SourceMappingStore {
 
@@ -21,6 +24,7 @@ class DefaultSourceMappingStore(
         val raw = preferences.getString(key, null)
         val mapping = codec.decode(raw, key)
         if (mapping == null && raw != null) {
+            diagnostics.onSourceMappingInvalid(key)
             preferences.edit().remove(key).apply()
         }
         return mapping

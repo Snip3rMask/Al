@@ -73,4 +73,21 @@ class DefaultEpisodeRepositoryTest {
 
         assertEquals(emptyList<PlaybackEpisode>(), single.test().await().values().single())
     }
+
+    @Test
+    fun `reports failed and empty fallback providers without identifiers leaking into messages`() {
+        val diagnostics = RecordingPlaybackDiagnostics()
+        val failed = FakeSourceProvider("mkissa", candidateError = true)
+        val empty = FakeSourceProvider("anifux")
+        val success = FakeSourceProvider(
+            id = "daki",
+            episodes = listOf(PlaybackEpisode(name = "Episode 1", url = "ep-1", number = 1f))
+        )
+        val repository = DefaultEpisodeRepository(listOf(failed, empty, success), diagnostics)
+
+        repository.getEpisodes(anime).test().await().values().single()
+
+        assertEquals(listOf("episode:mkissa:0:21:IllegalStateException"), diagnostics.failures)
+        assertEquals(listOf("episode:anifux:1:21:no-episodes"), diagnostics.skipped)
+    }
 }
