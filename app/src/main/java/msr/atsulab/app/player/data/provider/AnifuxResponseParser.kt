@@ -65,7 +65,7 @@ internal object AnifuxResponseParser {
 
     fun parseSources(json: String): List<VideoSource> {
         val array = json.asJsonArrayOrNull() ?: return emptyList()
-        return array.mapNotNull(JsonElement::asJsonObjectOrNull).map { source ->
+        return array.mapNotNull { element -> element.asJsonObjectOrNull() }.map { source ->
             var subtitleUrl = extractSubtitle(source)
             val directIntro = readSkip(source, "intro", "introStart", "introEnd")
             val directOutro = readSkip(source, "outro", "outroStart", "outroEnd")
@@ -75,7 +75,7 @@ internal object AnifuxResponseParser {
 
             val nestedSkips = source.optJsonArray("skipTimes")
             if (directIntro == null || directOutro == null) {
-                nestedSkips.mapNotNull(JsonElement::asJsonObjectOrNull).forEach { skip ->
+                nestedSkips.mapNotNull { element -> element.asJsonObjectOrNull() }.forEach { skip ->
                     val type = skip.optString("type").ifEmpty { skip.optString("skipType") }
                     val interval = SkipInterval(
                         startMs = skip.optSeconds("startTime", "start").toMillis(),
@@ -115,7 +115,7 @@ internal object AnifuxResponseParser {
     }
 
     private fun JsonArray.parseCandidates(backendProvider: String): List<SourceCandidate> {
-        return mapNotNull(JsonElement::asJsonObjectOrNull)
+        return mapNotNull { element -> element.asJsonObjectOrNull() }
             .map { candidate ->
                 SourceCandidate(
                     id = candidate.optString("id"),
