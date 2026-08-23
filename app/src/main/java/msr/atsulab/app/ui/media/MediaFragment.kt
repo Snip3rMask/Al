@@ -403,7 +403,7 @@ class MediaFragment : BaseFragment<FragmentMediaBinding, MediaViewModel>() {
                 contentDescription = getString(R.string.add_to_list)
             } else {
                 icon = ContextCompat.getDrawable(context, R.drawable.ic_bookmark)
-                strokeWidth = context.resources.getDimensionPixelSize(R.dimen.lineWidth)
+                strokeWidth = context.resources.getDimensionPixelSize(R.dimen.iconActionStrokeWidth)
                 strokeColor = ColorStateList.valueOf(context.getAttrValue(R.attr.themePrimaryColor))
                 backgroundTintList = ColorStateList.valueOf(Color.TRANSPARENT)
                 iconTint = ColorStateList.valueOf(context.getAttrValue(R.attr.themePrimaryColor))
