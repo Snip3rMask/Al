@@ -65,7 +65,7 @@ class MkissaSourceProviderTest {
         val request = server.takeRequest()
         assertEquals("/api", request.path ?: "")
         assertEquals("POST", request.method)
-        assertEquals("application/json", request.getHeader("Content-Type") ?: "")
+        assertEquals("application/json; charset=utf-8", request.getHeader("Content-Type") ?: "")
         assertEquals(providerSiteOrigin, request.getHeader("Origin") ?: "")
         assertEquals("$providerSiteOrigin/", request.getHeader("Referer") ?: "")
         assertEquals("Mozilla/5.0", request.getHeader("User-Agent") ?: "")
