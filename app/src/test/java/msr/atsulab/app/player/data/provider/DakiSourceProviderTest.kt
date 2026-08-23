@@ -9,6 +9,7 @@ import msr.atsulab.app.player.domain.model.PlaybackEpisode
 import msr.atsulab.app.player.domain.model.SourceCandidate
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
@@ -75,6 +76,19 @@ class DakiSourceProviderTest {
     }
 
     @Test
+    fun `preserves anilist id without searching when title is blank`() {
+        server.enqueue(MockResponse().setResponseCode(500))
+
+        val candidates = provider.findCandidates(title = "", aniListId = 21)
+            .test()
+            .await()
+
+        candidates.assertComplete()
+        candidates.assertValue(listOf(SourceCandidate(id = "21")))
+        assertEquals(1, server.requestCount)
+    }
+
+    @Test
     fun `loads episodes for a daki candidate`() {
         server.enqueue(
             MockResponse().setBody(
@@ -89,6 +103,15 @@ class DakiSourceProviderTest {
         episodes.assertComplete()
         assertEquals("episode-42", episodes.values()[0].single().url)
         assertEquals("/api/frontend/anime/123/episodes", server.takeRequest().path ?: "")
+    }
+
+    @Test
+    fun `defers invalid candidate failures until subscription`() {
+        val single = provider.getEpisodes(SourceCandidate(id = "", title = "AtsuLab Anime"))
+
+        assertDoesNotThrow { single }
+
+        single.test().await().assertError(IllegalArgumentException::class.java)
     }
 
     @Test

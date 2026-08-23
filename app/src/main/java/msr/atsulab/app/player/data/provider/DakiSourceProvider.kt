@@ -28,13 +28,23 @@ class DakiSourceProvider(
                     return@fromCallable listOf(SourceCandidate(id = directId, title = title))
                 }
             }
+            if (title.isBlank()) {
+                aniListId?.let { resolvedId ->
+                    return@fromCallable listOf(
+                        SourceCandidate(id = resolvedId.toString(), title = title)
+                    )
+                }
+                return@fromCallable emptyList()
+            }
             searchCandidates(title)
         }.subscribeOn(ioScheduler)
     }
 
     override fun getEpisodes(candidate: SourceCandidate): Single<List<PlaybackEpisode>> {
-        require(candidate.id.isNotBlank()) { "Daki candidate id is required" }
         return Single.fromCallable {
+            if (candidate.id.isBlank()) {
+                throw IllegalArgumentException("Daki candidate id is required")
+            }
             val json = getText("$baseUrl/api/frontend/anime/${candidate.id}/episodes")
             DakiResponseParser.parseEpisodes(candidateId = candidate.id, json = json)
         }.subscribeOn(ioScheduler)
@@ -45,8 +55,10 @@ class DakiSourceProvider(
         episode: PlaybackEpisode,
         preferredLanguage: String?
     ): Single<List<VideoSource>> {
-        require(candidate.id.isNotBlank()) { "Daki candidate id is required" }
         return Single.fromCallable {
+            if (candidate.id.isBlank()) {
+                throw IllegalArgumentException("Daki candidate id is required")
+            }
             val episodes = getEpisodesBlocking(candidate.id)
             val targetEpisode = DakiResponseParser.selectEpisode(episodes, episode.number.toInt())
             val json = getText("$baseUrl/api/frontend/episode/${targetEpisode.url}/languages")

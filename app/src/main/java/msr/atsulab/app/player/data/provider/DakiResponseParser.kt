@@ -8,6 +8,7 @@ import msr.atsulab.app.player.domain.model.PlaybackEpisode
 import msr.atsulab.app.player.domain.model.SourceCandidate
 import msr.atsulab.app.player.domain.model.VideoSource
 import org.jsoup.Jsoup
+import kotlin.math.roundToInt
 
 internal object DakiResponseParser {
 
@@ -87,11 +88,11 @@ internal object DakiResponseParser {
 
     fun selectEpisode(episodes: List<PlaybackEpisode>, requestedNumber: Int): PlaybackEpisode {
         val exactMatch = episodes.firstOrNull { episode -> episode.number.toInt() == requestedNumber }
-        if (exactMatch != null) return exactMatch
+        if (exactMatch != null) return requireValidEpisode(exactMatch, requestedNumber)
 
         val fallbackIndex = requestedNumber - 1
         if (episodes.isNotEmpty() && fallbackIndex >= 0 && fallbackIndex < episodes.size) {
-            return episodes[fallbackIndex]
+            return requireValidEpisode(episodes[fallbackIndex], requestedNumber)
         }
 
         throw IllegalArgumentException("Episode not found for episode $requestedNumber")
@@ -178,7 +179,7 @@ internal object DakiResponseParser {
         return value.lowercase().replace(Regex("[^a-z0-9]+"), " ").trim()
     }
 
-    private fun score(query: String, candidate: String): Int {
+    internal fun score(query: String, candidate: String): Int {
         if (query == candidate) return EXACT_SCORE
         if (query.contains(candidate) || candidate.contains(query)) return CONTAINS_SCORE
 
@@ -189,7 +190,14 @@ internal object DakiResponseParser {
         val candidateWordSet = candidateWords.toSet()
         val commonWords = queryWords.count(candidateWordSet::contains)
         return (commonWords / maxOf(queryWords.size, candidateWords.size).toDouble() * WORD_MATCH_SCORE)
-            .toInt()
+            .roundToInt()
+    }
+
+    private fun requireValidEpisode(episode: PlaybackEpisode, requestedNumber: Int): PlaybackEpisode {
+        if (episode.url.isBlank()) {
+            throw IllegalArgumentException("Episode not found for episode $requestedNumber")
+        }
+        return episode
     }
 
     internal data class SearchResult(

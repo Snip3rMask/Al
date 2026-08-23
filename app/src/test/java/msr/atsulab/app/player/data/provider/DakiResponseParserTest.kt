@@ -90,6 +90,19 @@ class DakiResponseParserTest {
         assertThrows(IllegalArgumentException::class.java) {
             DakiResponseParser.selectEpisode(episodes, requestedNumber = 5)
         }
+
+        val blankIdEpisode = listOf(createEpisode(id = "", number = 1f))
+        assertThrows(IllegalArgumentException::class.java) {
+            DakiResponseParser.selectEpisode(blankIdEpisode, requestedNumber = 1)
+        }
+    }
+
+    @Test
+    fun `rounds fractional word match score like java math round`() {
+        val query = "one two three four five six seven eight"
+        val candidate = "one nine ten eleven twelve thirteen fourteen fifteen"
+
+        assertEquals(8, DakiResponseParser.score(query, candidate))
     }
 
     @Test

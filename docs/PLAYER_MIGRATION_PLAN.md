@@ -215,6 +215,11 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
   - Mapped provider results into pure AtsuLab playback domain models without exposing Anifux types.
   - Registered the provider in Koin under a dedicated qualifier.
   - Added parser, provider, and Koin-resolution tests, including fallback and HLS source resolution paths.
+- Hardened the Daki port during behavior audit:
+  - Restored Java `Math.round` semantics for ranked search scores.
+  - Rejected valid-position episodes with blank IDs exactly like Anifux source resolution did.
+  - Preserved AniList-ID fallback when a title is unavailable.
+  - Moved candidate validation into Rx callables so failures remain deferred and observable.
 
 ## Part 3 — Headless ExoPlayer Engine
 
