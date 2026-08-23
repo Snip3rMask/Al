@@ -27,6 +27,9 @@ jobs:
           echo 'SPOTIFY_API_KEY=""' >> apikey.properties
           cat apikey.properties
 
+      - name: Run Unit Tests
+        run: ./gradlew testDebugUnitTest --stacktrace
+
       - name: Build Debug APK
         run: ./gradlew assembleDebug --stacktrace
 

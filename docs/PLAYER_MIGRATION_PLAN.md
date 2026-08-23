@@ -155,18 +155,31 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 
 **Exit gate:** Release `21` or later is confirmed stable, rollback point documented, and real-device installation/screenshots/cold-start validation completed.
 
-## Part 1 — Domain Contracts Only
+## Part 1 — Domain Contracts Only [x]
 
 **Goal:** Define playback models and repository interfaces without touching UI.
 
 - [x] Create `msr.atsulab.app.player.domain.model`.
-- [~] Port the concepts behind Anifux `AnimeItem`, `EpisodeItem`, `VideoSource`, `SkipInterval`, and `SourceCandidate`.
+- [x] Port the concepts behind Anifux `AnimeItem`, `EpisodeItem`, `VideoSource`, `SkipInterval`, and `SourceCandidate`.
   - [x] Port `AnimeItem` concept to `PlaybackAnime`.
-- [ ] Define `PlaybackAnime`, `PlaybackEpisode`, `PlaybackProgress`.
-- [ ] Define `EpisodeRepository`, `VideoSourceRepository`, `SkipTimeRepository`, and `PlaybackProgressRepository`.
-- [ ] Define `SourceProvider`.
-- [ ] Add model/mapping unit tests where practical.
-- [ ] Keep Android UI dependencies out of domain models.
+  - [x] Port `EpisodeItem` concept to `PlaybackEpisode`.
+  - [x] Port `VideoSource` concept to `VideoSource`.
+  - [x] Port `SkipInterval` concept to `SkipInterval`.
+  - [x] Port `SourceCandidate` concept to `SourceCandidate`.
+- [x] Define `PlaybackAnime`, `PlaybackEpisode`, `PlaybackProgress`.
+- [x] Define `EpisodeRepository`, `VideoSourceRepository`, `SkipTimeRepository`, and `PlaybackProgressRepository`.
+- [x] Define `SourceProvider`.
+- [x] Add model/mapping unit tests where practical.
+- [x] Keep Android UI dependencies out of domain models.
+
+### Part 1 Decisions
+
+- AniList identifiers use `Int?`; provider-specific slugs remain strings.
+- The old `VideoSource.source` compatibility field is named `legacySourceId`.
+- Embedded intro/outro sentinel values are represented by a shared `SkipInterval` list instead of four `-1` fields.
+- Playback progress includes enough anime/episode/source metadata for Continue Watching without coupling to ExoPlayer or storage JSON.
+- Repository contracts use Rx3: one-shot reads return `Single`, progress observation returns `Observable`, and writes return `Completable`.
+- CI now executes local unit tests before producing the debug release artifact.
 
 **Exit gate:** Build succeeds, existing UI remains unchanged, no Hilt or ExoPlayer dependency is needed yet.
 
@@ -473,10 +486,15 @@ Append dated entries here. Do not delete history.
 - Created `msr.atsulab.app.player.domain.model` package marker as the first Part 1 task.
 - Added `PlaybackAnime` as the first real domain model. Provider-specific IDs use `externalIds`; list/tracking and continue-watching fields are deferred to their own domains.
 - Replaced the temporary package marker with `PlaybackAnime`.
+- Completed Part 1 repository-side work:
+  - Added `PlaybackEpisode`, `VideoSource`, `SkipInterval`, `SourceCandidate`, and `PlaybackProgress`.
+  - Added episode, video-source, skip-time, playback-progress, and source-provider contracts using Rx3.
+  - Enabled JUnit Platform and added pure-domain model tests.
+  - Updated GitHub Actions to run unit tests before building and releasing the debug APK.
 
 ## Next Action
 
 1. User installs/tests Release `21`, confirms it opens, and captures baseline screenshots if possible.
 2. Record cold-start time manually or enable Shizuku/wireless ADB for automation.
-3. Complete **Part 0 — Baseline Freeze**.
-4. Start **Part 1 — Domain Contracts Only**.
+3. Complete the remaining real-device items in **Part 0 — Baseline Freeze**.
+4. Start **Part 2 — Source/API Layer** after Part 1 CI is green.

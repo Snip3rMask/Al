@@ -61,6 +61,10 @@ android {
     namespace 'msr.atsulab.app'
 }
 
+tasks.withType(Test).configureEach {
+    useJUnitPlatform()
+}
+
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation project(':imageviewer')
