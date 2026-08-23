@@ -2,4 +2,6 @@
     <string name="player_debug_copy_log">Copy log</string>
     <string name="player_debug_share_log">Share log</string>
     <string name="player_debug_log_copied">Crash log copied</string>
+    <string name="player_debug_retry">Retry playback</string>
+    <string name="player_debug_report_missing">No crash details were captured.</string>
 </resources>

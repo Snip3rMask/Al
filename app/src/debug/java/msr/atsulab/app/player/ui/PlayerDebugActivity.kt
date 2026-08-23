@@ -29,7 +29,13 @@ class PlayerDebugActivity : AppCompatActivity() {
     private var statusView: TextView? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        PlayerDebugCrashRecorder.install(this)
         super.onCreate(savedInstanceState)
+
+        PlayerDebugCrashRecorder.read(this)?.let { savedReport ->
+            showReport(savedReport, showRetry = true)
+            return
+        }
 
         val surfaceView = SurfaceView(this)
         val statusTextView = TextView(this).apply {
@@ -63,18 +69,35 @@ class PlayerDebugActivity : AppCompatActivity() {
         try {
             startPlayback(surfaceView)
         } catch (throwable: Throwable) {
+            PlayerDebugCrashRecorder.persist(
+                context = this,
+                thread = Thread.currentThread(),
+                throwable = throwable
+            )
             showCrashReport(throwable)
         }
     }
 
     override fun onStop() {
         super.onStop()
-        runCatching { engine?.onBackground() }
+        try {
+            engine?.onBackground()
+        } catch (throwable: Throwable) {
+            if (engine == null) return
+            PlayerDebugCrashRecorder.persist(this, Thread.currentThread(), throwable)
+            throw throwable
+        }
     }
 
     override fun onResume() {
         super.onResume()
-        runCatching { engine?.onForeground() }
+        try {
+            engine?.onForeground()
+        } catch (throwable: Throwable) {
+            if (engine == null) return
+            PlayerDebugCrashRecorder.persist(this, Thread.currentThread(), throwable)
+            throw throwable
+        }
     }
 
     override fun onDestroy() {
@@ -104,7 +127,12 @@ class PlayerDebugActivity : AppCompatActivity() {
                     error.type.name,
                     error.message
                 )
-                statusView?.text = listOf(details, error.cause?.let(::stackTrace)).filterNotNull().joinToString("\n\n")
+                val causeTrace = error.cause?.let { throwable ->
+                    java.io.StringWriter().also { writer ->
+                        throwable.printStackTrace(java.io.PrintWriter(writer))
+                    }.toString()
+                }
+                statusView?.text = listOf(details, causeTrace).filterNotNull().joinToString("\n\n")
             }
         }
 
@@ -115,21 +143,16 @@ class PlayerDebugActivity : AppCompatActivity() {
     private fun showCrashReport(throwable: Throwable) {
         engine?.release()
         engine = null
+        showReport(PlayerDebugCrashRecorder.read(this).orEmpty(), showRetry = false)
+    }
 
-        val report = buildString {
-            appendLine("AtsuLab HLS Debug Crash")
-            appendLine("Android: ${Build.VERSION.RELEASE} (API ${Build.VERSION.SDK_INT})")
-            appendLine("Package: $packageName")
-            appendLine()
-            append(stackTrace(throwable))
-        }
-
+    private fun showReport(report: String, showRetry: Boolean) {
         val reportView = TextView(this).apply {
             typeface = android.graphics.Typeface.MONOSPACE
             setTextIsSelectable(true)
             setTextColor(Color.WHITE)
             textSize = 12f
-            text = report
+            text = report.ifBlank { getString(msr.atsulab.app.R.string.player_debug_report_missing) }
         }
 
         val controls = LinearLayout(this).apply {
@@ -143,6 +166,15 @@ class PlayerDebugActivity : AppCompatActivity() {
                 text = getString(msr.atsulab.app.R.string.player_debug_share_log)
                 setOnClickListener { shareReport(report) }
             })
+            if (showRetry) {
+                addView(Button(this@PlayerDebugActivity).apply {
+                    text = getString(msr.atsulab.app.R.string.player_debug_retry)
+                    setOnClickListener {
+                        PlayerDebugCrashRecorder.clear(this@PlayerDebugActivity)
+                        recreate()
+                    }
+                })
+            }
         }
 
         val content = LinearLayout(this).apply {
@@ -175,12 +207,6 @@ class PlayerDebugActivity : AppCompatActivity() {
             putExtra(Intent.EXTRA_TEXT, report)
         }
         startActivity(Intent.createChooser(intent, getString(msr.atsulab.app.R.string.player_debug_share_log)))
-    }
-
-    private fun stackTrace(throwable: Throwable): String {
-        return java.io.StringWriter().also { writer ->
-            throwable.printStackTrace(java.io.PrintWriter(writer))
-        }.toString()
     }
 
     private companion object {
