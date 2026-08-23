@@ -132,6 +132,7 @@ dependencies {
     def okhttp_version = "4.10.0"
     implementation "com.squareup.okhttp3:okhttp:$okhttp_version"
     implementation "com.squareup.okhttp3:logging-interceptor:$okhttp_version"
+    testImplementation "com.squareup.okhttp3:mockwebserver:$okhttp_version"
 
     // Retrofit
     def retrofit_version = "2.9.0"
@@ -144,6 +145,7 @@ dependencies {
     implementation "io.insert-koin:koin-android:$koin_version"
 
     // Others
+    implementation 'org.jsoup:jsoup:1.17.2'
     implementation 'com.jaredrummler:colorpicker:1.1.0'
     implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
     implementation 'pl.droidsonroids.gif:android-gif-drawable:1.2.31'

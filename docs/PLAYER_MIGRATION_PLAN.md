@@ -188,7 +188,7 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 **Goal:** Port source discovery and video resolution behind clean interfaces.
 
 - [x] Add shared playback `OkHttpClient` through Koin.
-- [ ] Port `DakiApi` to `DakiSourceProvider`.
+- [x] Port `DakiApi` to `DakiSourceProvider`.
 - [ ] Port `MkissaApi` to `MkissaSourceProvider`.
 - [ ] Port `AnifuxApi` to `AnifuxSourceProvider`.
 - [ ] Port `AniSkipService` to `SkipTimeRepository`.
@@ -208,6 +208,13 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - [x] Registered it in Koin as `playbackHttpClient`.
 - [x] Added factory unit tests for timeout, redirect, retry, and instance independence.
 - [x] Added a Koin module test proving the qualified client resolves as a singleton.
+- Completed the Daki provider port:
+  - Added `DakiSourceProvider` behind the shared Part 1 `SourceProvider` contract.
+  - Preserved direct AniList-to-AniDB resolution with ranked search fallback.
+  - Preserved Daki HTML search parsing, episode selection, language discovery, HLS extraction, headers, referer, and Cloudflare challenge detection.
+  - Mapped provider results into pure AtsuLab playback domain models without exposing Anifux types.
+  - Registered the provider in Koin under a dedicated qualifier.
+  - Added parser, provider, and Koin-resolution tests, including fallback and HLS source resolution paths.
 
 ## Part 3 — Headless ExoPlayer Engine
 
