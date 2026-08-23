@@ -70,7 +70,7 @@ class MkissaSourceProviderTest {
         assertEquals("$providerSiteOrigin/", request.getHeader("Referer") ?: "")
         assertEquals("Mozilla/5.0", request.getHeader("User-Agent") ?: "")
         val body = request.body?.readUtf8().orEmpty()
-        assertEquals(true, body.contains("\"query\":\"query ($_id: String!)"))
+        assertEquals(true, body.contains("\"query\":\"query (${'$'}_id: String!)"))
         assertEquals(true, body.contains("\"variables\":{\"_id\":\"21\"}"))
     }
 
