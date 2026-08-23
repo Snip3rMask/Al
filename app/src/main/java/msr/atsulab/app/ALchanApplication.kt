@@ -15,6 +15,7 @@ import msr.atsulab.app.data.network.retrofit.DefaultRetrofitHandler
 import msr.atsulab.app.data.network.retrofit.RetrofitHandler
 import msr.atsulab.app.data.repository.*
 import msr.atsulab.app.helper.Constant
+import msr.atsulab.app.helper.crash.CrashReporter
 import msr.atsulab.app.helper.service.clipboard.ClipboardService
 import msr.atsulab.app.helper.service.clipboard.DefaultClipboardService
 import msr.atsulab.app.helper.service.pushnotification.DefaultPushNotificationService
@@ -222,6 +223,7 @@ class ALchanApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        CrashReporter.install(this)
         startKoin {
             androidLogger(Level.ERROR)
             androidContext(this@ALchanApplication)

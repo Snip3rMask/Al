@@ -14,6 +14,7 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.viewbinding.ViewBinding
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import msr.atsulab.app.helper.crash.CrashReporter
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 
@@ -29,8 +30,10 @@ abstract class BaseDialogFragment<VB: ViewBinding> : BottomSheetDialogFragment()
     private var insetsController: WindowInsetsControllerCompat? = null
 
     protected var screenWidth = 0
+    private val className = javaClass.simpleName
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        CrashReporter.event("dialog_create", className)
         super.onCreate(savedInstanceState)
 
         activity?.window?.let {
@@ -76,22 +79,26 @@ abstract class BaseDialogFragment<VB: ViewBinding> : BottomSheetDialogFragment()
 
     override fun onResume() {
         super.onResume()
+        CrashReporter.event("dialog_resume", className)
         if (disposables.isDisposed) {
             setUpObserver()
         }
     }
 
     override fun onPause() {
+        CrashReporter.event("dialog_pause", className)
         super.onPause()
         disposables.clear()
     }
 
     override fun onStop() {
+        CrashReporter.event("dialog_stop", className)
         super.onStop()
         disposables.clear()
     }
 
     override fun onDestroy() {
+        CrashReporter.event("dialog_destroy", className)
         super.onDestroy()
         disposables.clear()
     }

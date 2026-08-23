@@ -13,6 +13,7 @@ import androidx.fragment.app.Fragment
 import androidx.viewbinding.ViewBinding
 import androidx.window.layout.WindowMetricsCalculator
 import msr.atsulab.app.R
+import msr.atsulab.app.helper.crash.CrashReporter
 import msr.atsulab.app.helper.utils.DeepLink
 import msr.atsulab.app.ui.launch.LaunchActivity
 import io.reactivex.rxjava3.disposables.CompositeDisposable
@@ -55,6 +56,7 @@ abstract class BaseFragment<VB: ViewBinding, VM: BaseViewModel<*>> : Fragment(),
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        CrashReporter.event("fragment_create_view", className)
         _binding = generateViewBinding(activity?.layoutInflater ?: inflater, container)
         return binding.root
     }
