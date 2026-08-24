@@ -96,7 +96,7 @@ internal class PlayerShellLayoutBuilder(
         lowerPanel.addView(controller.statusControls)
         lowerPanel.addView(
             controller.transportControls,
-            LinearLayout.LayoutParams(MATCH_PARENT, dp(PlayerShellMetrics.TRANSPORT_ROW_HEIGHT_DP, density))
+            LinearLayout.LayoutParams(MATCH_PARENT, dp(PlayerShellMetrics.BOTTOM_CONTROLS_HEIGHT_DP, density))
         )
         lowerScroll.addView(lowerPanel)
 
@@ -136,7 +136,7 @@ internal class PlayerShellLayoutBuilder(
             controller.transportControls,
             FrameLayout.LayoutParams(
                 MATCH_PARENT,
-                dp(PlayerShellMetrics.TRANSPORT_ROW_HEIGHT_DP, density),
+                dp(PlayerShellMetrics.BOTTOM_CONTROLS_HEIGHT_DP, density),
                 Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL
             )
         )

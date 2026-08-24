@@ -73,6 +73,20 @@ class DefaultPlaybackEngineTest {
     }
 
     @Test
+    fun `current state delegates before release and resets after release`() {
+        val mediaPlayer = FakeEngineMediaPlayer()
+        val playingState = PlaybackState(isPlaying = true, playWhenReady = true)
+        mediaPlayer.currentState = playingState
+        val engine = DefaultPlaybackEngine(mediaPlayer)
+
+        assertEquals(playingState, engine.currentState)
+
+        engine.release()
+
+        assertEquals(PlaybackState(), engine.currentState)
+    }
+
+    @Test
     fun `release is idempotent and blocks later commands`() {
         val mediaPlayer = FakeEngineMediaPlayer()
         val engine = DefaultPlaybackEngine(mediaPlayer)

@@ -434,7 +434,7 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 ### 7.1 Basic Transport [~]
 
 - [x] Play/pause and previous/next episode controls.
-- [ ] Seekbar drag.
+- [x] Seekbar drag.
 - [ ] Elapsed time, total/remaining time, buffered indicator.
 
 #### Part 7.1 Slice A — Episode Navigation State — 2026-08-24
@@ -459,6 +459,14 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - Preserved playback state, navigation index, button enablement, and icon state across orientation rebuilds.
 - Moved landscape source/status feedback to center, matching Anifux and avoiding overlap with bottom transport controls.
 - Kept the persistent status surface for retry/error states only; normal playback relies on transport controls and the loading spinner.
+
+#### Part 7.1 Slice D — Seekbar Drag — 2026-08-24
+
+- Ported Anifux's 1000-step seekbar, accent progress line, buffered layer, thin thumb, bottom gradient, and 38dp progress row.
+- Added a read-only `PlaybackEngine.currentState` seam for live position polling without exposing ExoPlayer.
+- Updated seek position/buffer every 250ms on the main thread while preserving lifecycle cleanup.
+- Suppressed automatic progress writes during drag and committed the selected position through `seekTo` only after release.
+- Kept numeric elapsed/total labels deferred to the next focused slice.
 
 ### 7.2 Lock Controls
 
@@ -715,5 +723,5 @@ Append dated entries here. Do not delete history.
 
 ## Next Action
 
-1. Install Release `90` or newer and verify play/pause, previous/next, disabled boundary states, rotation persistence, retry/error recovery, and HLS playback.
-2. After validation, start Part 7.1 Slice D with seekbar drag before adding elapsed/total/buffered time labels.
+1. Install Release `91` or newer and verify play/pause, previous/next, boundary-disabled states, drag-to-seek, buffering/buffered movement, rotation persistence, retry/error recovery, and HLS playback.
+2. After validation, complete Part 7.1 with elapsed, total/remaining, and buffered time indicators.

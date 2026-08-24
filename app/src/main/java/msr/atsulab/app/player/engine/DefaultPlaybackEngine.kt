@@ -23,6 +23,9 @@ internal class DefaultPlaybackEngine(
 
     override var listener: PlaybackEngineListener? = null
 
+    override val currentState: PlaybackState
+        get() = if (released) PlaybackState() else mediaPlayer.currentState
+
     override fun prepare(source: VideoSource, startPositionMs: Long) {
         if (released) return
         require(source.url.isNotBlank()) { "Playback URL must not be blank" }

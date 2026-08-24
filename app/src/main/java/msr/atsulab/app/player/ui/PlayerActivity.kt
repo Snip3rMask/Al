@@ -3,6 +3,8 @@ package msr.atsulab.app.player.ui
 import android.content.res.Configuration
 import android.graphics.Color
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.View
 import android.widget.FrameLayout
 import android.widget.ProgressBar
@@ -45,6 +47,13 @@ class PlayerActivity : AppCompatActivity() {
     private var waitingForPlayback = true
     private var latestPlaybackState = PlaybackState()
     private var transportVisible = false
+    private val progressHandler = Handler(Looper.getMainLooper())
+    private val progressRunnable = object : Runnable {
+        override fun run() {
+            updatePlaybackProgress()
+            progressHandler.postDelayed(this, PROGRESS_UPDATE_INTERVAL_MS)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -87,14 +96,17 @@ class PlayerActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
         if (engineAttached) playbackEngine.onForeground()
+        startProgressLoop()
     }
 
     override fun onStop() {
+        stopProgressLoop()
         if (engineAttached) playbackEngine.onBackground()
         super.onStop()
     }
 
     override fun onDestroy() {
+        progressHandler.removeCallbacks(progressRunnable)
         playbackDisposable?.dispose()
         if (engineAttached) {
             playbackEngine.release()
@@ -158,6 +170,10 @@ class PlayerActivity : AppCompatActivity() {
 
             override fun onNextEpisodeClicked() {
                 loadAdjacentEpisode(1)
+            }
+
+            override fun onSeekFinished(fraction: Float) {
+                seekToFraction(fraction)
             }
         }
         val title = currentAnime?.title.orEmpty()
@@ -241,6 +257,37 @@ class PlayerActivity : AppCompatActivity() {
             canShowPrevious = transportVisible && episodeNavigator.canMove(-1),
             canShowNext = transportVisible && episodeNavigator.canMove(1)
         )
+        shell.controller.updatePlaybackProgress(
+            positionMs = latestPlaybackState.positionMs,
+            bufferedPositionMs = latestPlaybackState.bufferedPositionMs,
+            durationMs = latestPlaybackState.durationMs
+        )
+    }
+
+    private fun seekToFraction(fraction: Float) {
+        if (!transportVisible) return
+        val durationMs = latestPlaybackState.durationMs
+        if (durationMs <= 0L) return
+
+        val positionMs = (durationMs * fraction).toLong().coerceIn(0L, durationMs)
+        latestPlaybackState = latestPlaybackState.copy(positionMs = positionMs)
+        playbackEngine.seekTo(positionMs)
+        updateTransportControls()
+    }
+
+    private fun startProgressLoop() {
+        progressHandler.removeCallbacks(progressRunnable)
+        progressHandler.post(progressRunnable)
+    }
+
+    private fun stopProgressLoop() {
+        progressHandler.removeCallbacks(progressRunnable)
+    }
+
+    private fun updatePlaybackProgress() {
+        if (!transportVisible || !engineAttached) return
+        latestPlaybackState = playbackEngine.currentState
+        updateTransportControls()
     }
 
     private fun loadAdjacentEpisode(offset: Int) {
@@ -303,6 +350,7 @@ class PlayerActivity : AppCompatActivity() {
         internal const val INVALID_MAL_ID = 0
         internal const val INVALID_TOTAL_EPISODES = 0
         internal const val DEFAULT_INITIAL_EPISODE = 1
+        private const val PROGRESS_UPDATE_INTERVAL_MS = 250L
     }
 
     private class PlaybackUnavailableException : IllegalStateException()

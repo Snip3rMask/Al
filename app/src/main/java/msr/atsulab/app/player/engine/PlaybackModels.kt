@@ -43,6 +43,8 @@ interface PlaybackEngineListener {
 interface PlaybackEngine {
     var listener: PlaybackEngineListener?
 
+    val currentState: PlaybackState
+
     fun prepare(source: VideoSource, startPositionMs: Long = 0L)
 
     fun play()

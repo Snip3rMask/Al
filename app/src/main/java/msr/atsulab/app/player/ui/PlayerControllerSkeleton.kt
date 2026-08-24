@@ -3,12 +3,15 @@ package msr.atsulab.app.player.ui
 import android.content.Context
 import android.graphics.Color
 import android.graphics.Typeface
+import android.graphics.drawable.ClipDrawable
 import android.graphics.drawable.GradientDrawable
+import android.graphics.drawable.LayerDrawable
 import android.view.Gravity
 import android.view.View
 import android.widget.ImageView
 import android.widget.FrameLayout
 import android.widget.LinearLayout
+import android.widget.SeekBar
 import android.widget.TextView
 import com.google.android.material.button.MaterialButton
 import msr.atsulab.app.R
@@ -24,6 +27,7 @@ internal class PlayerControllerSkeleton(
         fun onPlayPauseClicked()
         fun onPreviousEpisodeClicked()
         fun onNextEpisodeClicked()
+        fun onSeekFinished(fraction: Float)
     }
 
     lateinit var titleView: TextView
@@ -44,9 +48,12 @@ internal class PlayerControllerSkeleton(
     lateinit var nextEpisodeButton: ImageView
         private set
 
+    private lateinit var seekBar: SeekBar
+    private var userSeeking = false
+
     val topBar: LinearLayout = createTopBar()
     val statusControls: LinearLayout = createStatusControls()
-    val transportControls: FrameLayout = createTransportControls()
+    val transportControls: LinearLayout = createTransportControls()
 
     fun setStatus(message: String, showRetry: Boolean) {
         statusView.text = message
@@ -70,6 +77,22 @@ internal class PlayerControllerSkeleton(
         previousEpisodeButton.alpha = if (canShowPrevious) 1f else 0.38f
         nextEpisodeButton.isEnabled = canShowNext
         nextEpisodeButton.alpha = if (canShowNext) 1f else 0.38f
+    }
+
+    fun updatePlaybackProgress(positionMs: Long, bufferedPositionMs: Long, durationMs: Long) {
+        seekBar.isEnabled = durationMs > 0L
+        if (userSeeking || durationMs <= 0L) return
+
+        seekBar.progress = progressFraction(positionMs, durationMs)
+        seekBar.secondaryProgress = maxOf(
+            seekBar.progress,
+            progressFraction(bufferedPositionMs, durationMs)
+        )
+    }
+
+    private fun progressFraction(positionMs: Long, durationMs: Long): Int {
+        if (durationMs <= 0L) return 0
+        return (positionMs.coerceAtLeast(0L) * SEEK_BAR_MAX / durationMs).toInt().coerceIn(0, SEEK_BAR_MAX)
     }
 
     private fun createTopBar(): LinearLayout {
@@ -140,11 +163,45 @@ internal class PlayerControllerSkeleton(
         }
     }
 
-    private fun createTransportControls(): FrameLayout {
+    private fun createTransportControls(): LinearLayout {
         val density = context.resources.displayMetrics.density
 
-        return FrameLayout(context).apply {
+        return LinearLayout(context).apply {
+            orientation = LinearLayout.VERTICAL
             visibility = View.GONE
+            background = createBottomGradient()
+
+            val progressRow = LinearLayout(context).apply {
+                gravity = Gravity.CENTER_VERTICAL
+                setPadding(dp(30, density), 0, dp(30, density), 0)
+            }
+
+            seekBar = SeekBar(context).apply {
+                max = SEEK_BAR_MAX
+                progressDrawable = createBufferedSeekDrawable(density)
+                thumb = createThinSeekThumb(density)
+                thumbOffset = dp(6, density)
+                splitTrack = false
+                isEnabled = false
+                setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+                    override fun onProgressChanged(bar: SeekBar?, progress: Int, fromUser: Boolean) = Unit
+
+                    override fun onStartTrackingTouch(bar: SeekBar?) {
+                        userSeeking = true
+                    }
+
+                    override fun onStopTrackingTouch(bar: SeekBar?) {
+                        userSeeking = false
+                        callbacks.onSeekFinished((bar?.progress ?: 0) / SEEK_BAR_MAX.toFloat())
+                    }
+                })
+            }
+            progressRow.addView(
+                seekBar,
+                LinearLayout.LayoutParams(MATCH_PARENT, dp(PlayerShellMetrics.SEEK_CONTROL_HEIGHT_DP, density))
+            )
+
+            val iconRow = FrameLayout(context)
             previousEpisodeButton = createTransportIcon(
                 R.drawable.ic_player_previous_modern,
                 R.string.player_previous_episode
@@ -163,8 +220,7 @@ internal class PlayerControllerSkeleton(
             ) {
                 callbacks.onNextEpisodeClicked()
             }
-
-            addView(
+            iconRow.addView(
                 previousEpisodeButton,
                 FrameLayout.LayoutParams(
                     dp(PlayerShellMetrics.CONTROL_ICON_SIZE_DP, density),
@@ -174,7 +230,7 @@ internal class PlayerControllerSkeleton(
                     setMargins(0, 0, dp(PlayerShellMetrics.TRANSPORT_ICON_OFFSET_DP, density), 0)
                 }
             )
-            addView(
+            iconRow.addView(
                 playPauseButton,
                 FrameLayout.LayoutParams(
                     dp(PlayerShellMetrics.CONTROL_ICON_SIZE_DP, density),
@@ -182,7 +238,7 @@ internal class PlayerControllerSkeleton(
                     Gravity.CENTER
                 )
             )
-            addView(
+            iconRow.addView(
                 nextEpisodeButton,
                 FrameLayout.LayoutParams(
                     dp(PlayerShellMetrics.CONTROL_ICON_SIZE_DP, density),
@@ -191,6 +247,21 @@ internal class PlayerControllerSkeleton(
                 ).apply {
                     setMargins(dp(PlayerShellMetrics.TRANSPORT_ICON_OFFSET_DP, density), 0, 0, 0)
                 }
+            )
+
+            addView(
+                progressRow,
+                LinearLayout.LayoutParams(
+                    MATCH_PARENT,
+                    dp(PlayerShellMetrics.PROGRESS_ROW_HEIGHT_DP, density)
+                )
+            )
+            addView(
+                iconRow,
+                LinearLayout.LayoutParams(
+                    MATCH_PARENT,
+                    dp(PlayerShellMetrics.TRANSPORT_ROW_HEIGHT_DP, density)
+                )
             )
         }
     }
@@ -208,6 +279,41 @@ internal class PlayerControllerSkeleton(
         }
     }
 
+    private fun createBufferedSeekDrawable(density: Float): LayerDrawable {
+        val background = roundedLine(0x665F6672.toInt(), density)
+        val secondary = ClipDrawable(roundedLine(0x99FFFFFF.toInt(), density), Gravity.LEFT, ClipDrawable.HORIZONTAL)
+        val progress = ClipDrawable(
+            roundedLine(PlayerShellMetrics.ACCENT_COLOR, density),
+            Gravity.LEFT,
+            ClipDrawable.HORIZONTAL
+        )
+        return LayerDrawable(arrayOf(background, secondary, progress)).apply {
+            setId(0, android.R.id.background)
+            setId(1, android.R.id.secondaryProgress)
+            setId(2, android.R.id.progress)
+            val inset = dp(14, density)
+            setLayerInset(0, 0, inset, 0, inset)
+            setLayerInset(1, 0, inset, 0, inset)
+            setLayerInset(2, 0, inset, 0, inset)
+        }
+    }
+
+    private fun createThinSeekThumb(density: Float): GradientDrawable {
+        return GradientDrawable().apply {
+            shape = GradientDrawable.OVAL
+            setColor(PlayerShellMetrics.ACCENT_COLOR)
+            setSize(dp(12, density), dp(12, density))
+        }
+    }
+
+    private fun roundedLine(color: Int, density: Float): GradientDrawable {
+        return GradientDrawable().apply {
+            setColor(color)
+            cornerRadius = dp(2, density)
+            setSize(1, dp(3, density))
+        }
+    }
+
     private fun createTopGradient(): GradientDrawable {
         return GradientDrawable(
             GradientDrawable.Orientation.TOP_BOTTOM,
@@ -215,7 +321,19 @@ internal class PlayerControllerSkeleton(
         )
     }
 
+    private fun createBottomGradient(): GradientDrawable {
+        return GradientDrawable(
+            GradientDrawable.Orientation.BOTTOM_TOP,
+            intArrayOf(0xCC000000.toInt(), 0x66000000.toInt(), 0x00000000)
+        )
+    }
+
     private fun dp(value: Int, density: Float): Int {
         return (value * density).toInt()
+    }
+
+    private companion object {
+        const val SEEK_BAR_MAX = 1000
+        const val MATCH_PARENT = LinearLayout.LayoutParams.MATCH_PARENT
     }
 }
