@@ -23,6 +23,7 @@ import msr.atsulab.app.helper.enums.MediaType
 import msr.atsulab.app.helper.enums.SearchCategory
 import msr.atsulab.app.helper.enums.TextEditorType
 import msr.atsulab.app.helper.utils.DeepLink
+import msr.atsulab.app.player.domain.model.PlaybackAnime
 import msr.atsulab.app.player.ui.PlayerActivity
 import msr.atsulab.app.type.ScoreFormat
 import msr.atsulab.app.ui.activity.ActivityDetailFragment
