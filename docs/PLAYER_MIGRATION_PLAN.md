@@ -506,6 +506,12 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - Device validation confirmed buffering stays chrome-free, ready playback reveals controls, tap toggling works, four-second auto-hide works, and locked-state unlock reveal/unlock work.
 - Closed Part 7.2 Lock Controls.
 
+#### Brightness Reliability Fix — 2026-08-25
+
+- Replaced the OEM-dependent activity-window brightness override with a dedicated video-surface dimming scrim.
+- Mapped gesture level directly to scrim opacity so downward drags reliably darken video and upward drags remove the dimming layer.
+- Preserved the minimum/max levels, HUD percentage, rotation state, lock blocking, and existing volume behavior.
+
 ### 7.3 Gestures [x]
 
 - [x] Double-tap seek and single-tap controls toggle.
