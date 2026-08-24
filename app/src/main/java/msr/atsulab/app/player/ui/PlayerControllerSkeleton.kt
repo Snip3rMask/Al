@@ -55,9 +55,6 @@ internal class PlayerControllerSkeleton(
     lateinit var lockButton: ImageView
         private set
 
-    lateinit var unlockButton: ImageView
-        private set
-
     var isControlsLocked: Boolean = false
         private set
 
