@@ -12,7 +12,7 @@ internal class PlayerGestureHudView(context: Context) : View(context) {
 
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val rect = RectF()
-    private var label = LABEL_VOLUME
+    private var label = DEFAULT_LABEL_VOLUME
     private var level = 0.5f
 
     fun setLevel(label: String, level: Float) {
@@ -33,7 +33,7 @@ internal class PlayerGestureHudView(context: Context) : View(context) {
 
         paint.textSize = width * HUD_LABEL_SIZE_RATIO
         canvas.drawText(
-            if (label.startsWith("B")) LABEL_BRIGHTNESS_DISPLAY else LABEL_VOLUME,
+            if (label.startsWith("B")) LABEL_BRIGHTNESS_DISPLAY else LABEL_VOLUME_DISPLAY,
             width / 2f,
             height * HUD_LABEL_VERTICAL_RATIO,
             paint
@@ -61,9 +61,9 @@ internal class PlayerGestureHudView(context: Context) : View(context) {
     }
 
     private companion object {
-        const val LABEL_VOLUME = "Volume"
+        const val DEFAULT_LABEL_VOLUME = "Volume"
         const val LABEL_BRIGHTNESS_DISPLAY = "SUN"
-        const val LABEL_VOLUME = "VOL"
+        const val LABEL_VOLUME_DISPLAY = "VOL"
         const val HUD_LABEL_SIZE_RATIO = 0.16f
         const val HUD_LABEL_VERTICAL_RATIO = 0.20f
         const val HUD_TRACK_HORIZONTAL_RATIO = 0.46f

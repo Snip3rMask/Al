@@ -53,9 +53,9 @@ internal class PlayerShellLayoutBuilder(
         )
 
         return if (orientation == PlayerShellOrientation.LANDSCAPE) {
-            buildLandscape(videoFrame, playerView, controller, loadingIndicator, episodeLabel)
+            buildLandscape(videoFrame, playerView, controller, loadingIndicator, gestureHudView, episodeLabel)
         } else {
-            buildPortrait(videoFrame, playerView, controller, loadingIndicator, episodeLabel)
+            buildPortrait(videoFrame, playerView, controller, loadingIndicator, gestureHudView, episodeLabel)
         }
     }
 
@@ -64,6 +64,7 @@ internal class PlayerShellLayoutBuilder(
         playerView: PlayerView,
         controller: PlayerControllerSkeleton,
         loadingIndicator: ProgressBar,
+        gestureHudView: PlayerGestureHudView,
         episodeLabel: String
     ): PlayerShellViews {
         val density = context.resources.displayMetrics.density
@@ -161,6 +162,7 @@ internal class PlayerShellLayoutBuilder(
         playerView: PlayerView,
         controller: PlayerControllerSkeleton,
         loadingIndicator: ProgressBar,
+        gestureHudView: PlayerGestureHudView,
         episodeLabel: String
     ): PlayerShellViews {
         val density = context.resources.displayMetrics.density

@@ -63,7 +63,7 @@ internal class PlayerGestureHandler(
                 }
 
                 if (isAdjusting) {
-                    if (context.resources.configuration.orientation ==
+                    if (view.resources.configuration.orientation ==
                         android.content.res.Configuration.ORIENTATION_LANDSCAPE
                     ) {
                         val normalizedDelta = -deltaY / view.height.coerceAtLeast(1)
