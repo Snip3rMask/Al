@@ -3,19 +3,51 @@ package msr.atsulab.app.player.ui
 import android.graphics.Color
 import android.os.Bundle
 import android.view.Gravity
+import android.view.SurfaceView
+import android.view.View
+import android.widget.Button
+import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.button.MaterialButton
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.disposables.Disposable
 import msr.atsulab.app.R
+import msr.atsulab.app.player.domain.model.PlaybackAnime
+import msr.atsulab.app.player.domain.model.PlaybackEpisode
+import msr.atsulab.app.player.domain.model.VideoSource
+import msr.atsulab.app.player.engine.PlaybackError
+import msr.atsulab.app.player.domain.repository.EpisodeRepository
+import msr.atsulab.app.player.domain.repository.VideoSourceRepository
+import msr.atsulab.app.player.engine.PlaybackEngine
+import msr.atsulab.app.player.engine.PlaybackEngineListener
+import msr.atsulab.app.player.engine.PlaybackReadyState
+import msr.atsulab.app.player.engine.PlaybackState
+import msr.atsulab.app.player.runtime.selectPlaybackEpisode
+import org.koin.android.ext.android.inject
+import org.koin.core.KoinComponent
 
-class PlayerActivity : AppCompatActivity() {
+class PlayerActivity : AppCompatActivity(), KoinComponent {
+
+    private val episodeRepository: EpisodeRepository by inject()
+    private val videoSourceRepository: VideoSourceRepository by inject()
+
+    private lateinit var statusView: TextView
+    private lateinit var retryButton: Button
+    private lateinit var surfaceView: SurfaceView
+
+    private var currentAnime: PlaybackAnime? = null
+    private var requestedEpisode = DEFAULT_INITIAL_EPISODE
+    private var playbackEngine: PlaybackEngine? = null
+    private var playbackDisposable: Disposable? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         val aniListId = intent.getIntExtra(EXTRA_ANILIST_ID, INVALID_ANILIST_ID)
         val title = intent.getStringExtra(EXTRA_TITLE).orEmpty()
-        val initialEpisode = intent.getIntExtra(EXTRA_INITIAL_EPISODE, DEFAULT_INITIAL_EPISODE)
+        requestedEpisode = intent.getIntExtra(EXTRA_INITIAL_EPISODE, DEFAULT_INITIAL_EPISODE)
             .coerceAtLeast(DEFAULT_INITIAL_EPISODE)
 
         if (aniListId == INVALID_ANILIST_ID || title.isBlank()) {
@@ -23,27 +55,164 @@ class PlayerActivity : AppCompatActivity() {
             return
         }
 
-        val statusView = TextView(this).apply {
+        currentAnime = PlaybackAnime(
+            aniListId = aniListId,
+            malId = intent.getIntExtra(EXTRA_MAL_ID, INVALID_MAL_ID).takeIf { it != INVALID_MAL_ID },
+            title = title,
+            coverImageUrl = intent.getStringExtra(EXTRA_COVER_IMAGE_URL).orEmpty(),
+            bannerImageUrl = intent.getStringExtra(EXTRA_BANNER_IMAGE_URL).orEmpty(),
+            totalEpisodes = intent.getIntExtra(EXTRA_TOTAL_EPISODES, INVALID_TOTAL_EPISODES)
+                .takeIf { it != INVALID_TOTAL_EPISODES }
+        )
+
+        setupContent()
+        playbackEngine = getKoin().get<PlaybackEngine>().also(::attachEngine)
+        loadPlayback()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        playbackEngine?.onForeground()
+    }
+
+    override fun onStop() {
+        playbackEngine?.onBackground()
+        super.onStop()
+    }
+
+    override fun onDestroy() {
+        playbackDisposable?.dispose()
+        playbackEngine?.release()
+        playbackEngine = null
+        super.onDestroy()
+    }
+
+    private fun attachEngine(engine: PlaybackEngine) {
+        engine.setSurfaceView(surfaceView)
+        engine.listener = object : PlaybackEngineListener {
+            override fun onStateChanged(state: PlaybackState) {
+                when (state.readyState) {
+                    PlaybackReadyState.BUFFERING -> showMessage(R.string.player_buffering)
+                    PlaybackReadyState.READY -> showMessage(R.string.player_playing)
+                    PlaybackReadyState.ENDED -> showMessage(R.string.player_ended)
+                    PlaybackReadyState.IDLE -> Unit
+                }
+            }
+
+            override fun onError(error: PlaybackError) {
+                showError()
+            }
+        }
+    }
+
+    private fun setupContent() {
+        surfaceView = SurfaceView(this)
+        val surfaceHost = FrameLayout(this).apply { setBackgroundColor(Color.BLACK) }
+        surfaceHost.addView(
+            surfaceView,
+            FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.MATCH_PARENT
+            )
+        )
+
+        statusView = TextView(this).apply {
             gravity = Gravity.CENTER
-            setPadding(64, 64, 64, 64)
+            setPadding(48, 24, 48, 8)
             setTextColor(Color.WHITE)
-            text = getString(R.string.player_shell_status_format, title, initialEpisode)
         }
 
-        setContentView(
-            LinearLayout(this).apply {
-                orientation = LinearLayout.VERTICAL
-                gravity = Gravity.CENTER
-                setBackgroundColor(Color.BLACK)
-                addView(
-                    statusView,
-                    LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.MATCH_PARENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT
-                    )
-                )
+        retryButton = MaterialButton(this).apply {
+            setText(R.string.retry)
+            visibility = View.GONE
+            setOnClickListener {
+                val anime = currentAnime ?: return@setOnClickListener
+                loadPlayback(anime)
             }
-        )
+        }
+
+        val controls = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.CENTER
+            setBackgroundColor(Color.BLACK)
+            addView(statusView)
+            addView(retryButton)
+        }
+
+        val root = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setBackgroundColor(Color.BLACK)
+            addView(
+                surfaceHost,
+                LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    0,
+                    1f
+                )
+            )
+            addView(
+                controls,
+                LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                )
+            )
+        }
+
+        setContentView(root)
+    }
+
+    private fun loadPlayback() {
+        val anime = currentAnime ?: return
+        loadPlayback(anime)
+    }
+
+    private fun loadPlayback(anime: PlaybackAnime) {
+        showMessage(R.string.player_loading_episode, anime.title, requestedEpisode)
+        retryButton.visibility = View.GONE
+        playbackDisposable?.dispose()
+
+        playbackDisposable = episodeRepository.getEpisodes(anime)
+            .map { episodes -> episodes.selectPlaybackEpisode(requestedEpisode) }
+            .flatMap { episode ->
+                if (episode == null) throw PlaybackUnavailableException()
+                videoSourceRepository.getSources(anime, episode)
+                    .map { sources -> episode to sources }
+            }
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(
+                { (episode, sources) -> startPlayback(episode, sources) },
+                { error ->
+                    if (error is PlaybackUnavailableException) showUnavailable() else showError()
+                }
+            )
+    }
+
+    private fun startPlayback(episode: PlaybackEpisode, sources: List<VideoSource>) {
+        val source = sources.firstOrNull()
+        if (source == null) {
+            showUnavailable()
+            return
+        }
+
+        showMessage(R.string.player_starting_playback, episode.name)
+        playbackEngine?.prepare(source)
+        playbackEngine?.play()
+    }
+
+    private fun showMessage(messageResId: Int, vararg args: Any?) {
+        statusView.text = getString(messageResId, *args)
+        retryButton.visibility = View.GONE
+    }
+
+    private fun showUnavailable() {
+        statusView.text = getString(R.string.playback_unavailable)
+        retryButton.visibility = View.VISIBLE
+    }
+
+    private fun showError() {
+        statusView.text = getString(R.string.player_runtime_error)
+        retryButton.visibility = View.VISIBLE
     }
 
     companion object {
@@ -56,6 +225,10 @@ class PlayerActivity : AppCompatActivity() {
         const val EXTRA_INITIAL_EPISODE = "EXTRA_INITIAL_EPISODE"
 
         internal const val INVALID_ANILIST_ID = 0
+        internal const val INVALID_MAL_ID = 0
+        internal const val INVALID_TOTAL_EPISODES = 0
         internal const val DEFAULT_INITIAL_EPISODE = 1
     }
+
+    private class PlaybackUnavailableException : IllegalStateException()
 }

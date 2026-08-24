@@ -574,4 +574,11 @@
         <item quantity="other">volumes</item>
     </plurals>
     <string name="player_shell_status_format">Ready to load %1$s — episode %2$d</string>
+    <string name="player_loading_episode">Loading %1$s — episode %2$d…</string>
+    <string name="player_starting_playback">Starting %1$s</string>
+    <string name="player_buffering">Buffering…</string>
+    <string name="player_playing">Playing</string>
+    <string name="player_ended">Playback ended</string>
+    <string name="player_runtime_error">Playback could not be started.</string>
+    <string name="retry">Retry</string>
 </resources>

@@ -103,6 +103,13 @@ class PlaybackAnimeMapperTest {
         assertEquals(null, result.getOrNull())
     }
 
+    @Test
+    fun `rejects a playback start without a title`() {
+        val result = createMedia().copy(title = MediaTitle()).toPlaybackStart(AppSetting())
+
+        assertEquals(null, result.getOrNull())
+    }
+
     private fun createMedia(type: MediaType = MediaType.ANIME): Media {
         return Media(
             idAniList = 21,

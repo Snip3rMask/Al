@@ -327,7 +327,7 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - [x] Pass media ID, title, type, cover image, and initial episode.
 - [x] Replace the Play placeholder in `MediaFragment` with real navigation.
 - [x] Keep Download as placeholder until the offline phase.
-- [ ] Handle guest mode and unavailable episodes gracefully.
+- [x] Handle guest mode and unavailable episodes gracefully.
 
 **Exit gate:** Details page opens the player, episodes load, a working source plays, and back navigation returns correctly.
 
@@ -345,6 +345,16 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - Added a pure playback start-policy helper that allows guests and rejects manga, invalid AniList IDs, blank titles, and not-yet-released anime.
 - Replaced the Media Details Play placeholder with navigation to the minimal player destination using episode 1 by default.
 - Added a user-facing playback-unavailable fallback for invalid or unsupported entries.
+
+### Part 4 Runtime Work — 2026-08-24
+
+- Added a temporary playback-ready shell with a video surface, loading/status text, retry, and fatal-error feedback.
+- Wired `PlayerActivity` to the existing Rx3 episode and source repository fallback chains.
+- Added pure requested-episode selection with exact-number matching and positional fallback for provider numbering differences.
+- Resolved the selected episode through `VideoSourceRepository`, attached the winning HLS source to Media3, and preserved referer handling in the engine.
+- Kept guest access allowed at the entry-policy layer; runtime playback performs no AniList login dependency.
+- Separated unavailable-episode/source results from generic runtime errors and made both retryable.
+- Released the playback engine, cancelled active Rx work on destroy, and routed foreground/background transitions through the engine lifecycle.
 
 ## Part 5 — Continue Watching
 
@@ -626,9 +636,10 @@ Append dated entries here. Do not delete history.
 - Started Part 4 by adding the playback navigation contract without touching the current Play placeholder.
 - Implemented manager navigation through a temporary minimal `PlayerActivity` shell.
 - Added the AniList-to-playback-domain anime mapper with unit tests.
+- Implemented runtime episode loading, source resolution, Media3 attachment, retry/error states, and lifecycle cleanup.
 
 ## Next Action
 
-1. Implement episode loading inside `PlayerActivity` with loading, empty, error, and retry states.
-2. Resolve a playable source through `VideoSourceRepository` and attach it safely to Media3.
-3. Complete runtime guest/unavailable-episode validation before moving to Continue Watching.
+1. Install the next debug release and verify Details → Play loads episodes, resolves a playable source, renders video/audio, and back navigation works.
+2. Verify an unavailable title shows the retryable unavailable state instead of crashing.
+3. After device confirmation, close Part 4 and begin Part 5 — Continue Watching.
