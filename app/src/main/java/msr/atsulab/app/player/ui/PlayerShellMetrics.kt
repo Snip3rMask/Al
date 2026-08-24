@@ -27,6 +27,10 @@ object PlayerShellMetrics {
     const val UNLOCK_BUTTON_PORTRAIT_TOP_MARGIN_DP = 138
     const val UNLOCK_BUTTON_LANDSCAPE_TOP_MARGIN_DP = 92
     const val LOADING_INDICATOR_SIZE_DP = 58
+    const val GESTURE_HUD_WIDTH_DP = 82
+    const val GESTURE_HUD_HEIGHT_DP = 138
+    const val GESTURE_HUD_SIDE_MARGIN_DP = 32
+    const val VERTICAL_GESTURE_ACTIVATION_DP = 22
     const val WATCHING_ROW_HEIGHT_DP = 72
     const val EPISODE_GRID_COLUMN_COUNT = 5
 

@@ -506,11 +506,11 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - Device validation confirmed buffering stays chrome-free, ready playback reveals controls, tap toggling works, four-second auto-hide works, and locked-state unlock reveal/unlock work.
 - Closed Part 7.2 Lock Controls.
 
-### 7.3 Gestures [~]
+### 7.3 Gestures [x]
 
 - [x] Double-tap seek and single-tap controls toggle.
-- [ ] Vertical volume and brightness gestures.
-- [ ] Gesture HUD feedback.
+- [x] Vertical volume and brightness gestures.
+- [x] Gesture HUD feedback.
 
 #### Part 7.3 Slice A — Double-Tap Seek — 2026-08-24
 
@@ -519,6 +519,16 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - Migrated single-tap handling into the same gesture boundary while preserving controls toggling and locked-touch unlock reveal.
 - Blocked gesture seeking during loading/error states and while playback controls are locked.
 - Kept relative seeks clamped to the current media duration and synchronized transport state immediately.
+
+#### Part 7.3 Slice B — Vertical Levels & HUD — 2026-08-24
+
+- Ported Anifux landscape-only vertical gestures: left-half drag adjusts brightness and right-half drag adjusts media volume.
+- Preserved the 22dp activation threshold, 1.15 diagonal bias, 1.25 sensitivity, 5% minimum brightness, 0–100% volume range, and immediate gesture reset on release.
+- Added the exact 82×138dp gesture HUD with SUN/VOL labels, accent level bar, percentage feedback, side placement, and margins.
+- Restored Anifux HUD timing: visible during adjustment, then a 420ms delay followed by a 160ms fade.
+- Kept locked touches isolated from brightness/volume adjustment, single taps, double-tap seeks, and control visibility changes.
+- Rebuilt and attached a fresh HUD during orientation changes while retaining the same shell lifecycle cleanup.
+- Closed Part 7.3 Gestures pending Release `100` real-device validation.
 
 ### 7.4 Speed Control
 
@@ -764,8 +774,9 @@ Append dated entries here. Do not delete history.
 - Completed Part 7.1 Slices D–E: Anifux-style seekbar drag, portrait overlay fix, elapsed/total labels, and buffered-progress synchronization.
 - Closed Part 7.1 Basic Transport at code level pending Release `94` device validation.
 - Implemented Part 7.2 playback locking, temporary unlock overlay, control blocking, and rotation persistence.
+- Completed Part 7.3 Slices A–B: confirmed/double/single tap handling, ±10s double-tap seek, landscape vertical volume/brightness, and Anifux-style HUD.
 
 ## Next Action
 
-1. Install Release `97` or newer and verify tap-to-show/hide controls, four-second auto-hide, buffering/loading transitions, retry/error recovery, locked-tap unlock reveal, rotation persistence, and HLS playback.
+1. Install Release `100` or newer and verify double-tap left/right seek, landscape left/right vertical brightness/volume, HUD feedback and fade timing, lock-state blocking, single-tap controls, four-second auto-hide, rotation persistence, and HLS playback.
 2. After validation, begin Part 7.3 Gestures.

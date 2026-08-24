@@ -1,10 +1,13 @@
 package msr.atsulab.app.player.ui
 
+import android.content.Context
 import android.content.res.Configuration
+import android.media.AudioManager
 import android.graphics.Color
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.view.Gravity
 import android.view.View
 import android.widget.FrameLayout
 import android.widget.ProgressBar
@@ -223,6 +226,57 @@ class PlayerActivity : AppCompatActivity() {
                 override fun onSeek(isForward: Boolean) {
                     seekBy(if (isForward) GESTURE_SEEK_DURATION_MS else -GESTURE_SEEK_DURATION_MS)
                 }
+
+                override fun onPlaybackTouchStarted() {
+                    scheduleControlsAutoHide()
+                }
+
+                override fun currentBrightness(): Float {
+                    val brightness = window.attributes.screenBrightness
+                    return if (brightness >= 0f) brightness else DEFAULT_BRIGHTNESS
+                }
+
+                override fun setBrightness(value: Float) {
+                    window.attributes = window.attributes.apply { screenBrightness = value }
+                }
+
+                override fun currentVolume(): Int {
+                    return audioManager.getStreamVolume(AudioManager.STREAM_MUSIC)
+                }
+
+                override fun maxVolume(): Int {
+                    return audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
+                }
+
+                override fun setVolume(value: Int) {
+                    audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, value, 0)
+                }
+
+                override fun showHud(label: String, level: Float, isRightSide: Boolean) {
+                    val layoutParams = shell.gestureHudView.layoutParams as FrameLayout.LayoutParams
+                    layoutParams.gravity = (if (isRightSide) Gravity.END else Gravity.START) or Gravity.CENTER_VERTICAL
+                    layoutParams.setMargins(
+                        if (isRightSide) 0 else dp(GESTURE_HUD_SIDE_MARGIN_DP),
+                        0,
+                        if (isRightSide) dp(GESTURE_HUD_SIDE_MARGIN_DP) else 0,
+                        0
+                    )
+                    shell.gestureHudView.layoutParams = layoutParams
+                    shell.gestureHudView.setLevel(label, level)
+                    shell.gestureHudView.animate().cancel()
+                    shell.gestureHudView.alpha = 1f
+                    shell.gestureHudView.visibility = View.VISIBLE
+                }
+
+                override fun hideHudSoon() {
+                    shell.gestureHudView.animate().cancel()
+                    shell.gestureHudView.animate()
+                        .alpha(0f)
+                        .setStartDelay(GESTURE_HUD_HIDE_START_DELAY_MS)
+                        .setDuration(GESTURE_HUD_FADE_DURATION_MS)
+                        .withEndAction { shell.gestureHudView.visibility = View.GONE }
+                        .start()
+                }
             }
         )
         this.gestureHandler = gestureHandler
@@ -357,6 +411,13 @@ class PlayerActivity : AppCompatActivity() {
         updateTransportControls()
     }
 
+    private val audioManager: AudioManager
+        get() = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+
+    private fun dp(value: Int): Int {
+        return (value * resources.displayMetrics.density).toInt()
+    }
+
     private fun togglePlayback() {
         if (!transportVisible || controlsLocked) return
         if (latestPlaybackState.playWhenReady) playbackEngine.pause() else playbackEngine.play()
@@ -453,6 +514,10 @@ class PlayerActivity : AppCompatActivity() {
     companion object {
         const val EXTRA_ANILIST_ID = "EXTRA_ANILIST_ID"
         const val GESTURE_SEEK_DURATION_MS = 10_000L
+        const val GESTURE_HUD_SIDE_MARGIN_DP = PlayerShellMetrics.GESTURE_HUD_SIDE_MARGIN_DP
+        const val GESTURE_HUD_HIDE_START_DELAY_MS = 420L
+        const val GESTURE_HUD_FADE_DURATION_MS = 160L
+        const val DEFAULT_BRIGHTNESS = 0.5f
         const val EXTRA_MAL_ID = "EXTRA_MAL_ID"
         const val EXTRA_TITLE = "EXTRA_TITLE"
         const val EXTRA_COVER_IMAGE_URL = "EXTRA_COVER_IMAGE_URL"

@@ -19,7 +19,8 @@ internal data class PlayerShellViews(
     val videoFrame: FrameLayout,
     val playerView: PlayerView,
     val controller: PlayerControllerSkeleton,
-    val loadingIndicator: ProgressBar
+    val loadingIndicator: ProgressBar,
+    val gestureHudView: PlayerGestureHudView
 )
 
 internal class PlayerShellLayoutBuilder(
@@ -38,6 +39,7 @@ internal class PlayerShellLayoutBuilder(
         }
 
         val loadingIndicator = ProgressBar(context).apply { visibility = View.GONE }
+        val gestureHudView = PlayerGestureHudView(context).apply { visibility = View.GONE }
         val videoFrame = FrameLayout(context).apply {
             setBackgroundColor(Color.BLACK)
             isClickable = true
@@ -109,6 +111,17 @@ internal class PlayerShellLayoutBuilder(
             }
         )
 
+        videoFrame.addView(
+            gestureHudView,
+            FrameLayout.LayoutParams(
+                dp(PlayerShellMetrics.GESTURE_HUD_WIDTH_DP, density),
+                dp(PlayerShellMetrics.GESTURE_HUD_HEIGHT_DP, density),
+                Gravity.START or Gravity.CENTER_VERTICAL
+            ).apply {
+                setMargins(dp(PlayerShellMetrics.GESTURE_HUD_SIDE_MARGIN_DP, density), 0, 0, 0)
+            }
+        )
+
         val watchingView = TextView(context).apply {
             text = episodeLabel
             gravity = Gravity.CENTER
@@ -133,7 +146,14 @@ internal class PlayerShellLayoutBuilder(
 
         val root = FrameLayout(context).apply { setBackgroundColor(PlayerShellMetrics.PRIMARY_DARK_COLOR) }
         root.addView(page, FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT))
-        return PlayerShellViews(root, videoFrame, playerView, controller, loadingIndicator)
+        return PlayerShellViews(
+            root,
+            videoFrame,
+            playerView,
+            controller,
+            loadingIndicator,
+            gestureHudView
+        )
     }
 
     private fun buildLandscape(
@@ -179,9 +199,27 @@ internal class PlayerShellLayoutBuilder(
             }
         )
 
+        videoFrame.addView(
+            gestureHudView,
+            FrameLayout.LayoutParams(
+                dp(PlayerShellMetrics.GESTURE_HUD_WIDTH_DP, density),
+                dp(PlayerShellMetrics.GESTURE_HUD_HEIGHT_DP, density),
+                Gravity.END or Gravity.CENTER_VERTICAL
+            ).apply {
+                setMargins(0, 0, dp(PlayerShellMetrics.GESTURE_HUD_SIDE_MARGIN_DP, density), 0)
+            }
+        )
+
         val root = FrameLayout(context).apply { setBackgroundColor(PlayerShellMetrics.PRIMARY_DARK_COLOR) }
         root.addView(videoFrame, FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT))
-        return PlayerShellViews(root, videoFrame, playerView, controller, loadingIndicator)
+        return PlayerShellViews(
+            root,
+            videoFrame,
+            playerView,
+            controller,
+            loadingIndicator,
+            gestureHudView
+        )
     }
 
     private fun dp(value: Int, density: Float): Int {

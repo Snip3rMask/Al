@@ -29,6 +29,10 @@ class PlayerShellMetricsTest {
         assertEquals(48, PlayerShellMetrics.UNLOCK_BUTTON_LEFT_MARGIN_DP)
         assertEquals(138, PlayerShellMetrics.UNLOCK_BUTTON_PORTRAIT_TOP_MARGIN_DP)
         assertEquals(92, PlayerShellMetrics.UNLOCK_BUTTON_LANDSCAPE_TOP_MARGIN_DP)
+        assertEquals(82, PlayerShellMetrics.GESTURE_HUD_WIDTH_DP)
+        assertEquals(138, PlayerShellMetrics.GESTURE_HUD_HEIGHT_DP)
+        assertEquals(32, PlayerShellMetrics.GESTURE_HUD_SIDE_MARGIN_DP)
+        assertEquals(22, PlayerShellMetrics.VERTICAL_GESTURE_ACTIVATION_DP)
         assertEquals(5, PlayerShellMetrics.EPISODE_GRID_COLUMN_COUNT)
     }
 
