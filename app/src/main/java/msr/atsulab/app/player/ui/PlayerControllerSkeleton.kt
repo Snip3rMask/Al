@@ -32,6 +32,7 @@ internal class PlayerControllerSkeleton(
         fun onSeekFinished(fraction: Float)
         fun onLockClicked()
         fun onUnlockClicked()
+        fun onVideoTapped()
     }
 
     lateinit var titleView: TextView
@@ -60,6 +61,7 @@ internal class PlayerControllerSkeleton(
 
     private var statusRetryVisible = false
     private var transportVisible = false
+    private var controlsVisible = false
     private val unlockHandler = Handler(Looper.getMainLooper())
     private val hideUnlockRunnable = Runnable {
         unlockButton.visibility = View.GONE
@@ -102,9 +104,10 @@ internal class PlayerControllerSkeleton(
         unlockButton.scaleX = 1f
         unlockButton.scaleY = 1f
 
-        topBar.visibility = View.VISIBLE
+        val restoreChrome = transportVisible && controlsVisible
+        topBar.visibility = if (restoreChrome) View.VISIBLE else View.GONE
         statusControls.visibility = if (statusRetryVisible) View.VISIBLE else View.GONE
-        transportControls.visibility = if (transportVisible) View.VISIBLE else View.GONE
+        transportControls.visibility = if (restoreChrome) View.VISIBLE else View.GONE
     }
 
     fun release() {
@@ -125,12 +128,15 @@ internal class PlayerControllerSkeleton(
 
     fun setTransportState(
         isVisible: Boolean,
+        controlsShown: Boolean,
         isPlaying: Boolean,
         canShowPrevious: Boolean,
         canShowNext: Boolean
     ) {
         transportVisible = isVisible
-        val effectiveVisible = isVisible && !isControlsLocked
+        controlsVisible = controlsShown
+        val effectiveVisible = isVisible && controlsShown && !isControlsLocked
+        topBar.visibility = if (effectiveVisible) View.VISIBLE else View.GONE
         transportControls.visibility = if (effectiveVisible) View.VISIBLE else View.GONE
         playPauseButton.setImageResource(
             if (isPlaying) R.drawable.ic_player_pause_modern else R.drawable.ic_player_play_modern

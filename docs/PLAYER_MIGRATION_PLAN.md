@@ -492,6 +492,14 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - Locked state blocks play/pause, previous/next, seekbar commits, and future gesture actions at the central control boundary.
 - Preserved lock state across rotation and cleaned up unlock timers on destruction.
 
+#### Part 7.2 Slice B — Controls Visibility Fix — 2026-08-24
+
+- Separated playback availability from user-facing controls visibility so ready/buffering state no longer forces permanent controls.
+- Restored Anifux behavior: video tap toggles controls, shown controls auto-hide after four seconds, and interactions can restart that window.
+- Locked-state screen taps now reveal the temporary unlock button again after it auto-hides.
+- Controls are hidden during IDLE/unavailable/source-loading transitions, while retry/status remains available when required.
+- Preserved manual visibility, lock state, and auto-hide scheduling across orientation changes and lifecycle stops.
+
 ### 7.3 Gestures
 
 ### 7.3 Gestures
@@ -747,5 +755,5 @@ Append dated entries here. Do not delete history.
 
 ## Next Action
 
-1. Install Release `95` or newer and verify all Part 7.1 transport behavior plus lock/unlock, temporary unlock overlay, locked-action blocking, retry/error recovery, rotation persistence, and HLS playback.
+1. Install Release `97` or newer and verify tap-to-show/hide controls, four-second auto-hide, buffering/loading transitions, retry/error recovery, locked-tap unlock reveal, rotation persistence, and HLS playback.
 2. After validation, begin Part 7.3 Gestures.

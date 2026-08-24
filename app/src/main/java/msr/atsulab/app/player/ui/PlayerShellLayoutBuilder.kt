@@ -37,7 +37,11 @@ internal class PlayerShellLayoutBuilder(
         }
 
         val loadingIndicator = ProgressBar(context).apply { visibility = View.GONE }
-        val videoFrame = FrameLayout(context).apply { setBackgroundColor(Color.BLACK) }
+        val videoFrame = FrameLayout(context).apply {
+            setBackgroundColor(Color.BLACK)
+            isClickable = true
+            setOnClickListener { callbacks.onVideoTapped() }
+        }
         videoFrame.addView(
             playerView,
             FrameLayout.LayoutParams(

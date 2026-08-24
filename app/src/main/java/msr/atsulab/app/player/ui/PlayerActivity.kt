@@ -47,8 +47,13 @@ class PlayerActivity : AppCompatActivity() {
     private var waitingForPlayback = true
     private var latestPlaybackState = PlaybackState()
     private var transportVisible = false
+    private var controlsVisible = false
     private var controlsLocked = false
     private val progressHandler = Handler(Looper.getMainLooper())
+    private val controlsHandler = Handler(Looper.getMainLooper())
+    private val hideControlsRunnable = Runnable {
+        hideControls()
+    }
     private val progressRunnable = object : Runnable {
         override fun run() {
             updatePlaybackProgress()
@@ -102,12 +107,14 @@ class PlayerActivity : AppCompatActivity() {
 
     override fun onStop() {
         stopProgressLoop()
+        cancelControlsAutoHide()
         if (engineAttached) playbackEngine.onBackground()
         super.onStop()
     }
 
     override fun onDestroy() {
         progressHandler.removeCallbacks(progressRunnable)
+        controlsHandler.removeCallbacks(hideControlsRunnable)
         if (::shell.isInitialized) shell.controller.release()
         playbackDisposable?.dispose()
         if (engineAttached) {
@@ -129,18 +136,22 @@ class PlayerActivity : AppCompatActivity() {
                 when (state.readyState) {
                     PlaybackReadyState.BUFFERING -> {
                         transportVisible = true
+                        showControls()
                         showMessage(R.string.player_buffering, loading = true)
                     }
                     PlaybackReadyState.READY -> {
                         transportVisible = true
+                        showControls()
                         showMessage(R.string.player_playing)
                     }
                     PlaybackReadyState.ENDED -> {
                         transportVisible = true
+                        showControls()
                         showMessage(R.string.player_ended)
                     }
                     PlaybackReadyState.IDLE -> {
                         transportVisible = false
+                        hideControls()
                         updateTransportControls()
                     }
                 }
@@ -179,11 +190,15 @@ class PlayerActivity : AppCompatActivity() {
             }
 
             override fun onLockClicked() {
-                setControlsLocked(true)
+                lockControls()
             }
 
             override fun onUnlockClicked() {
-                setControlsLocked(false)
+                unlockControls()
+            }
+
+            override fun onVideoTapped() {
+                handlePlayerTap()
             }
         }
         val title = currentAnime?.title.orEmpty()
@@ -198,6 +213,7 @@ class PlayerActivity : AppCompatActivity() {
         shell.controller.setLocked(controlsLocked)
         loadingIndicator.visibility = if (waitingForPlayback) View.VISIBLE else View.GONE
         updateTransportControls()
+        if (controlsVisible) scheduleControlsAutoHide()
     }
 
     private fun applySystemBars() {
@@ -256,20 +272,67 @@ class PlayerActivity : AppCompatActivity() {
         playbackEngine.play()
     }
 
+    private fun handlePlayerTap() {
+        if (controlsLocked) {
+            shell.controller.showUnlockOverlayTemporarily()
+            return
+        }
+        toggleControlsVisibility()
+    }
+
+    private fun toggleControlsVisibility() {
+        if (!transportVisible || controlsLocked) return
+        if (controlsVisible) hideControls() else showControls()
+    }
+
+    private fun showControls() {
+        if (!transportVisible || controlsLocked) return
+        controlsVisible = true
+        updateTransportControls()
+        scheduleControlsAutoHide()
+    }
+
+    private fun hideControls() {
+        cancelControlsAutoHide()
+        controlsVisible = false
+        updateTransportControls()
+    }
+
+    private fun scheduleControlsAutoHide() {
+        if (!controlsVisible || controlsLocked || !transportVisible) return
+        controlsHandler.removeCallbacks(hideControlsRunnable)
+        controlsHandler.postDelayed(hideControlsRunnable, CONTROLS_AUTO_HIDE_DELAY_MS)
+    }
+
+    private fun cancelControlsAutoHide() {
+        controlsHandler.removeCallbacks(hideControlsRunnable)
+    }
+
+    private fun lockControls() {
+        cancelControlsAutoHide()
+        controlsVisible = false
+        controlsLocked = true
+        shell.controller.setLocked(true)
+        updateTransportControls()
+    }
+
+    private fun unlockControls() {
+        controlsLocked = false
+        controlsVisible = true
+        shell.controller.setLocked(false)
+        updateTransportControls()
+        scheduleControlsAutoHide()
+    }
+
     private fun togglePlayback() {
         if (!transportVisible || controlsLocked) return
         if (latestPlaybackState.playWhenReady) playbackEngine.pause() else playbackEngine.play()
     }
 
-    private fun setControlsLocked(locked: Boolean) {
-        controlsLocked = locked
-        shell.controller.setLocked(locked)
-        updateTransportControls()
-    }
-
     private fun updateTransportControls() {
         shell.controller.setTransportState(
             isVisible = transportVisible,
+            controlsShown = controlsVisible,
             isPlaying = latestPlaybackState.playWhenReady,
             canShowPrevious = transportVisible && !controlsLocked && episodeNavigator.canMove(-1),
             canShowNext = transportVisible && !controlsLocked && episodeNavigator.canMove(1)
@@ -368,6 +431,7 @@ class PlayerActivity : AppCompatActivity() {
         internal const val INVALID_TOTAL_EPISODES = 0
         internal const val DEFAULT_INITIAL_EPISODE = 1
         private const val PROGRESS_UPDATE_INTERVAL_MS = 250L
+        internal const val CONTROLS_AUTO_HIDE_DELAY_MS = 4_000L
     }
 
     private class PlaybackUnavailableException : IllegalStateException()
