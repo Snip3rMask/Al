@@ -49,6 +49,7 @@ class PlayerActivity : AppCompatActivity() {
     private var transportVisible = false
     private var controlsVisible = false
     private var controlsLocked = false
+    private var gestureHandler: PlayerGestureHandler? = null
     private val progressHandler = Handler(Looper.getMainLooper())
     private val controlsHandler = Handler(Looper.getMainLooper())
     private val hideControlsRunnable = Runnable {
@@ -201,14 +202,31 @@ class PlayerActivity : AppCompatActivity() {
                 unlockControls()
             }
 
-            override fun onVideoTapped() {
-                handlePlayerTap()
-            }
         }
         val title = currentAnime?.title.orEmpty()
         val episodeLabel = getString(R.string.player_shell_status_format, title, requestedEpisode)
 
         shell = PlayerShellLayoutBuilder(this, callbacks).build(title, episodeLabel)
+        val gestureHandler = PlayerGestureHandler(
+            this,
+            object : PlayerGestureHandler.Callbacks {
+                override fun isControlsLocked(): Boolean = controlsLocked
+
+                override fun onLockedTouch() {
+                    shell.controller.showUnlockOverlayTemporarily()
+                }
+
+                override fun onSingleTap() {
+                    handlePlayerTap()
+                }
+
+                override fun onSeek(isForward: Boolean) {
+                    seekBy(if (isForward) GESTURE_SEEK_DURATION_MS else -GESTURE_SEEK_DURATION_MS)
+                }
+            }
+        )
+        this.gestureHandler = gestureHandler
+        shell.videoFrame.setOnTouchListener(gestureHandler)
         playerView = shell.playerView
         loadingIndicator = shell.loadingIndicator
         setContentView(shell.root)
@@ -328,6 +346,17 @@ class PlayerActivity : AppCompatActivity() {
         scheduleControlsAutoHide()
     }
 
+    private fun seekBy(deltaMs: Long) {
+        if (!transportVisible || controlsLocked) return
+        val durationMs = latestPlaybackState.durationMs
+        if (durationMs <= 0L) return
+        val targetPositionMs = (latestPlaybackState.positionMs + deltaMs)
+            .coerceIn(0L, durationMs)
+        playbackEngine.seekTo(targetPositionMs)
+        latestPlaybackState = latestPlaybackState.copy(positionMs = targetPositionMs)
+        updateTransportControls()
+    }
+
     private fun togglePlayback() {
         if (!transportVisible || controlsLocked) return
         if (latestPlaybackState.playWhenReady) playbackEngine.pause() else playbackEngine.play()
@@ -423,6 +452,7 @@ class PlayerActivity : AppCompatActivity() {
 
     companion object {
         const val EXTRA_ANILIST_ID = "EXTRA_ANILIST_ID"
+        const val GESTURE_SEEK_DURATION_MS = 10_000L
         const val EXTRA_MAL_ID = "EXTRA_MAL_ID"
         const val EXTRA_TITLE = "EXTRA_TITLE"
         const val EXTRA_COVER_IMAGE_URL = "EXTRA_COVER_IMAGE_URL"

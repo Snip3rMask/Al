@@ -16,6 +16,7 @@ import msr.atsulab.app.R
 
 internal data class PlayerShellViews(
     val root: FrameLayout,
+    val videoFrame: FrameLayout,
     val playerView: PlayerView,
     val controller: PlayerControllerSkeleton,
     val loadingIndicator: ProgressBar
@@ -40,7 +41,6 @@ internal class PlayerShellLayoutBuilder(
         val videoFrame = FrameLayout(context).apply {
             setBackgroundColor(Color.BLACK)
             isClickable = true
-            setOnClickListener { callbacks.onVideoTapped() }
         }
         videoFrame.addView(
             playerView,
@@ -133,7 +133,7 @@ internal class PlayerShellLayoutBuilder(
 
         val root = FrameLayout(context).apply { setBackgroundColor(PlayerShellMetrics.PRIMARY_DARK_COLOR) }
         root.addView(page, FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT))
-        return PlayerShellViews(root, playerView, controller, loadingIndicator)
+        return PlayerShellViews(root, videoFrame, playerView, controller, loadingIndicator)
     }
 
     private fun buildLandscape(
@@ -181,7 +181,7 @@ internal class PlayerShellLayoutBuilder(
 
         val root = FrameLayout(context).apply { setBackgroundColor(PlayerShellMetrics.PRIMARY_DARK_COLOR) }
         root.addView(videoFrame, FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT))
-        return PlayerShellViews(root, playerView, controller, loadingIndicator)
+        return PlayerShellViews(root, videoFrame, playerView, controller, loadingIndicator)
     }
 
     private fun dp(value: Int, density: Float): Int {

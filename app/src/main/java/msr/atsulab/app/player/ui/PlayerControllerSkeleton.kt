@@ -32,7 +32,6 @@ internal class PlayerControllerSkeleton(
         fun onSeekFinished(fraction: Float)
         fun onLockClicked()
         fun onUnlockClicked()
-        fun onVideoTapped()
     }
 
     lateinit var titleView: TextView
