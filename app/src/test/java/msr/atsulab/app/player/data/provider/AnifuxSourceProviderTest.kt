@@ -111,6 +111,10 @@ class AnifuxSourceProviderTest {
             candidate = SourceCandidate(id = "123", title = "AtsuLab Anime"),
             episode = PlaybackEpisode(name = "Episode 1", url = "ep-1", number = 1f, postTitle = "AtsuLab")
         ).test().await().assertError(IOException::class.java)
+        assertEquals(
+            "/api/anime/episode/ep-1/sources?title=AtsuLab&ep=1",
+            server.takeRequest().path
+        )
     }
 
     @Test

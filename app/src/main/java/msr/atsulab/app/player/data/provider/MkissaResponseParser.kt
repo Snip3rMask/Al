@@ -37,7 +37,6 @@ internal object MkissaResponseParser {
                     number = episodeNumber,
                     postTitle = request.title,
                     playbackId = showId,
-                    confirmedSourceSlug = MkissaSourceProvider.PROVIDER_ID,
                     aniListId = request.id.trim().toIntOrNull()
                 )
             }

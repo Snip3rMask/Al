@@ -2,6 +2,7 @@ package msr.atsulab.app.player.data.provider
 
 import msr.atsulab.app.player.domain.model.SourceCandidate
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 
 class MkissaResponseParserTest {
@@ -22,7 +23,7 @@ class MkissaResponseParserTest {
         assertEquals(listOf(1.5f, 2f, 10f), episodes.map { it.number })
         episodes.forEach { episode ->
             assertEquals("show-42", episode.playbackId)
-            assertEquals(MkissaSourceProvider.PROVIDER_ID, episode.confirmedSourceSlug)
+            assertNull(episode.confirmedSourceSlug)
             assertEquals(21, episode.aniListId)
         }
     }

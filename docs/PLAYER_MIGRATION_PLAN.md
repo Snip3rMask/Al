@@ -201,7 +201,7 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 
 **Exit gate:** Build succeeds, existing UI remains unchanged, no Hilt or ExoPlayer dependency is needed yet.
 
-## Part 2 — Source/API Layer [~]
+## Part 2 — Source/API Layer [x]
 
 **Goal:** Port source discovery and video resolution behind clean interfaces.
 
@@ -281,7 +281,18 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
   - Confirmed no `com.anifux.*` package or Anifux source-path dependency leaked into AtsuLab production code.
   - Confirmed this phase changed player data/diagnostic seams only; existing AtsuLab screens and resources remain untouched.
 
-## Part 3 — Headless ExoPlayer Engine
+### Part 2 Closure — 2026-08-24
+
+- Completed a live exit-gate check for AniList ID `21` (`One Piece`):
+  - Mkissa resolved `1176` SUB episodes.
+  - Episode `1` produced `10` sources through the primary backend resolver; `5` were HLS.
+- Found and fixed a compatibility regression where Mkissa episodes incorrectly supplied `confirmedSourceSlug = mkissa`.
+  - The field is reserved for a confirmed Nora/anineko slug and was intentionally absent in the original Anifux flow.
+  - Added parser and wire-path regression assertions so the backend resolver receives the exact original request shape.
+- Confirmed failed and empty provider results continue through the typed repository fallback chain with anonymous diagnostics.
+- Existing AtsuLab tracking UI remained unchanged during this data-layer phase.
+
+## Part 3 — Headless ExoPlayer Engine [x]
 
 **Goal:** Prove playback before adding heavy custom UI.
 
