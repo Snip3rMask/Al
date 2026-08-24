@@ -23,7 +23,7 @@ class PlaybackSpeedOptionsTest {
     fun `normalizes persisted values to supported options`() {
         assertEquals(1f, PlaybackSpeedOptions.normalize(-0.2f))
         assertEquals(1.25f, PlaybackSpeedOptions.normalize(1.26f))
-        assertEquals(2.0f, PlaybackSpeedOptions.normalize(9f))
+        assertEquals(1f, PlaybackSpeedOptions.normalize(9f))
         assertEquals(1f, PlaybackSpeedOptions.normalize(0.9f))
     }
 
