@@ -478,7 +478,7 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - Buffered progress remains synchronized through the seekbar's secondary-progress layer.
 - Closed Part 7.1 Basic Transport.
 
-### 7.2 Lock Controls [~]
+### 7.2 Lock Controls [x]
 
 - [x] Lock button and unlock overlay.
 - [x] Block gestures while locked.
@@ -501,13 +501,24 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - Controls are hidden during IDLE/unavailable/source-loading transitions, while retry/status remains available when required.
 - Preserved manual visibility, lock state, and auto-hide scheduling across orientation changes and lifecycle stops.
 
-### 7.3 Gestures
+#### Validation — Release 98 — 2026-08-24
 
-### 7.3 Gestures
+- Device validation confirmed buffering stays chrome-free, ready playback reveals controls, tap toggling works, four-second auto-hide works, and locked-state unlock reveal/unlock work.
+- Closed Part 7.2 Lock Controls.
 
-- [ ] Horizontal seek, volume, brightness.
-- [ ] Double-tap seek and single-tap controls toggle.
+### 7.3 Gestures [~]
+
+- [x] Double-tap seek and single-tap controls toggle.
+- [ ] Vertical volume and brightness gestures.
 - [ ] Gesture HUD feedback.
+
+#### Part 7.3 Slice A — Double-Tap Seek — 2026-08-24
+
+- Added a dedicated player gesture handler using Anifux's confirmed single-tap and immediate double-tap behavior.
+- Double-tapping the left half seeks back 10 seconds; double-tapping the right half seeks forward 10 seconds.
+- Migrated single-tap handling into the same gesture boundary while preserving controls toggling and locked-touch unlock reveal.
+- Blocked gesture seeking during loading/error states and while playback controls are locked.
+- Kept relative seeks clamped to the current media duration and synchronized transport state immediately.
 
 ### 7.4 Speed Control
 
