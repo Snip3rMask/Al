@@ -383,12 +383,12 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 
 **Goal:** Introduce the Anifux-style player shell without advanced controls.
 
-- [ ] Create AtsuLab-owned `PlayerActivity`.
-- [ ] Port basic portrait and landscape/fullscreen layout builders.
-- [ ] Port `PlayerVideoView` and `PlayerControllerView` skeletons.
-- [ ] Show video surface, loading state, and fatal playback error state.
-- [ ] Add back/close, orientation, and fullscreen system-bar behavior.
-- [ ] Preserve Anifux dimensions and colors.
+- [x] Create AtsuLab-owned `PlayerActivity`.
+- [x] Port basic portrait and landscape/fullscreen layout builders.
+- [x] Port `PlayerVideoView` and `PlayerControllerView` skeletons.
+- [x] Show video surface, loading state, and fatal playback error state.
+- [x] Add back/close, orientation, and fullscreen system-bar behavior.
+- [x] Preserve Anifux dimensions and colors.
 
 **Exit gate:** Portrait/landscape shells match Anifux structure; rotation does not restart playback unexpectedly; system bars and back press behave correctly.
 
@@ -414,6 +414,15 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - Attached and detached Media3 `PlayerView` inside the Media3 engine implementation without exposing ExoPlayer.
 - Migrated the temporary player shell to a Media3 `PlayerView` with controls disabled, keep-screen-on enabled, and FIT resize mode.
 - Updated engine delegation tests for the new video-view lifecycle.
+
+### Part 6 Slice 3 — Shell Skeleton — 2026-08-24
+
+- Added Kotlin-owned shell builders for Anifux-shaped portrait and landscape player layouts.
+- Portrait now uses a measured fixed-height video frame, watching/status row, and scrollable lower shell area.
+- Landscape now uses full-screen video with immersive system bars, a compact top bar, and centered bottom status controls.
+- Added a controller skeleton with close/back, title, status, retry, and loading-indicator seams without advanced transport controls.
+- Preserved the frozen primary-dark/surface colors and core `102dp` portrait / `86dp` landscape top-bar dimensions.
+- Rotation now rebuilds the shell and reattaches the existing playback engine to the new Media3 `PlayerView`.
 
 ## Part 7 — Advanced Controls
 
@@ -674,4 +683,4 @@ Append dated entries here. Do not delete history.
 
 ## Next Action
 
-1. Port the video shell, portrait/landscape layout builders, and controller skeleton with back/loading/error behavior.
+1. Install the next debug release and verify portrait, landscape, rotation, back/close, loading, retry, and normal HLS playback.

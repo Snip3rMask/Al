@@ -1,29 +1,25 @@
 package msr.atsulab.app.player.ui
 
+import android.content.res.Configuration
 import android.graphics.Color
 import android.os.Bundle
-import android.view.Gravity
 import android.view.View
-import android.widget.Button
 import android.widget.FrameLayout
-import android.widget.LinearLayout
-import android.widget.TextView
+import android.widget.ProgressBar
 import androidx.appcompat.app.AppCompatActivity
-import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
-import com.google.android.material.button.MaterialButton
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.disposables.Disposable
 import msr.atsulab.app.R
 import msr.atsulab.app.player.domain.model.PlaybackAnime
 import msr.atsulab.app.player.domain.model.PlaybackEpisode
 import msr.atsulab.app.player.domain.model.VideoSource
-import msr.atsulab.app.player.engine.PlaybackError
 import msr.atsulab.app.player.domain.repository.EpisodeRepository
 import msr.atsulab.app.player.domain.repository.VideoSourceRepository
 import msr.atsulab.app.player.engine.PlaybackEngine
 import msr.atsulab.app.player.engine.PlaybackEngineListener
 import msr.atsulab.app.player.engine.PlaybackReadyState
+import msr.atsulab.app.player.engine.PlaybackError
 import msr.atsulab.app.player.engine.PlaybackState
 import msr.atsulab.app.player.runtime.selectPlaybackEpisode
 import org.koin.java.KoinJavaComponent.inject
@@ -34,14 +30,17 @@ class PlayerActivity : AppCompatActivity() {
     private val videoSourceRepository: VideoSourceRepository by inject(VideoSourceRepository::class.java)
     private val playbackEngine: PlaybackEngine by inject(PlaybackEngine::class.java)
 
-    private lateinit var statusView: TextView
-    private lateinit var retryButton: Button
+    private lateinit var shell: PlayerShellViews
     private lateinit var playerView: PlayerView
+    private lateinit var loadingIndicator: ProgressBar
 
     private var currentAnime: PlaybackAnime? = null
     private var requestedEpisode = DEFAULT_INITIAL_EPISODE
     private var engineAttached = false
     private var playbackDisposable: Disposable? = null
+    private var statusMessage = ""
+    private var statusRetryVisible = false
+    private var waitingForPlayback = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -66,10 +65,19 @@ class PlayerActivity : AppCompatActivity() {
                 .takeIf { it != INVALID_TOTAL_EPISODES }
         )
 
-        setupContent()
+        rebuildShell()
         attachEngine(playbackEngine)
         engineAttached = true
         loadPlayback()
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        rebuildShell()
+
+        if (engineAttached) {
+            playbackEngine.setVideoView(playerView)
+        }
     }
 
     override fun onStart() {
@@ -91,12 +99,16 @@ class PlayerActivity : AppCompatActivity() {
         super.onDestroy()
     }
 
+    override fun onBackPressed() {
+        finish()
+    }
+
     private fun attachEngine(engine: PlaybackEngine) {
         engine.setVideoView(playerView)
         engine.listener = object : PlaybackEngineListener {
             override fun onStateChanged(state: PlaybackState) {
                 when (state.readyState) {
-                    PlaybackReadyState.BUFFERING -> showMessage(R.string.player_buffering)
+                    PlaybackReadyState.BUFFERING -> showMessage(R.string.player_buffering, loading = true)
                     PlaybackReadyState.READY -> showMessage(R.string.player_playing)
                     PlaybackReadyState.ENDED -> showMessage(R.string.player_ended)
                     PlaybackReadyState.IDLE -> Unit
@@ -109,65 +121,43 @@ class PlayerActivity : AppCompatActivity() {
         }
     }
 
-    private fun setupContent() {
-        playerView = PlayerView(this).apply {
-            useController = false
-            keepScreenOn = true
-            resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
-        }
-        val surfaceHost = FrameLayout(this).apply { setBackgroundColor(Color.BLACK) }
-        surfaceHost.addView(
-            playerView,
-            FrameLayout.LayoutParams(
-                FrameLayout.LayoutParams.MATCH_PARENT,
-                FrameLayout.LayoutParams.MATCH_PARENT
-            )
-        )
+    private fun rebuildShell() {
+        val callbacks = object : PlayerControllerSkeleton.Callbacks {
+            override fun onBackClicked() {
+                finish()
+            }
 
-        statusView = TextView(this).apply {
-            gravity = Gravity.CENTER
-            setPadding(48, 24, 48, 8)
-            setTextColor(Color.WHITE)
-        }
-
-        retryButton = MaterialButton(this).apply {
-            setText(R.string.retry)
-            visibility = View.GONE
-            setOnClickListener {
-                val anime = currentAnime ?: return@setOnClickListener
-                loadPlayback(anime)
+            override fun onRetryClicked() {
+                loadPlayback()
             }
         }
+        val title = currentAnime?.title.orEmpty()
+        val episodeLabel = getString(R.string.player_shell_status_format, title, requestedEpisode)
 
-        val controls = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            gravity = Gravity.CENTER
-            setBackgroundColor(Color.BLACK)
-            addView(statusView)
-            addView(retryButton)
+        shell = PlayerShellLayoutBuilder(this, callbacks).build(title, episodeLabel)
+        playerView = shell.playerView
+        loadingIndicator = shell.loadingIndicator
+        setContentView(shell.root)
+        applySystemBars()
+        shell.controller.setStatus(statusMessage, statusRetryVisible)
+        loadingIndicator.visibility = if (waitingForPlayback) View.VISIBLE else View.GONE
+    }
+
+    private fun applySystemBars() {
+        window.statusBarColor = Color.TRANSPARENT
+        window.navigationBarColor = Color.BLACK
+
+        val isLandscape = resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+        window.decorView.systemUiVisibility = if (isLandscape) {
+            View.SYSTEM_UI_FLAG_FULLSCREEN or
+                View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or
+                View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or
+                View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
+                View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or
+                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+        } else {
+            View.SYSTEM_UI_FLAG_LAYOUT_STABLE
         }
-
-        val root = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            setBackgroundColor(Color.BLACK)
-            addView(
-                surfaceHost,
-                LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                    0,
-                    1f
-                )
-            )
-            addView(
-                controls,
-                LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT
-                )
-            )
-        }
-
-        setContentView(root)
     }
 
     private fun loadPlayback() {
@@ -176,8 +166,7 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     private fun loadPlayback(anime: PlaybackAnime) {
-        showMessage(R.string.player_loading_episode, anime.title, requestedEpisode)
-        retryButton.visibility = View.GONE
+        showMessage(R.string.player_loading_episode, loading = true, anime.title, requestedEpisode)
         playbackDisposable?.dispose()
 
         playbackDisposable = episodeRepository.getEpisodes(anime)
@@ -203,24 +192,29 @@ class PlayerActivity : AppCompatActivity() {
             return
         }
 
-        showMessage(R.string.player_starting_playback, episode.name)
+        showMessage(R.string.player_starting_playback, loading = true, episode.name)
         playbackEngine.prepare(source)
         playbackEngine.play()
     }
 
-    private fun showMessage(messageResId: Int, vararg args: Any?) {
-        statusView.text = getString(messageResId, *args)
-        retryButton.visibility = View.GONE
+    private fun showMessage(messageResId: Int, retryVisible: Boolean = false, loading: Boolean = false, vararg args: Any?) {
+        updateStatus(getString(messageResId, *args), retryVisible, loading)
     }
 
     private fun showUnavailable() {
-        statusView.text = getString(R.string.playback_unavailable)
-        retryButton.visibility = View.VISIBLE
+        showMessage(R.string.playback_unavailable, retryVisible = true)
     }
 
     private fun showError() {
-        statusView.text = getString(R.string.player_runtime_error)
-        retryButton.visibility = View.VISIBLE
+        showMessage(R.string.player_runtime_error, retryVisible = true)
+    }
+
+    private fun updateStatus(message: String, retryVisible: Boolean, loading: Boolean) {
+        statusMessage = message
+        statusRetryVisible = retryVisible
+        waitingForPlayback = loading
+        shell.controller.setStatus(statusMessage, statusRetryVisible)
+        loadingIndicator.visibility = if (waitingForPlayback) View.VISIBLE else View.GONE
     }
 
     companion object {
