@@ -467,6 +467,7 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - Updated seek position/buffer every 250ms on the main thread while preserving lifecycle cleanup.
 - Suppressed automatic progress writes during drag and committed the selected position through `seekTo` only after release.
 - Kept numeric elapsed/total labels deferred to the next focused slice.
+- Fixed portrait placement by moving seekbar/transport buttons from the lower scroll panel into the video-frame bottom overlay, matching Anifux.
 
 ### 7.2 Lock Controls
 

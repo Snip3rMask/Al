@@ -81,6 +81,14 @@ internal class PlayerShellLayoutBuilder(
             loadingIndicator,
             FrameLayout.LayoutParams(dp(PlayerShellMetrics.LOADING_INDICATOR_SIZE_DP, density), dp(PlayerShellMetrics.LOADING_INDICATOR_SIZE_DP, density), Gravity.CENTER)
         )
+        videoFrame.addView(
+            controller.transportControls,
+            FrameLayout.LayoutParams(
+                MATCH_PARENT,
+                dp(PlayerShellMetrics.BOTTOM_CONTROLS_HEIGHT_DP, density),
+                Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL
+            )
+        )
 
         val watchingView = TextView(context).apply {
             text = episodeLabel
@@ -94,10 +102,6 @@ internal class PlayerShellLayoutBuilder(
         val lowerPanel = LinearLayout(context).apply { orientation = LinearLayout.VERTICAL }
         lowerPanel.setPadding(dp(37, density), dp(28, density), dp(37, density), dp(28, density))
         lowerPanel.addView(controller.statusControls)
-        lowerPanel.addView(
-            controller.transportControls,
-            LinearLayout.LayoutParams(MATCH_PARENT, dp(PlayerShellMetrics.BOTTOM_CONTROLS_HEIGHT_DP, density))
-        )
         lowerScroll.addView(lowerPanel)
 
         val page = LinearLayout(context).apply { orientation = LinearLayout.VERTICAL }
