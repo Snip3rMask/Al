@@ -317,7 +317,7 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - Used that staged activity to confirm real-device HLS playback, background/resume breadcrumbs, and crash reporting behavior.
 - Removed the temporary HLS launcher/provider/recorder after verification while retaining the reusable Media3 engine contract for Part 4 onward.
 
-## Part 4 — AtsuLab Entry Point
+## Part 4 — AtsuLab Entry Point [~]
 
 **Goal:** Connect Media Details to real playback.
 
@@ -355,6 +355,12 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - Kept guest access allowed at the entry-policy layer; runtime playback performs no AniList login dependency.
 - Separated unavailable-episode/source results from generic runtime errors and made both retryable.
 - Released the playback engine, cancelled active Rx work on destroy, and routed foreground/background transitions through the engine lifecycle.
+
+### Part 4 Device Verification — 2026-08-24
+
+- Confirmed on a real device with Release `77` that the Media Details Play button opens `PlayerActivity`.
+- Confirmed episode discovery, source resolution, and real HLS video playback work end-to-end without crashing.
+- Back-navigation behavior and the retryable unavailable-title state remain to be verified before Part 4 can be closed.
 
 ## Part 5 — Continue Watching
 
@@ -637,9 +643,10 @@ Append dated entries here. Do not delete history.
 - Implemented manager navigation through a temporary minimal `PlayerActivity` shell.
 - Added the AniList-to-playback-domain anime mapper with unit tests.
 - Implemented runtime episode loading, source resolution, Media3 attachment, retry/error states, and lifecycle cleanup.
+- Confirmed Release `77` plays real HLS video from the Media Details entry point on a real device.
 
 ## Next Action
 
-1. Install the next debug release and verify Details → Play loads episodes, resolves a playable source, renders video/audio, and back navigation works.
+1. Verify back navigation returns correctly from an active player session.
 2. Verify an unavailable title shows the retryable unavailable state instead of crashing.
-3. After device confirmation, close Part 4 and begin Part 5 — Continue Watching.
+3. After both checks pass, close Part 4 and begin Part 5 — Continue Watching.
