@@ -317,7 +317,7 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - Used that staged activity to confirm real-device HLS playback, background/resume breadcrumbs, and crash reporting behavior.
 - Removed the temporary HLS launcher/provider/recorder after verification while retaining the reusable Media3 engine contract for Part 4 onward.
 
-## Part 4 — AtsuLab Entry Point [~]
+## Part 4 — AtsuLab Entry Point [x]
 
 **Goal:** Connect Media Details to real playback.
 
@@ -360,9 +360,10 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 
 - Confirmed on a real device with Release `77` that the Media Details Play button opens `PlayerActivity`.
 - Confirmed episode discovery, source resolution, and real HLS video playback work end-to-end without crashing.
-- Back-navigation behavior and the retryable unavailable-title state remain to be verified before Part 4 can be closed.
+- Confirmed back navigation returns correctly from an active player session.
+- Closed Part 4 after the real-device playback and navigation checks passed.
 
-## Part 5 — Continue Watching
+## Part 5 — Continue Watching [!]
 
 **Goal:** Save and restore playback progress reliably.
 
@@ -376,7 +377,9 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 
 **Exit gate:** Partial progress survives app kill/process death and resumes exactly once per episode.
 
-## Part 6 — Player Shell UI
+**Deferred — 2026-08-24:** Continue Watching is postponed until the full player shell and basic transport controls exist. Saving/resuming progress before those surfaces stabilize would risk repeated runtime and UI refactors.
+
+## Part 6 — Player Shell UI [~]
 
 **Goal:** Introduce the Anifux-style player shell without advanced controls.
 
@@ -388,6 +391,16 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - [ ] Preserve Anifux dimensions and colors.
 
 **Exit gate:** Portrait/landscape shells match Anifux structure; rotation does not restart playback unexpectedly; system bars and back press behave correctly.
+
+### Part 6 Planning Audit — 2026-08-24
+
+- Anifux shell is split across `PlayerLayoutBuilder`, `PlayerVideoView`, and `PlayerControllerView`.
+- Portrait shell uses a fixed-height video frame above a watching/status row and scrollable lower panel.
+- Landscape shell uses full-screen video with centered loading/source-error feedback.
+- Anifux video shell embeds Media3 `PlayerView` with its own controller disabled, `RESIZE_MODE_FIT`, keep-screen-on, transparent controls overlay, and top/bottom control containers.
+- Key preserved dimensions/colors: primary dark `#0A0A0D`, surface `#1F222A`, accent `#0EA5E9`; portrait top `102dp`, landscape top `86dp`, bottom controls `112dp`, main icons `44dp`, loading spinner `58dp`.
+- AtsuLab currently has a functional temporary shell but still uses a raw `SurfaceView`, simple bottom status, no `PlayerView`, no Anifux gradients/top bar, no orientation-specific builder, and no reusable controller skeleton.
+- Part 6 must therefore be executed as small slices: design metrics → `PlayerView` engine seam → video shell → portrait/landscape builders → controller skeleton/system bars → rotation/back validation.
 
 ## Part 7 — Advanced Controls
 
@@ -647,6 +660,6 @@ Append dated entries here. Do not delete history.
 
 ## Next Action
 
-1. Verify back navigation returns correctly from an active player session.
-2. Verify an unavailable title shows the retryable unavailable state instead of crashing.
-3. After both checks pass, close Part 4 and begin Part 5 — Continue Watching.
+1. Freeze the Anifux shell reference and add Kotlin-owned player metrics/design constants.
+2. Adapt the playback engine seam so Media3 `PlayerView` can be attached without exposing ExoPlayer.
+3. Port the video shell, portrait/landscape layout builders, and controller skeleton with back/loading/error behavior.
