@@ -72,7 +72,7 @@ class PlaybackAnimeMapperTest {
 
         val anime = media.toPlaybackAnime(AppSetting())
 
-        assertEquals("user preferred", anime.title)
+        assertEquals("User Preferred", anime.title)
         assertEquals(PlaybackAnime.ReleaseStatus.UNKNOWN, anime.releaseStatus)
         assertEquals(null, anime.totalEpisodes)
         assertEquals(null, anime.episodeDurationMinutes)
