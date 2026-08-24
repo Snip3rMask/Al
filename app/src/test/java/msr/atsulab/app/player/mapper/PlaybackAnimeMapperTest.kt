@@ -58,7 +58,17 @@ class PlaybackAnimeMapperTest {
 
     @Test
     fun `maps unknown status with safe defaults`() {
-        val media = Media(idAniList = 31)
+        val media = createMedia().copy(
+            idAniList = 31,
+            idMal = null,
+            status = null,
+            episodes = null,
+            duration = null,
+            seasonYear = null,
+            countryOfOrigin = null,
+            coverImage = MediaCoverImage(),
+            bannerImage = ""
+        )
 
         val anime = media.toPlaybackAnime(AppSetting())
 
