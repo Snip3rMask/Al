@@ -73,6 +73,19 @@ class DefaultPlaybackEngineTest {
     }
 
     @Test
+    fun `speed change does not reprepare or reset playback position`() {
+        val mediaPlayer = FakeEngineMediaPlayer()
+        val engine = DefaultPlaybackEngine(mediaPlayer)
+
+        engine.prepare(source)
+        engine.setSpeed(1.5f)
+
+        assertEquals(1, mediaPlayer.preparedSources.size)
+        assertEquals(0, mediaPlayer.seekPositions.size)
+        assertEquals(listOf(1.5f), mediaPlayer.speeds)
+    }
+
+    @Test
     fun `current state delegates before release and resets after release`() {
         val mediaPlayer = FakeEngineMediaPlayer()
         val playingState = PlaybackState(isPlaying = true, playWhenReady = true)

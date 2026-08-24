@@ -530,11 +530,24 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - Rebuilt and attached a fresh HUD during orientation changes while retaining the same shell lifecycle cleanup.
 - Closed Part 7.3 Gestures pending real-device validation of the latest green gesture release.
 
-### 7.4 Speed Control
+### 7.4 Speed Control [x]
 
-- [ ] Speed menu.
-- [ ] Persist selected speed.
-- [ ] Apply speed without resetting stream.
+- [x] Speed menu.
+- [x] Persist selected speed.
+- [x] Apply speed without resetting stream.
+
+#### Part 7.4 — Speed Control — 2026-08-24
+
+- Ported Anifux's compact landscape speed menu with `0.75x`, `1.0x`, `1.25x`, `1.5x`, and `2.0x`.
+- Reproduced the exact 190dp popup, right-top offsets, 48dp rows, selected accent fill, surface border, and 170ms slide/fade animation.
+- Added the original-style speed icon to the landscape top bar while keeping portrait controls unchanged.
+- Applied selection directly through Media3 playback parameters so changing speed never reprepares the source or resets position.
+- Reasserted the selected speed on READY and before each source start so episode switches retain it.
+- Added a player-scoped `PlaybackPreferencesStore` backed by isolated SharedPreferences; invalid persisted values normalize safely to `1.0x`.
+- Dismissed the popup silently on rotation, background, destruction, and shell rebuild to prevent stale callbacks and window leaks.
+- Kept the menu blocked during loading/error/locked states through the existing transport visibility boundary.
+- Closed Part 7.4 Speed Control pending real-device validation of the latest green release.
+
 
 ### 7.5 Subtitles
 
@@ -775,8 +788,9 @@ Append dated entries here. Do not delete history.
 - Closed Part 7.1 Basic Transport at code level pending Release `94` device validation.
 - Implemented Part 7.2 playback locking, temporary unlock overlay, control blocking, and rotation persistence.
 - Completed Part 7.3 Slices A–B: confirmed/double/single tap handling, ±10s double-tap seek, landscape vertical volume/brightness, and Anifux-style HUD.
+- Completed Part 7.4 Speed Control: exact landscape popup, persistent normalized speed, direct Media3 application without stream reset, and safe rotation/lifecycle dismissal.
 
 ## Next Action
 
-1. Install the latest GitHub Release and verify double-tap left/right seek, landscape left/right vertical brightness/volume, HUD feedback and fade timing, lock-state blocking, single-tap controls, four-second auto-hide, rotation persistence, and HLS playback.
-2. After validation, begin Part 7.4 Speed Control.
+1. Install the latest GitHub Release and verify the landscape speed menu, selected-row state, persistence across close/reopen and episode switch, reset-free speed changes, double-tap seek, vertical brightness/volume HUD, lock blocking, tap/auto-hide controls, rotation, and HLS playback.
+2. After validation, begin Part 7.5 Subtitles.

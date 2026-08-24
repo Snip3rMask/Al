@@ -4,7 +4,9 @@ import msr.atsulab.app.BuildConfig
 import msr.atsulab.app.player.diagnostics.AndroidLogPlaybackDiagnostics
 import msr.atsulab.app.player.diagnostics.NoOpPlaybackDiagnostics
 import msr.atsulab.app.player.diagnostics.PlaybackDiagnostics
+import msr.atsulab.app.player.storage.DefaultPlaybackPreferencesStore
 import msr.atsulab.app.player.storage.DefaultSourceMappingStore
+import msr.atsulab.app.player.storage.PlaybackPreferencesStore
 import msr.atsulab.app.player.storage.SourceMappingStore
 import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
@@ -15,5 +17,8 @@ val playbackStorageModule = module {
     }
     single<SourceMappingStore> {
         DefaultSourceMappingStore(androidContext(), diagnostics = get())
+    }
+    single<PlaybackPreferencesStore> {
+        DefaultPlaybackPreferencesStore(androidContext())
     }
 }

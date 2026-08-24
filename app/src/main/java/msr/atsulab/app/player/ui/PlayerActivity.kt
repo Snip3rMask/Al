@@ -27,6 +27,7 @@ import msr.atsulab.app.player.engine.PlaybackReadyState
 import msr.atsulab.app.player.engine.PlaybackError
 import msr.atsulab.app.player.engine.PlaybackState
 import msr.atsulab.app.player.runtime.PlaybackEpisodeNavigator
+import msr.atsulab.app.player.storage.PlaybackPreferencesStore
 import org.koin.java.KoinJavaComponent.inject
 
 class PlayerActivity : AppCompatActivity() {
@@ -34,6 +35,7 @@ class PlayerActivity : AppCompatActivity() {
     private val episodeRepository: EpisodeRepository by inject(EpisodeRepository::class.java)
     private val videoSourceRepository: VideoSourceRepository by inject(VideoSourceRepository::class.java)
     private val playbackEngine: PlaybackEngine by inject(PlaybackEngine::class.java)
+    private val playbackPreferencesStore: PlaybackPreferencesStore by inject(PlaybackPreferencesStore::class.java)
 
     private lateinit var shell: PlayerShellViews
     private lateinit var playerView: PlayerView
@@ -53,6 +55,23 @@ class PlayerActivity : AppCompatActivity() {
     private var controlsVisible = false
     private var controlsLocked = false
     private var gestureHandler: PlayerGestureHandler? = null
+    private val speedMenu: PlayerSpeedMenu by lazy {
+        PlayerSpeedMenu(
+            this,
+            object : PlayerSpeedMenu.Callbacks {
+                override fun currentSpeed(): Float = playbackSpeed
+
+                override fun onSpeedSelected(speed: Float) {
+                    setPlaybackSpeed(speed)
+                }
+
+                override fun onSpeedMenuDismissed() {
+                    scheduleControlsAutoHide()
+                }
+            }
+        )
+    }
+    private var playbackSpeed = PlaybackSpeedOptions.DEFAULT
     private val progressHandler = Handler(Looper.getMainLooper())
     private val controlsHandler = Handler(Looper.getMainLooper())
     private val hideControlsRunnable = Runnable {
@@ -72,6 +91,7 @@ class PlayerActivity : AppCompatActivity() {
         val title = intent.getStringExtra(EXTRA_TITLE).orEmpty()
         requestedEpisode = intent.getIntExtra(EXTRA_INITIAL_EPISODE, DEFAULT_INITIAL_EPISODE)
             .coerceAtLeast(DEFAULT_INITIAL_EPISODE)
+        playbackSpeed = PlaybackSpeedOptions.normalize(playbackPreferencesStore.getSpeed())
 
         if (aniListId == INVALID_ANILIST_ID || title.isBlank()) {
             finish()
@@ -112,6 +132,7 @@ class PlayerActivity : AppCompatActivity() {
     override fun onStop() {
         stopProgressLoop()
         cancelControlsAutoHide()
+        speedMenu.dismiss(notifyCallbacks = false)
         if (engineAttached) playbackEngine.onBackground()
         super.onStop()
     }
@@ -119,6 +140,7 @@ class PlayerActivity : AppCompatActivity() {
     override fun onDestroy() {
         progressHandler.removeCallbacks(progressRunnable)
         controlsHandler.removeCallbacks(hideControlsRunnable)
+        speedMenu.dismiss(notifyCallbacks = false)
         if (::shell.isInitialized) shell.controller.release()
         playbackDisposable?.dispose()
         if (engineAttached) {
@@ -150,6 +172,9 @@ class PlayerActivity : AppCompatActivity() {
                     PlaybackReadyState.READY -> {
                         transportVisible = true
                         showControls()
+                        if (!PlaybackSpeedOptions.isSelected(state.speed, playbackSpeed)) {
+                            playbackEngine.setSpeed(playbackSpeed)
+                        }
                         showMessage(R.string.player_playing)
                     }
                     PlaybackReadyState.ENDED -> {
@@ -172,6 +197,7 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     private fun rebuildShell() {
+        speedMenu.dismiss(notifyCallbacks = false)
         val callbacks = object : PlayerControllerSkeleton.Callbacks {
             override fun onBackClicked() {
                 finish()
@@ -203,6 +229,10 @@ class PlayerActivity : AppCompatActivity() {
 
             override fun onUnlockClicked() {
                 unlockControls()
+            }
+
+            override fun onSpeedClicked() {
+                showPlaybackSpeedMenu()
             }
 
         }
@@ -341,10 +371,11 @@ class PlayerActivity : AppCompatActivity() {
             return
         }
 
-        latestPlaybackState = PlaybackState()
+        latestPlaybackState = PlaybackState(speed = playbackSpeed)
         transportVisible = false
         showMessage(R.string.player_starting_playback, arguments = listOf(episode.name), loading = true)
         playbackEngine.prepare(source)
+        playbackEngine.setSpeed(playbackSpeed)
         playbackEngine.play()
     }
 
@@ -416,6 +447,22 @@ class PlayerActivity : AppCompatActivity() {
 
     private fun dp(value: Int): Int {
         return (value * resources.displayMetrics.density).toInt()
+    }
+
+    private fun showPlaybackSpeedMenu() {
+        if (!transportVisible || controlsLocked) return
+        cancelControlsAutoHide()
+        speedMenu.show()
+    }
+
+    private fun setPlaybackSpeed(speed: Float) {
+        val normalizedSpeed = PlaybackSpeedOptions.normalize(speed)
+        playbackSpeed = normalizedSpeed
+        playbackPreferencesStore.setSpeed(normalizedSpeed)
+        if (engineAttached) {
+            playbackEngine.setSpeed(normalizedSpeed)
+        }
+        updateTransportControls()
     }
 
     private fun togglePlayback() {

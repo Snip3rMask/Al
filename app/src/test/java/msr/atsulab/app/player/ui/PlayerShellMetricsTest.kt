@@ -11,6 +11,9 @@ class PlayerShellMetricsTest {
         assertEquals(0xFF0A0A0D.toInt(), PlayerShellMetrics.PRIMARY_DARK_COLOR)
         assertEquals(0xFF1F222A.toInt(), PlayerShellMetrics.SURFACE_COLOR)
         assertEquals(0xFF0EA5E9.toInt(), PlayerShellMetrics.ACCENT_COLOR)
+        assertEquals(0xFF1F222A.toInt(), PlayerShellMetrics.MENU_SURFACE_COLOR)
+        assertEquals(0xFF2B2D37.toInt(), PlayerShellMetrics.MENU_BORDER_COLOR)
+        assertEquals(0xFFD4D3DC.toInt(), PlayerShellMetrics.MENU_TEXT_COLOR)
     }
 
     @Test
@@ -33,6 +36,10 @@ class PlayerShellMetricsTest {
         assertEquals(138, PlayerShellMetrics.GESTURE_HUD_HEIGHT_DP)
         assertEquals(32, PlayerShellMetrics.GESTURE_HUD_SIDE_MARGIN_DP)
         assertEquals(22, PlayerShellMetrics.VERTICAL_GESTURE_ACTIVATION_DP)
+        assertEquals(190, PlayerShellMetrics.SPEED_MENU_WIDTH_DP)
+        assertEquals(48, PlayerShellMetrics.SPEED_MENU_ROW_HEIGHT_DP)
+        assertEquals(34, PlayerShellMetrics.SPEED_MENU_HORIZONTAL_OFFSET_DP)
+        assertEquals(92, PlayerShellMetrics.SPEED_MENU_VERTICAL_OFFSET_DP)
         assertEquals(5, PlayerShellMetrics.EPISODE_GRID_COLUMN_COUNT)
     }
 

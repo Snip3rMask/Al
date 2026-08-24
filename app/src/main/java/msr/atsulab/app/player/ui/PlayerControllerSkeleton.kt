@@ -32,6 +32,7 @@ internal class PlayerControllerSkeleton(
         fun onSeekFinished(fraction: Float)
         fun onLockClicked()
         fun onUnlockClicked()
+        fun onSpeedClicked()
     }
 
     lateinit var titleView: TextView
@@ -53,6 +54,9 @@ internal class PlayerControllerSkeleton(
         private set
 
     lateinit var lockButton: ImageView
+        private set
+
+    var speedButton: ImageView? = null
         private set
 
     var isControlsLocked: Boolean = false
@@ -207,6 +211,18 @@ internal class PlayerControllerSkeleton(
             val titleParams = LinearLayout.LayoutParams(0, dp(44, density), 1f)
             titleParams.setMargins(dp(18, density), 0, dp(8, density), 0)
             addView(titleView, titleParams)
+
+            if (isLandscape) {
+                val button = ImageView(context).apply {
+                    setImageResource(R.drawable.ic_player_speed_modern)
+                    contentDescription = context.getString(R.string.player_speed)
+                    setOnClickListener { callbacks.onSpeedClicked() }
+                }
+                speedButton = button
+                val buttonParams = LinearLayout.LayoutParams(dp(42, density), dp(42, density))
+                buttonParams.setMargins(0, 0, dp(8, density), 0)
+                addView(button, buttonParams)
+            }
         }
     }
 
