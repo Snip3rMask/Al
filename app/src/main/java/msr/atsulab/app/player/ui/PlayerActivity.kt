@@ -25,13 +25,13 @@ import msr.atsulab.app.player.engine.PlaybackEngineListener
 import msr.atsulab.app.player.engine.PlaybackReadyState
 import msr.atsulab.app.player.engine.PlaybackState
 import msr.atsulab.app.player.runtime.selectPlaybackEpisode
-import org.koin.android.ext.android.inject
-import org.koin.core.KoinComponent
+import org.koin.java.KoinJavaComponent.inject
 
-class PlayerActivity : AppCompatActivity(), KoinComponent {
+class PlayerActivity : AppCompatActivity() {
 
-    private val episodeRepository: EpisodeRepository by inject()
-    private val videoSourceRepository: VideoSourceRepository by inject()
+    private val episodeRepository: EpisodeRepository by inject(EpisodeRepository::class.java)
+    private val videoSourceRepository: VideoSourceRepository by inject(VideoSourceRepository::class.java)
+    private val playbackEngine: PlaybackEngine by inject(PlaybackEngine::class.java)
 
     private lateinit var statusView: TextView
     private lateinit var retryButton: Button
@@ -39,7 +39,7 @@ class PlayerActivity : AppCompatActivity(), KoinComponent {
 
     private var currentAnime: PlaybackAnime? = null
     private var requestedEpisode = DEFAULT_INITIAL_EPISODE
-    private var playbackEngine: PlaybackEngine? = null
+    private var engineAttached = false
     private var playbackDisposable: Disposable? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -66,24 +66,27 @@ class PlayerActivity : AppCompatActivity(), KoinComponent {
         )
 
         setupContent()
-        playbackEngine = getKoin().get<PlaybackEngine>().also(::attachEngine)
+        attachEngine(playbackEngine)
+        engineAttached = true
         loadPlayback()
     }
 
     override fun onStart() {
         super.onStart()
-        playbackEngine?.onForeground()
+        if (engineAttached) playbackEngine.onForeground()
     }
 
     override fun onStop() {
-        playbackEngine?.onBackground()
+        if (engineAttached) playbackEngine.onBackground()
         super.onStop()
     }
 
     override fun onDestroy() {
         playbackDisposable?.dispose()
-        playbackEngine?.release()
-        playbackEngine = null
+        if (engineAttached) {
+            playbackEngine.release()
+            engineAttached = false
+        }
         super.onDestroy()
     }
 
@@ -173,11 +176,11 @@ class PlayerActivity : AppCompatActivity(), KoinComponent {
         playbackDisposable?.dispose()
 
         playbackDisposable = episodeRepository.getEpisodes(anime)
-            .map { episodes -> episodes.selectPlaybackEpisode(requestedEpisode) }
-            .flatMap { episode ->
-                if (episode == null) throw PlaybackUnavailableException()
-                videoSourceRepository.getSources(anime, episode)
-                    .map { sources -> episode to sources }
+            .flatMap { episodes ->
+                val selectedEpisode = episodes.selectPlaybackEpisode(requestedEpisode)
+                    ?: throw PlaybackUnavailableException()
+                videoSourceRepository.getSources(anime, selectedEpisode)
+                    .map { sources -> selectedEpisode to sources }
             }
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
@@ -196,8 +199,8 @@ class PlayerActivity : AppCompatActivity(), KoinComponent {
         }
 
         showMessage(R.string.player_starting_playback, episode.name)
-        playbackEngine?.prepare(source)
-        playbackEngine?.play()
+        playbackEngine.prepare(source)
+        playbackEngine.play()
     }
 
     private fun showMessage(messageResId: Int, vararg args: Any?) {
