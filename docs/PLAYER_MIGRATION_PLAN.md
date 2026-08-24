@@ -313,9 +313,9 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - [x] Extend navigation contract with player navigation.
 - [x] Implement navigation in `DefaultNavigationManager`.
 - [x] Map AniList `Media` to `PlaybackAnime`.
-- [ ] Pass media ID, title, type, cover image, and initial episode.
-- [ ] Replace the Play placeholder in `MediaFragment` with real navigation.
-- [ ] Keep Download as placeholder until the offline phase.
+- [x] Pass media ID, title, type, cover image, and initial episode.
+- [x] Replace the Play placeholder in `MediaFragment` with real navigation.
+- [x] Keep Download as placeholder until the offline phase.
 - [ ] Handle guest mode and unavailable episodes gracefully.
 
 **Exit gate:** Details page opens the player, episodes load, a working source plays, and back navigation returns correctly.
@@ -331,6 +331,9 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
   - Maps IDs, preferred title, alternative titles, cover quality preference, banner, episode count/duration, year, release status, adult flag, country, and MAL ID.
   - Rejects manga input before any player navigation can begin.
 - Added JUnit coverage for naming/image preferences, normal-quality cover fallback, manga rejection, unknown status, and safe defaults.
+- Added a pure playback start-policy helper that allows guests and rejects manga, invalid AniList IDs, blank titles, and not-yet-released anime.
+- Replaced the Media Details Play placeholder with navigation to the minimal player destination using episode 1 by default.
+- Added a user-facing playback-unavailable fallback for invalid or unsupported entries.
 
 ## Part 5 — Continue Watching
 
@@ -615,5 +618,6 @@ Append dated entries here. Do not delete history.
 
 ## Next Action
 
-1. Replace the Media Details Play placeholder with real player navigation using the mapper and a safe initial episode.
-2. Preserve guest-mode and unavailable-episode handling during playback entry.
+1. Implement episode loading inside `PlayerActivity` with loading, empty, error, and retry states.
+2. Resolve a playable source through `VideoSourceRepository` and attach it safely to Media3.
+3. Complete runtime guest/unavailable-episode validation before moving to Continue Watching.

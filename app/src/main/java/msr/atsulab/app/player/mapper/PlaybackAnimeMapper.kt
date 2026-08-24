@@ -34,6 +34,18 @@ fun Media.toPlaybackAnime(appSetting: AppSetting): PlaybackAnime {
     )
 }
 
+fun Media.toPlaybackStart(appSetting: AppSetting): Result<PlaybackAnime> {
+    return runCatching {
+        require(type == MediaType.ANIME) { "Playback is only available for anime" }
+        require(idAniList > 0) { "A valid AniList anime ID is required" }
+        require(status != MediaStatus.NOT_YET_RELEASED) { "This anime has not been released yet" }
+
+        val anime = toPlaybackAnime(appSetting)
+        require(anime.title.isNotBlank()) { "A valid anime title is required" }
+        anime
+    }
+}
+
 private fun MediaStatus?.toPlaybackReleaseStatus(): PlaybackAnime.ReleaseStatus {
     return when (this) {
         MediaStatus.FINISHED -> PlaybackAnime.ReleaseStatus.FINISHED

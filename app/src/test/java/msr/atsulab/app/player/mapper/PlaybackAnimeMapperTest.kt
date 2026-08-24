@@ -78,6 +78,31 @@ class PlaybackAnimeMapperTest {
         assertEquals(null, anime.episodeDurationMinutes)
     }
 
+    @Test
+    fun `creates a playback start for a released anime`() {
+        val result = createMedia()
+            .copy(status = MediaStatus.FINISHED)
+            .toPlaybackStart(AppSetting())
+
+        assertEquals(21, result.getOrNull()?.aniListId)
+    }
+
+    @Test
+    fun `rejects an unreleased playback start`() {
+        val result = createMedia()
+            .copy(status = MediaStatus.NOT_YET_RELEASED)
+            .toPlaybackStart(AppSetting())
+
+        assertEquals(null, result.getOrNull())
+    }
+
+    @Test
+    fun `rejects a playback start without an AniList ID`() {
+        val result = createMedia().copy(idAniList = 0).toPlaybackStart(AppSetting())
+
+        assertEquals(null, result.getOrNull())
+    }
+
     private fun createMedia(type: MediaType = MediaType.ANIME): Media {
         return Media(
             idAniList = 21,

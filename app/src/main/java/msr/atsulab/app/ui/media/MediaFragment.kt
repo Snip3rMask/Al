@@ -29,6 +29,7 @@ import msr.atsulab.app.helper.pojo.ListItem
 import msr.atsulab.app.helper.utils.ImageUtil
 import msr.atsulab.app.helper.utils.SpaceItemDecoration
 import msr.atsulab.app.helper.utils.TimeUtil
+import msr.atsulab.app.player.mapper.toPlaybackStart
 import msr.atsulab.app.type.MediaSeason
 import msr.atsulab.app.type.MediaListStatus
 import msr.atsulab.app.ui.base.BaseFragment
@@ -117,7 +118,7 @@ class MediaFragment : BaseFragment<FragmentMediaBinding, MediaViewModel>() {
             }
 
             mediaPlayButton.clicks {
-                dialog.showToast(getString(R.string.coming_soon))
+                startPlayback()
             }
 
             mediaAddToListButton.clicks {
@@ -222,6 +223,17 @@ class MediaFragment : BaseFragment<FragmentMediaBinding, MediaViewModel>() {
     private fun assignAdapter(appSetting: AppSetting) {
         mediaAdapter = MediaRvAdapter(requireContext(), listOf(), appSetting, screenWidth, getMediaListener())
         binding.mediaRecyclerView.adapter = mediaAdapter
+    }
+
+    private fun startPlayback() {
+        val anime = currentMedia?.toPlaybackStart(appSetting)?.getOrNull()
+
+        if (anime == null) {
+            dialog.showToast(getString(R.string.playback_unavailable))
+            return
+        }
+
+        navigation.navigateToPlayer(anime, initialEpisode = 1)
     }
 
     private fun getMediaListener(): MediaListener {
