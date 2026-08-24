@@ -572,4 +572,5 @@
         <item quantity="one">volume</item>
         <item quantity="other">volumes</item>
     </plurals>
+    <string name="player_shell_status_format">Ready to load %1$s — episode %2$d</string>
 </resources>

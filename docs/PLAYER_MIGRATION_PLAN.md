@@ -311,7 +311,7 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 **Goal:** Connect Media Details to real playback.
 
 - [x] Extend navigation contract with player navigation.
-- [ ] Implement navigation in `DefaultNavigationManager`.
+- [x] Implement navigation in `DefaultNavigationManager`.
 - [ ] Map AniList `Media` to `PlaybackAnime`.
 - [ ] Pass media ID, title, type, cover image, and initial episode.
 - [ ] Replace the Play placeholder in `MediaFragment` with real navigation.
@@ -324,7 +324,9 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 
 - Added `navigateToPlayer(anime: PlaybackAnime, initialEpisode: Int = 1)` as the player navigation seam.
 - Kept the contract independent from AniList response types so a dedicated mapper can translate `Media` into `PlaybackAnime` next.
-- Deferred `DefaultNavigationManager`, Play-button wiring, and runtime handling to their own focused slices.
+- Implemented the navigation override in `DefaultNavigationManager`.
+- Added a minimal registered `PlayerActivity` destination with primitive intent extras and invalid-input finishing.
+- Deferred full player shell UI, playback loading, Play-button wiring, and runtime handling to their own focused slices.
 
 ## Part 5 — Continue Watching
 
@@ -604,9 +606,9 @@ Append dated entries here. Do not delete history.
 - Published Release `65` from green CI at commit `0104ef44`.
 - Set next executable phase: **Part 4 — AtsuLab Entry Point**.
 - Started Part 4 by adding the playback navigation contract without touching the current Play placeholder.
+- Implemented manager navigation through a temporary minimal `PlayerActivity` shell.
 
 ## Next Action
 
-1. Implement `navigateToPlayer` in `DefaultNavigationManager`.
-2. Add an AniList `Media` → `PlaybackAnime` mapper with media ID, title, cover image, and initial episode.
-3. Replace the Media Details Play placeholder with real player navigation while preserving guest-mode and unavailable-episode handling.
+1. Add an AniList `Media` → `PlaybackAnime` mapper with media ID, title, cover image, and initial episode.
+2. Replace the Media Details Play placeholder with real player navigation while preserving guest-mode and unavailable-episode handling.

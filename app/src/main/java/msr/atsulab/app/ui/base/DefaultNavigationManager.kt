@@ -23,6 +23,7 @@ import msr.atsulab.app.helper.enums.MediaType
 import msr.atsulab.app.helper.enums.SearchCategory
 import msr.atsulab.app.helper.enums.TextEditorType
 import msr.atsulab.app.helper.utils.DeepLink
+import msr.atsulab.app.player.ui.PlayerActivity
 import msr.atsulab.app.type.ScoreFormat
 import msr.atsulab.app.ui.activity.ActivityDetailFragment
 import msr.atsulab.app.ui.activity.ActivityListFragment
@@ -169,6 +170,20 @@ class DefaultNavigationManager(
         }
         intent.putExtras(bundle)
         context.startActivity(intent)
+    }
+
+    override fun navigateToPlayer(anime: PlaybackAnime, initialEpisode: Int) {
+        context.startActivity(
+            Intent(context, PlayerActivity::class.java).apply {
+                putExtra(PlayerActivity.EXTRA_ANILIST_ID, anime.aniListId)
+                anime.malId?.let { putExtra(PlayerActivity.EXTRA_MAL_ID, it) }
+                putExtra(PlayerActivity.EXTRA_TITLE, anime.title)
+                putExtra(PlayerActivity.EXTRA_COVER_IMAGE_URL, anime.coverImageUrl)
+                putExtra(PlayerActivity.EXTRA_BANNER_IMAGE_URL, anime.bannerImageUrl)
+                anime.totalEpisodes?.let { putExtra(PlayerActivity.EXTRA_TOTAL_EPISODES, it) }
+                putExtra(PlayerActivity.EXTRA_INITIAL_EPISODE, initialEpisode.coerceAtLeast(1))
+            }
+        )
     }
 
     override fun navigateToSettings() {
