@@ -43,6 +43,8 @@ class PlayerActivity : AppCompatActivity() {
     private var statusMessage = ""
     private var statusRetryVisible = false
     private var waitingForPlayback = true
+    private var latestPlaybackState = PlaybackState()
+    private var transportVisible = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -109,11 +111,24 @@ class PlayerActivity : AppCompatActivity() {
         engine.setVideoView(playerView)
         engine.listener = object : PlaybackEngineListener {
             override fun onStateChanged(state: PlaybackState) {
+                latestPlaybackState = state
                 when (state.readyState) {
-                    PlaybackReadyState.BUFFERING -> showMessage(R.string.player_buffering, loading = true)
-                    PlaybackReadyState.READY -> showMessage(R.string.player_playing)
-                    PlaybackReadyState.ENDED -> showMessage(R.string.player_ended)
-                    PlaybackReadyState.IDLE -> Unit
+                    PlaybackReadyState.BUFFERING -> {
+                        transportVisible = true
+                        showMessage(R.string.player_buffering, loading = true)
+                    }
+                    PlaybackReadyState.READY -> {
+                        transportVisible = true
+                        showMessage(R.string.player_playing)
+                    }
+                    PlaybackReadyState.ENDED -> {
+                        transportVisible = true
+                        showMessage(R.string.player_ended)
+                    }
+                    PlaybackReadyState.IDLE -> {
+                        transportVisible = false
+                        updateTransportControls()
+                    }
                 }
             }
 
@@ -133,11 +148,17 @@ class PlayerActivity : AppCompatActivity() {
                 loadPlayback()
             }
 
-            override fun onPlayPauseClicked() = Unit
+            override fun onPlayPauseClicked() {
+                togglePlayback()
+            }
 
-            override fun onPreviousEpisodeClicked() = Unit
+            override fun onPreviousEpisodeClicked() {
+                loadAdjacentEpisode(-1)
+            }
 
-            override fun onNextEpisodeClicked() = Unit
+            override fun onNextEpisodeClicked() {
+                loadAdjacentEpisode(1)
+            }
         }
         val title = currentAnime?.title.orEmpty()
         val episodeLabel = getString(R.string.player_shell_status_format, title, requestedEpisode)
@@ -149,6 +170,7 @@ class PlayerActivity : AppCompatActivity() {
         applySystemBars()
         shell.controller.setStatus(statusMessage, statusRetryVisible)
         loadingIndicator.visibility = if (waitingForPlayback) View.VISIBLE else View.GONE
+        updateTransportControls()
     }
 
     private fun applySystemBars() {
@@ -200,16 +222,35 @@ class PlayerActivity : AppCompatActivity() {
             return
         }
 
+        latestPlaybackState = PlaybackState()
+        transportVisible = false
         showMessage(R.string.player_starting_playback, arguments = listOf(episode.name), loading = true)
         playbackEngine.prepare(source)
         playbackEngine.play()
     }
 
+    private fun togglePlayback() {
+        if (!transportVisible) return
+        if (latestPlaybackState.playWhenReady) playbackEngine.pause() else playbackEngine.play()
+    }
+
+    private fun updateTransportControls() {
+        shell.controller.setTransportState(
+            isVisible = transportVisible,
+            isPlaying = latestPlaybackState.playWhenReady,
+            canShowPrevious = transportVisible && episodeNavigator.canMove(-1),
+            canShowNext = transportVisible && episodeNavigator.canMove(1)
+        )
+    }
+
     private fun loadAdjacentEpisode(offset: Int) {
         val anime = currentAnime ?: return
+        if (!transportVisible || !episodeNavigator.canMove(offset)) return
         val episode = episodeNavigator.move(offset) ?: return
 
         requestedEpisode = episodeNavigator.selectedIndex + 1
+        latestPlaybackState = PlaybackState()
+        transportVisible = false
         showMessage(R.string.player_loading_episode, arguments = listOf(anime.title, requestedEpisode), loading = true)
         playbackDisposable?.dispose()
         playbackDisposable = videoSourceRepository.getSources(anime, episode)
@@ -231,10 +272,12 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     private fun showUnavailable() {
+        transportVisible = false
         showMessage(R.string.playback_unavailable, retryVisible = true)
     }
 
     private fun showError() {
+        transportVisible = false
         showMessage(R.string.player_runtime_error, retryVisible = true)
     }
 
@@ -244,6 +287,7 @@ class PlayerActivity : AppCompatActivity() {
         waitingForPlayback = loading
         shell.controller.setStatus(statusMessage, statusRetryVisible)
         loadingIndicator.visibility = if (waitingForPlayback) View.VISIBLE else View.GONE
+        updateTransportControls()
     }
 
     companion object {

@@ -433,7 +433,8 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 
 ### 7.1 Basic Transport [~]
 
-- [ ] Play/pause, previous/next, seekbar drag.
+- [x] Play/pause and previous/next episode controls.
+- [ ] Seekbar drag.
 - [ ] Elapsed time, total/remaining time, buffered indicator.
 
 #### Part 7.1 Slice A — Episode Navigation State — 2026-08-24
@@ -449,6 +450,15 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - Ported the original 48dp icon artwork into 44dp controls with circular ripple targets and 70dp center offsets.
 - Added explicit transport callbacks to `PlayerControllerSkeleton`; current shell callbacks remain temporary no-ops.
 - Attached the hidden transport row to both portrait and landscape shells so user-visible behavior remains unchanged until Slice C wires engine actions.
+
+#### Part 7.1 Slice C — Transport Wiring — 2026-08-24
+
+- Added tested adjacency availability checks so previous/next controls disable at list boundaries.
+- Exposed the transport row during buffering, ready playback, and ended states; hid it while loading or after errors.
+- Wired play/pause to the retained Media3 play-when-ready state and previous/next to the episode navigator.
+- Preserved playback state, navigation index, button enablement, and icon state across orientation rebuilds.
+- Moved landscape source/status feedback to center, matching Anifux and avoiding overlap with bottom transport controls.
+- Kept the persistent status surface for retry/error states only; normal playback relies on transport controls and the loading spinner.
 
 ### 7.2 Lock Controls
 
@@ -701,9 +711,9 @@ Append dated entries here. Do not delete history.
 - Fixed the shell-builder scope issue and mixed positional/named arguments, then confirmed green CI and Release `83`.
 - User confirmed Release `84` real-device validation on Symphony Z35: portrait, landscape, rotation, back/close, loading/retry, and HLS playback.
 - Closed Part 6 and set the next executable phase to **Part 7.1 Basic Transport**.
+- Completed Part 7.1 Slices A–C: navigation state, transport contract, and working play/pause plus previous/next wiring.
 
 ## Next Action
 
-1. Complete Part 7.1 Slice C: make the hidden transport row visible during stable playback and wire its callbacks to engine/navigation actions.
-2. Preserve play/pause and episode-navigation state across rotation.
-3. Add elapsed time, total/remaining time, buffered indicator, and seekbar drag only after transport buttons are stable.
+1. Install Release `89` or newer and verify play/pause, previous/next, disabled boundary states, rotation persistence, retry/error recovery, and HLS playback.
+2. After validation, start Part 7.1 Slice D with seekbar drag before adding elapsed/total/buffered time labels.

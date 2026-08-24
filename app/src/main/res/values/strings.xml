@@ -344,6 +344,7 @@
     <string name="add_to_list">Add to List</string>
     <string name="download">Download</string>
     <string name="play">Play</string>
+    <string name="pause">Pause</string>
     <string name="playback_unavailable">Playback is not available for this entry.</string>
     <string name="coming_soon">Coming soon</string>
     <string name="synopsis">Synopsis</string>

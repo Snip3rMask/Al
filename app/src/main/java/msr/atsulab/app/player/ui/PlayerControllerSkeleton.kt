@@ -50,7 +50,26 @@ internal class PlayerControllerSkeleton(
 
     fun setStatus(message: String, showRetry: Boolean) {
         statusView.text = message
+        statusControls.visibility = if (showRetry) View.VISIBLE else View.GONE
         retryButton.visibility = if (showRetry) View.VISIBLE else View.GONE
+    }
+
+    fun setTransportState(
+        isVisible: Boolean,
+        isPlaying: Boolean,
+        canShowPrevious: Boolean,
+        canShowNext: Boolean
+    ) {
+        transportControls.visibility = if (isVisible) View.VISIBLE else View.GONE
+        playPauseButton.setImageResource(
+            if (isPlaying) R.drawable.ic_player_pause_modern else R.drawable.ic_player_play_modern
+        )
+        playPauseButton.contentDescription = context.getString(if (isPlaying) R.string.pause else R.string.play)
+
+        previousEpisodeButton.isEnabled = canShowPrevious
+        previousEpisodeButton.alpha = if (canShowPrevious) 1f else 0.38f
+        nextEpisodeButton.isEnabled = canShowNext
+        nextEpisodeButton.alpha = if (canShowNext) 1f else 0.38f
     }
 
     private fun createTopBar(): LinearLayout {

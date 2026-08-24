@@ -130,7 +130,7 @@ internal class PlayerShellLayoutBuilder(
         controller.statusControls.setBackgroundColor(PlayerShellMetrics.SURFACE_COLOR)
         videoFrame.addView(
             controller.statusControls,
-            FrameLayout.LayoutParams(MATCH_PARENT, FrameLayout.LayoutParams.WRAP_CONTENT, Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL)
+            FrameLayout.LayoutParams(MATCH_PARENT, FrameLayout.LayoutParams.WRAP_CONTENT, Gravity.CENTER)
         )
         videoFrame.addView(
             controller.transportControls,

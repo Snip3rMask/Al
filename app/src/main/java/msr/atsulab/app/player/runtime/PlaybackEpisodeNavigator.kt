@@ -21,6 +21,11 @@ internal class PlaybackEpisodeNavigator {
         return currentEpisode
     }
 
+    fun canMove(offset: Int): Boolean {
+        if (selectedIndex == INVALID_INDEX || offset == 0) return false
+        return selectedIndex + offset in episodes.indices
+    }
+
     fun move(offset: Int): PlaybackEpisode? {
         if (selectedIndex == INVALID_INDEX || offset == 0) return null
 

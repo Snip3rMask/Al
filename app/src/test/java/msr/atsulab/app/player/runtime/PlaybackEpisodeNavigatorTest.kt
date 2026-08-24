@@ -49,6 +49,30 @@ class PlaybackEpisodeNavigatorTest {
     }
 
     @Test
+    fun `availability reports adjacent movement without wrapping`() {
+        val navigator = PlaybackEpisodeNavigator()
+        val first = PlaybackEpisode(name = "First", url = "first")
+        val second = PlaybackEpisode(name = "Second", url = "second")
+        val third = PlaybackEpisode(name = "Third", url = "third")
+
+        assertEquals(false, navigator.canMove(-1))
+        assertEquals(false, navigator.canMove(1))
+
+        navigator.reset(listOf(first, second, third), requestedNumber = 2)
+
+        assertEquals(false, navigator.canMove(-1))
+        assertEquals(true, navigator.canMove(1))
+        navigator.move(1)
+
+        assertEquals(true, navigator.canMove(-1))
+        assertEquals(false, navigator.canMove(0))
+        navigator.move(1)
+
+        assertEquals(true, navigator.canMove(-1))
+        assertEquals(false, navigator.canMove(1))
+    }
+
+    @Test
     fun `move is unavailable without a valid selection`() {
         val navigator = PlaybackEpisodeNavigator()
 
