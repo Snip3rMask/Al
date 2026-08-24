@@ -5,6 +5,7 @@ import msr.atsulab.app.data.response.anilist.Media
 import msr.atsulab.app.data.response.anilist.MediaCoverImage
 import msr.atsulab.app.data.response.anilist.MediaTitle
 import msr.atsulab.app.helper.enums.MediaNaming
+import msr.atsulab.app.player.domain.model.PlaybackAnime
 import msr.atsulab.app.type.MediaStatus
 import msr.atsulab.app.type.MediaType
 import org.junit.jupiter.api.Assertions.assertEquals
