@@ -350,6 +350,7 @@ internal class PlayerControllerSkeleton(
 
     private fun createTransportControls(): LinearLayout {
         val density = context.resources.displayMetrics.density
+        val isLandscape = orientation == PlayerShellOrientation.LANDSCAPE
 
         return LinearLayout(context).apply {
             orientation = LinearLayout.VERTICAL
@@ -453,7 +454,7 @@ internal class PlayerControllerSkeleton(
             val volumeButton = createPlayerIcon(R.drawable.ic_volume_up, R.string.player_volume) {
                 callbacks.onVolumeClicked()
             }
-            this.volumeButton = volumeButton
+            this@PlayerControllerSkeleton.volumeButton = volumeButton
             iconRow.addView(
                 volumeButton,
                 FrameLayout.LayoutParams(
@@ -465,7 +466,7 @@ internal class PlayerControllerSkeleton(
                 }
             )
 
-            if (orientation == PlayerShellOrientation.LANDSCAPE) {
+            if (isLandscape) {
                 iconRow.addView(
                     createPlayerIcon(R.drawable.ic_player_rewind_modern, R.string.player_rewind) {
                         callbacks.onRewindClicked()
@@ -509,7 +510,7 @@ internal class PlayerControllerSkeleton(
                 }
             )
 
-            if (orientation == PlayerShellOrientation.LANDSCAPE) {
+            if (isLandscape) {
                 iconRow.addView(
                     createPlayerIcon(R.drawable.ic_player_forward_modern, R.string.player_forward) {
                         callbacks.onForwardClicked()
@@ -525,7 +526,7 @@ internal class PlayerControllerSkeleton(
             }
 
             val rotateButton = createPlayerIcon(
-                if (orientation == PlayerShellOrientation.LANDSCAPE) {
+                if (isLandscape) {
                     R.drawable.ic_player_fullscreen_exit_modern
                 } else {
                     R.drawable.ic_player_fullscreen_enter_modern
@@ -534,8 +535,7 @@ internal class PlayerControllerSkeleton(
             ) {
                 callbacks.onRotateClicked()
             }
-            rotateButton.setImageResource(fullscreenIconRes())
-            this.rotateButton = rotateButton
+            this@PlayerControllerSkeleton.rotateButton = rotateButton
             iconRow.addView(
                 rotateButton,
                 FrameLayout.LayoutParams(

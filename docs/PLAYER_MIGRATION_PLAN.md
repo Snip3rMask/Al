@@ -436,6 +436,8 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - Corrected the landscape top chrome to remain in its frozen `86dp` band instead of stretching over the video surface.
 - Added a landscape server pill using active source metadata and wired rewind/forward plus orientation rotation.
 - Audio, subtitle, cast, episode list, settings, server selection, and player-level mute remain visible placeholders until their migration slices connect real behavior.
+- Fixed the CI receiver-shadowing failures by capturing the shell orientation before `LinearLayout.apply {}` and assigning outer controller fields with explicit receiver labels.
+- Confirmed all ported chrome drawables, labels, callbacks, icon order, and frozen offsets exist; advanced chrome actions remain intentionally inert until their slices are connected.
 
 ## Part 7 — Advanced Controls [~]
 
