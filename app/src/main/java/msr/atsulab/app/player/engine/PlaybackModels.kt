@@ -1,5 +1,6 @@
 package msr.atsulab.app.player.engine
 
+import msr.atsulab.app.player.domain.model.SubtitleTrack
 import msr.atsulab.app.player.domain.model.VideoSource
 
 enum class PlaybackReadyState {
@@ -25,7 +26,8 @@ data class PlaybackState(
     val positionMs: Long = 0L,
     val bufferedPositionMs: Long = 0L,
     val durationMs: Long = 0L,
-    val speed: Float = 1f
+    val speed: Float = 1f,
+    val subtitleTracks: List<SubtitleTrack> = emptyList()
 )
 
 data class PlaybackError(

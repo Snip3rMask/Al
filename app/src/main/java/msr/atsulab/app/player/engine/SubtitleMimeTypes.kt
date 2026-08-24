@@ -12,3 +12,16 @@ internal object SubtitleMimeTypes {
         }
     }
 }
+
+internal object SubtitleTrackMetadata {
+
+    fun displayLabel(label: String?, language: String?): String? {
+        val normalizedLanguage = language?.takeIf(String::isNotBlank)?.lowercase()
+        val normalizedLabel = label?.takeIf(String::isNotBlank)
+        if (normalizedLanguage == null) return normalizedLabel
+        if (normalizedLabel == null || normalizedLanguage.contains(normalizedLabel)) {
+            return normalizedLanguage
+        }
+        return "$normalizedLabel ($normalizedLanguage)"
+    }
+}

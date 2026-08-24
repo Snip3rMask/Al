@@ -555,11 +555,18 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - Closed Part 7.4 Speed Control pending real-device validation of the latest green release.
 
 
-### 7.5 Subtitles
+### 7.5 Subtitles [~]
 
-- [ ] Embedded subtitle detection.
+- [x] Embedded subtitle detection.
 - [ ] External subtitle attachment.
 - [ ] Language selection, styling, toggle, and missing-subtitle fallback.
+
+#### Part 7.5 Slice A — Embedded Track Detection — 2026-08-25
+
+- Added an engine-level subtitle-track snapshot containing stable IDs, display labels, languages, and selected state.
+- Media3 now emits playback-state updates when text tracks change so HLS embedded subtitles are detected without polling.
+- Normalized track labels using Anifux's label/language behavior while skipping tracks with no usable metadata.
+- Added focused metadata coverage; track selection UI, styling, toggling, and fallback remain deferred to the next slices.
 
 ### 7.6 Quality Selector
 
@@ -795,8 +802,9 @@ Append dated entries here. Do not delete history.
 - Implemented Part 7.2 playback locking, temporary unlock overlay, control blocking, and rotation persistence.
 - Completed Part 7.3 Slices A–B: confirmed/double/single tap handling, ±10s double-tap seek, landscape vertical volume/brightness, and Anifux-style HUD.
 - Completed Part 7.4 Speed Control: exact landscape popup, persistent normalized speed, direct Media3 application without stream reset, and safe rotation/lifecycle dismissal.
+- Started Part 7.5 Subtitles with Media3 embedded-track snapshots, track-change emissions, normalized metadata, and focused tests.
 
 ## Next Action
 
 1. Install the latest GitHub Release and verify the landscape speed menu, selected-row state, persistence across close/reopen and episode switch, reset-free speed changes, double-tap seek, vertical brightness/volume HUD, lock blocking, tap/auto-hide controls, rotation, and HLS playback.
-2. After validation, begin Part 7.5 Subtitles.
+2. After validation, continue Part 7.5 with the subtitle selection menu.

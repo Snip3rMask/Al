@@ -8,6 +8,7 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.PlaybackParameters
 import androidx.media3.common.Player
+import androidx.media3.common.Tracks
 import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.exoplayer.ExoPlayer
@@ -15,6 +16,7 @@ import androidx.media3.exoplayer.hls.HlsMediaSource
 import androidx.media3.exoplayer.source.MergingMediaSource
 import androidx.media3.exoplayer.source.SingleSampleMediaSource
 import androidx.media3.ui.PlayerView
+import msr.atsulab.app.player.domain.model.SubtitleTrack
 import msr.atsulab.app.player.domain.model.VideoSource
 
 internal class Media3EngineMediaPlayer(
@@ -43,7 +45,8 @@ internal class Media3EngineMediaPlayer(
                 positionMs = player.currentPosition.coerceAtLeast(0L),
                 bufferedPositionMs = player.bufferedPosition.coerceAtLeast(0L),
                 durationMs = durationMs,
-                speed = player.playbackParameters.speed
+                speed = player.playbackParameters.speed,
+                subtitleTracks = readSubtitleTracks()
             )
         }
 
@@ -64,6 +67,10 @@ internal class Media3EngineMediaPlayer(
             }
 
             override fun onPlaybackParametersChanged(playbackParameters: PlaybackParameters) {
+                emitState()
+            }
+
+            override fun onTracksChanged(tracks: Tracks) {
                 emitState()
             }
 
@@ -130,6 +137,24 @@ internal class Media3EngineMediaPlayer(
 
     private fun emitState() {
         listener?.onStateChanged(currentState)
+    }
+
+    private fun readSubtitleTracks(): List<SubtitleTrack> {
+        return player.currentTracks.groups.flatMapIndexed { groupIndex, group ->
+            (0 until group.length).mapNotNull { trackIndex ->
+                if (group.type != C.TRACK_TYPE_TEXT) return@mapNotNull null
+                val format = group.getTrackFormat(trackIndex)
+                val label = SubtitleTrackMetadata.displayLabel(format.label, format.language)
+                    ?: return@mapNotNull null
+
+                SubtitleTrack(
+                    id = "$groupIndex:$trackIndex",
+                    label = label,
+                    language = format.language.orEmpty(),
+                    isSelected = group.isTrackSelected(trackIndex)
+                )
+            }
+        }
     }
 
     private fun createDataSourceFactory(source: VideoSource): DefaultDataSource.Factory {
