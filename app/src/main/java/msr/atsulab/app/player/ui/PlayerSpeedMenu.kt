@@ -91,7 +91,7 @@ internal class PlayerSpeedMenu(
             LinearLayout.LayoutParams.WRAP_CONTENT,
             true
         ).apply {
-            outsideTouchable = true
+            isOutsideTouchable = true
             setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
             setOnDismissListener {
                 popup = null
