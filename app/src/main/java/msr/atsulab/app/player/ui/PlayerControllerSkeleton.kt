@@ -309,7 +309,7 @@ internal class PlayerControllerSkeleton(
     private fun roundedLine(color: Int, density: Float): GradientDrawable {
         return GradientDrawable().apply {
             setColor(color)
-            cornerRadius = dp(2, density)
+            cornerRadius = dp(2, density).toFloat()
             setSize(1, dp(3, density))
         }
     }
