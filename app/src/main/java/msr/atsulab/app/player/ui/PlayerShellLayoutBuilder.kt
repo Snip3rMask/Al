@@ -18,6 +18,7 @@ internal data class PlayerShellViews(
     val root: FrameLayout,
     val videoFrame: FrameLayout,
     val playerView: PlayerView,
+    val brightnessScrimView: View,
     val controller: PlayerControllerSkeleton,
     val loadingIndicator: ProgressBar,
     val gestureHudView: PlayerGestureHudView
@@ -38,6 +39,10 @@ internal class PlayerShellLayoutBuilder(
             resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
         }
 
+        val brightnessScrimView = View(context).apply {
+            setBackgroundColor(Color.BLACK)
+            importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
+        }
         val loadingIndicator = ProgressBar(context).apply { visibility = View.GONE }
         val gestureHudView = PlayerGestureHudView(context).apply { visibility = View.GONE }
         val videoFrame = FrameLayout(context).apply {
@@ -51,17 +56,38 @@ internal class PlayerShellLayoutBuilder(
                 FrameLayout.LayoutParams.MATCH_PARENT
             )
         )
+        videoFrame.addView(
+            brightnessScrimView,
+            FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT)
+        )
 
         return if (orientation == PlayerShellOrientation.LANDSCAPE) {
-            buildLandscape(videoFrame, playerView, controller, loadingIndicator, gestureHudView, episodeLabel)
+            buildLandscape(
+                videoFrame,
+                playerView,
+                brightnessScrimView,
+                controller,
+                loadingIndicator,
+                gestureHudView,
+                episodeLabel
+            )
         } else {
-            buildPortrait(videoFrame, playerView, controller, loadingIndicator, gestureHudView, episodeLabel)
+            buildPortrait(
+                videoFrame,
+                playerView,
+                brightnessScrimView,
+                controller,
+                loadingIndicator,
+                gestureHudView,
+                episodeLabel
+            )
         }
     }
 
     private fun buildPortrait(
         videoFrame: FrameLayout,
         playerView: PlayerView,
+        brightnessScrimView: View,
         controller: PlayerControllerSkeleton,
         loadingIndicator: ProgressBar,
         gestureHudView: PlayerGestureHudView,
@@ -151,6 +177,7 @@ internal class PlayerShellLayoutBuilder(
             root,
             videoFrame,
             playerView,
+            brightnessScrimView,
             controller,
             loadingIndicator,
             gestureHudView
@@ -160,6 +187,7 @@ internal class PlayerShellLayoutBuilder(
     private fun buildLandscape(
         videoFrame: FrameLayout,
         playerView: PlayerView,
+        brightnessScrimView: View,
         controller: PlayerControllerSkeleton,
         loadingIndicator: ProgressBar,
         gestureHudView: PlayerGestureHudView,
@@ -218,6 +246,7 @@ internal class PlayerShellLayoutBuilder(
             root,
             videoFrame,
             playerView,
+            brightnessScrimView,
             controller,
             loadingIndicator,
             gestureHudView

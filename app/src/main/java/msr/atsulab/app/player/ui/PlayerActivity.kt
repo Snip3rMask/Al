@@ -56,6 +56,7 @@ class PlayerActivity : AppCompatActivity() {
     private var controlsVisible = false
     private var controlsLocked = false
     private var gestureHandler: PlayerGestureHandler? = null
+    private var playbackBrightness = BRIGHTNESS_MAX
     private val speedMenu: PlayerSpeedMenu by lazy {
         PlayerSpeedMenu(
             this,
@@ -263,12 +264,12 @@ class PlayerActivity : AppCompatActivity() {
                 }
 
                 override fun currentBrightness(): Float {
-                    val brightness = window.attributes.screenBrightness
-                    return if (brightness >= 0f) brightness else DEFAULT_BRIGHTNESS
+                    return playbackBrightness
                 }
 
                 override fun setBrightness(value: Float) {
-                    window.attributes = window.attributes.apply { screenBrightness = value }
+                    playbackBrightness = value.coerceIn(BRIGHTNESS_MINIMUM, BRIGHTNESS_MAX)
+                    applyBrightnessScrim()
                 }
 
                 override fun currentVolume(): Int {
@@ -313,6 +314,7 @@ class PlayerActivity : AppCompatActivity() {
         this.gestureHandler = gestureHandler
         shell.videoFrame.setOnTouchListener(gestureHandler)
         playerView = shell.playerView
+        applyBrightnessScrim()
         loadingIndicator = shell.loadingIndicator
         setContentView(shell.root)
         applySystemBars()
@@ -450,6 +452,12 @@ class PlayerActivity : AppCompatActivity() {
         return (value * resources.displayMetrics.density).toInt()
     }
 
+    private fun applyBrightnessScrim() {
+        if (!::shell.isInitialized) return
+        val dimmingFraction = (1f - playbackBrightness).coerceIn(0f, 1f)
+        shell.brightnessScrimView.alpha = dimmingFraction * BRIGHTNESS_SCRIM_MAXIMUM_ALPHA
+    }
+
     private fun showPlaybackSpeedMenu() {
         if (!transportVisible || controlsLocked) return
         cancelControlsAutoHide()
@@ -565,7 +573,9 @@ class PlayerActivity : AppCompatActivity() {
         const val GESTURE_HUD_SIDE_MARGIN_DP = PlayerShellMetrics.GESTURE_HUD_SIDE_MARGIN_DP
         const val GESTURE_HUD_HIDE_START_DELAY_MS = 420L
         const val GESTURE_HUD_FADE_DURATION_MS = 160L
-        const val DEFAULT_BRIGHTNESS = 0.5f
+        const val BRIGHTNESS_MINIMUM = 0.05f
+        const val BRIGHTNESS_MAX = 1f
+        const val BRIGHTNESS_SCRIM_MAXIMUM_ALPHA = 0.85f
         const val EXTRA_MAL_ID = "EXTRA_MAL_ID"
         const val EXTRA_TITLE = "EXTRA_TITLE"
         const val EXTRA_COVER_IMAGE_URL = "EXTRA_COVER_IMAGE_URL"
