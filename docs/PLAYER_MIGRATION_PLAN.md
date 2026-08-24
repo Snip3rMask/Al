@@ -423,6 +423,9 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - Added a controller skeleton with close/back, title, status, retry, and loading-indicator seams without advanced transport controls.
 - Preserved the frozen primary-dark/surface colors and core `102dp` portrait / `86dp` landscape top-bar dimensions.
 - Rotation now rebuilds the shell and reattaches the existing playback engine to the new Media3 `PlayerView`.
+- Fixed the remaining builder scope/reference issues and normalized formatted player status arguments.
+- Confirmed green CI and published the shell-skeleton debug build as Release `83`.
+- Device validation is still required before Part 6 can be closed.
 
 ## Part 7 — Advanced Controls
 
@@ -680,7 +683,11 @@ Append dated entries here. Do not delete history.
 - Implemented runtime episode loading, source resolution, Media3 attachment, retry/error states, and lifecycle cleanup.
 - Confirmed Release `77` plays real HLS video from the Media Details entry point on a real device.
 - Deferred Continue Watching and started Part 6 with frozen player shell metrics and unit tests.
+- Completed Part 6 slices 1–3 at code level: frozen metrics, Media3 seam, portrait/landscape shells, controller/status/loading seams, rotation reattachment, and system-bar behavior.
+- Fixed the shell-builder scope issue and mixed positional/named arguments, then confirmed green CI and Release `83`.
+- Kept Part 6 marked in progress pending real-device validation of portrait, landscape, rotation, back/close, loading, retry, and HLS playback.
 
 ## Next Action
 
-1. Install the next debug release and verify portrait, landscape, rotation, back/close, loading, retry, and normal HLS playback.
+1. Install Release `83` or newer and verify portrait, landscape, rotation, back/close, loading, retry, and normal HLS playback.
+2. After successful device validation, close Part 6 and begin Part 7.1 Basic Transport.
