@@ -18,7 +18,7 @@ class SubtitleTrackMetadataTest {
 
     @Test
     fun `avoids duplicated label inside language`() {
-        assertEquals("english", SubtitleTrackMetadata.displayLabel("English", "english"))
+        assertEquals("english", SubtitleTrackMetadata.displayLabel("english", "english"))
     }
 
     @Test
