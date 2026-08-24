@@ -402,6 +402,12 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - AtsuLab currently has a functional temporary shell but still uses a raw `SurfaceView`, simple bottom status, no `PlayerView`, no Anifux gradients/top bar, no orientation-specific builder, and no reusable controller skeleton.
 - Part 6 must therefore be executed as small slices: design metrics → `PlayerView` engine seam → video shell → portrait/landscape builders → controller skeleton/system bars → rotation/back validation.
 
+### Part 6 Slice 1 — Design Metrics — 2026-08-24
+
+- Added Kotlin-owned `PlayerShellMetrics` for Anifux shell colors, typography sizes, control dimensions, episode grid columns, and portrait video sizing.
+- Added a pure portrait-height calculation that preserves the original 30% screen ratio and `460px` minimum.
+- Added focused unit coverage for exact shell values, ratio rounding, minimum enforcement, and invalid input.
+
 ## Part 7 — Advanced Controls
 
 **Goal:** Port controls incrementally. Each group is an independent commit and test cycle.
@@ -657,9 +663,9 @@ Append dated entries here. Do not delete history.
 - Added the AniList-to-playback-domain anime mapper with unit tests.
 - Implemented runtime episode loading, source resolution, Media3 attachment, retry/error states, and lifecycle cleanup.
 - Confirmed Release `77` plays real HLS video from the Media Details entry point on a real device.
+- Deferred Continue Watching and started Part 6 with frozen player shell metrics and unit tests.
 
 ## Next Action
 
-1. Freeze the Anifux shell reference and add Kotlin-owned player metrics/design constants.
-2. Adapt the playback engine seam so Media3 `PlayerView` can be attached without exposing ExoPlayer.
-3. Port the video shell, portrait/landscape layout builders, and controller skeleton with back/loading/error behavior.
+1. Adapt the playback engine seam so Media3 `PlayerView` can be attached without exposing ExoPlayer.
+2. Port the video shell, portrait/landscape layout builders, and controller skeleton with back/loading/error behavior.
