@@ -312,7 +312,7 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 
 - [x] Extend navigation contract with player navigation.
 - [x] Implement navigation in `DefaultNavigationManager`.
-- [ ] Map AniList `Media` to `PlaybackAnime`.
+- [x] Map AniList `Media` to `PlaybackAnime`.
 - [ ] Pass media ID, title, type, cover image, and initial episode.
 - [ ] Replace the Play placeholder in `MediaFragment` with real navigation.
 - [ ] Keep Download as placeholder until the offline phase.
@@ -327,6 +327,10 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - Implemented the navigation override in `DefaultNavigationManager`.
 - Added a minimal registered `PlayerActivity` destination with primitive intent extras and invalid-input finishing.
 - Deferred full player shell UI, playback loading, Play-button wiring, and runtime handling to their own focused slices.
+- Added a pure `Media.toPlaybackAnime(appSetting)` mapper for anime only.
+  - Maps IDs, preferred title, alternative titles, cover quality preference, banner, episode count/duration, year, release status, adult flag, country, and MAL ID.
+  - Rejects manga input before any player navigation can begin.
+- Added JUnit coverage for naming/image preferences, normal-quality cover fallback, manga rejection, unknown status, and safe defaults.
 
 ## Part 5 — Continue Watching
 
@@ -607,8 +611,9 @@ Append dated entries here. Do not delete history.
 - Set next executable phase: **Part 4 — AtsuLab Entry Point**.
 - Started Part 4 by adding the playback navigation contract without touching the current Play placeholder.
 - Implemented manager navigation through a temporary minimal `PlayerActivity` shell.
+- Added the AniList-to-playback-domain anime mapper with unit tests.
 
 ## Next Action
 
-1. Add an AniList `Media` → `PlaybackAnime` mapper with media ID, title, cover image, and initial episode.
-2. Replace the Media Details Play placeholder with real player navigation while preserving guest-mode and unavailable-episode handling.
+1. Replace the Media Details Play placeholder with real player navigation using the mapper and a safe initial episode.
+2. Preserve guest-mode and unavailable-episode handling during playback entry.
