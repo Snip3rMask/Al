@@ -427,6 +427,16 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - Confirmed green CI and published the shell-skeleton debug build as Release `83`.
 - User confirmed Release `84` device validation for portrait, landscape, rotation, back/close, loading/retry, and HLS playback; Part 6 is closed.
 
+### Chrome Parity Pass — 2026-08-25
+
+- Ported Anifux's complete static player chrome before advanced wiring so the shell no longer looks sparse.
+- Restored exact top-row order: back/title, then landscape server pill → speed; both orientations receive audio → subtitle → cast; landscape adds episode → settings.
+- Replaced the generic close glyph with Anifux's back artwork and reused the original 42dp icon targets with 8dp circular ripple padding.
+- Restored the bottom transport order and offsets: lock at `24dp`, volume at `76dp`, optional rewind at `-140dp`, previous/play/next around center, optional forward at `+140dp`, and rotate at the right `24dp`.
+- Corrected the landscape top chrome to remain in its frozen `86dp` band instead of stretching over the video surface.
+- Added a landscape server pill using active source metadata and wired rewind/forward plus orientation rotation.
+- Audio, subtitle, cast, episode list, settings, server selection, and player-level mute remain visible placeholders until their migration slices connect real behavior.
+
 ## Part 7 — Advanced Controls [~]
 
 **Goal:** Port controls incrementally. Each group is an independent commit and test cycle.
@@ -803,8 +813,9 @@ Append dated entries here. Do not delete history.
 - Completed Part 7.3 Slices A–B: confirmed/double/single tap handling, ±10s double-tap seek, landscape vertical volume/brightness, and Anifux-style HUD.
 - Completed Part 7.4 Speed Control: exact landscape popup, persistent normalized speed, direct Media3 application without stream reset, and safe rotation/lifecycle dismissal.
 - Started Part 7.5 Subtitles with Media3 embedded-track snapshots, track-change emissions, normalized metadata, and focused tests.
+- Completed a player chrome parity pass with Anifux icon/order/offset restoration and corrected compact landscape top placement.
 
 ## Next Action
 
-1. Install the latest GitHub Release and verify the landscape speed menu, selected-row state, persistence across close/reopen and episode switch, reset-free speed changes, double-tap seek, vertical brightness/volume HUD, lock blocking, tap/auto-hide controls, rotation, and HLS playback.
+1. Install the latest GitHub Release and verify player chrome positions/icons against Anifux, landscape server pill, rewind/forward, rotate, speed menu, persistence, reset-free speed changes, vertical brightness/volume HUD, lock blocking, tap/auto-hide controls, and HLS playback.
 2. After validation, continue Part 7.5 with the subtitle selection menu.

@@ -33,6 +33,16 @@ internal class PlayerControllerSkeleton(
         fun onLockClicked()
         fun onUnlockClicked()
         fun onSpeedClicked()
+        fun onServerClicked()
+        fun onAudioClicked()
+        fun onSubtitleClicked()
+        fun onCastClicked()
+        fun onEpisodeClicked()
+        fun onSettingsClicked()
+        fun onVolumeClicked()
+        fun onRewindClicked()
+        fun onForwardClicked()
+        fun onRotateClicked()
     }
 
     lateinit var titleView: TextView
@@ -57,6 +67,15 @@ internal class PlayerControllerSkeleton(
         private set
 
     var speedButton: ImageView? = null
+        private set
+
+    var serverPill: TextView? = null
+        private set
+
+    var volumeButton: ImageView? = null
+        private set
+
+    var rotateButton: ImageView? = null
         private set
 
     var isControlsLocked: Boolean = false
@@ -186,9 +205,8 @@ internal class PlayerControllerSkeleton(
                 0
             )
 
-            val backButton = ImageView(context).apply {
-                setImageResource(R.drawable.ic_custom_close)
-                setOnClickListener { callbacks.onBackClicked() }
+            val backButton = createPlayerIcon(R.drawable.ic_back) {
+                callbacks.onBackClicked()
             }
             addView(
                 backButton,
@@ -213,16 +231,95 @@ internal class PlayerControllerSkeleton(
             addView(titleView, titleParams)
 
             if (isLandscape) {
-                val button = ImageView(context).apply {
-                    setImageResource(R.drawable.ic_player_speed_modern)
-                    contentDescription = context.getString(R.string.player_speed)
-                    setOnClickListener { callbacks.onSpeedClicked() }
+                val pill = TextView(context).apply {
+                    text = "S1"
+                    textSize = 14f
+                    minHeight = 0
+                    gravity = Gravity.CENTER
+                    setTextColor(PlayerShellMetrics.MENU_TEXT_COLOR)
+                    background = GradientDrawable().apply {
+                        setColor(PlayerShellMetrics.SURFACE_COLOR)
+                        cornerRadius = dp(100, density).toFloat()
+                        setStroke(dp(1, density), 0x460EA5E9.toInt())
+                    }
+                    setOnClickListener { callbacks.onServerClicked() }
                 }
-                speedButton = button
-                val buttonParams = LinearLayout.LayoutParams(dp(42, density), dp(42, density))
-                buttonParams.setMargins(0, 0, dp(8, density), 0)
-                addView(button, buttonParams)
+                serverPill = pill
+                addView(
+                    pill,
+                    LinearLayout.LayoutParams(
+                        dp(PlayerShellMetrics.SERVER_PILL_WIDTH_DP, density),
+                        dp(PlayerShellMetrics.SERVER_PILL_HEIGHT_DP, density)
+                    )
+                )
+
+                val speedIcon = createPlayerIcon(R.drawable.ic_player_speed_modern, R.string.player_speed) {
+                    callbacks.onSpeedClicked()
+                }
+                speedButton = speedIcon
+                addView(speedIcon, topIconParams(density))
             }
+
+            addView(
+                createPlayerIcon(R.drawable.ic_player_audio_modern, R.string.player_audio) {
+                    callbacks.onAudioClicked()
+                },
+                topIconParams(density)
+            )
+            addView(
+                createPlayerIcon(R.drawable.ic_subtitle, R.string.player_subtitles) {
+                    callbacks.onSubtitleClicked()
+                },
+                topIconParams(density)
+            )
+            addView(
+                createPlayerIcon(R.drawable.ic_cast_button_static, R.string.player_cast) {
+                    callbacks.onCastClicked()
+                },
+                topIconParams(density)
+            )
+
+            if (isLandscape) {
+                addView(
+                    createPlayerIcon(R.drawable.ic_episode, R.string.player_episodes) {
+                        callbacks.onEpisodeClicked()
+                    },
+                    topIconParams(density)
+                )
+                addView(
+                    createPlayerIcon(R.drawable.ic_settings, R.string.player_settings) {
+                        callbacks.onSettingsClicked()
+                    },
+                    topIconParams(density)
+                )
+            }
+        }
+    }
+
+    private fun topIconParams(density: Float): LinearLayout.LayoutParams {
+        return LinearLayout.LayoutParams(dp(42, density), dp(42, density)).apply {
+            setMargins(0, 0, dp(8, density), 0)
+        }
+    }
+
+    private fun createPlayerIcon(
+        resourceId: Int,
+        contentDescriptionResId: Int,
+        onClick: () -> Unit
+    ): ImageView = createPlayerIcon(resourceId, context.getString(contentDescriptionResId), onClick)
+
+    private fun createPlayerIcon(resourceId: Int, onClick: () -> Unit): ImageView =
+        createPlayerIcon(resourceId, null, onClick)
+
+    private fun createPlayerIcon(resourceId: Int, description: String?, onClick: () -> Unit): ImageView {
+        val density = context.resources.displayMetrics.density
+        return ImageView(context).apply {
+            setImageResource(resourceId)
+            if (description != null) contentDescription = description
+            scaleType = ImageView.ScaleType.FIT_CENTER
+            setPadding(dp(8, density), dp(8, density), dp(8, density), dp(8, density))
+            setBackgroundResource(R.drawable.ripple_circle)
+            setOnClickListener { onClick() }
         }
     }
 
@@ -352,6 +449,37 @@ internal class PlayerControllerSkeleton(
                     setMargins(dp(PlayerShellMetrics.LOCK_BUTTON_LEFT_MARGIN_DP, density), 0, 0, 0)
                 }
             )
+
+            val volumeButton = createPlayerIcon(R.drawable.ic_volume_up, R.string.player_volume) {
+                callbacks.onVolumeClicked()
+            }
+            this.volumeButton = volumeButton
+            iconRow.addView(
+                volumeButton,
+                FrameLayout.LayoutParams(
+                    dp(PlayerShellMetrics.CONTROL_ICON_SIZE_DP, density),
+                    dp(PlayerShellMetrics.CONTROL_ICON_SIZE_DP, density),
+                    Gravity.LEFT or Gravity.CENTER_VERTICAL
+                ).apply {
+                    setMargins(dp(PlayerShellMetrics.VOLUME_BUTTON_LEFT_MARGIN_DP, density), 0, 0, 0)
+                }
+            )
+
+            if (orientation == PlayerShellOrientation.LANDSCAPE) {
+                iconRow.addView(
+                    createPlayerIcon(R.drawable.ic_player_rewind_modern, R.string.player_rewind) {
+                        callbacks.onRewindClicked()
+                    },
+                    FrameLayout.LayoutParams(
+                        dp(PlayerShellMetrics.CONTROL_ICON_SIZE_DP, density),
+                        dp(PlayerShellMetrics.CONTROL_ICON_SIZE_DP, density),
+                        Gravity.CENTER
+                    ).apply {
+                        setMargins(0, 0, dp(PlayerShellMetrics.SEEK_BUTTON_OFFSET_DP, density), 0)
+                    }
+                )
+            }
+
             iconRow.addView(
                 previousEpisodeButton,
                 FrameLayout.LayoutParams(
@@ -381,6 +509,44 @@ internal class PlayerControllerSkeleton(
                 }
             )
 
+            if (orientation == PlayerShellOrientation.LANDSCAPE) {
+                iconRow.addView(
+                    createPlayerIcon(R.drawable.ic_player_forward_modern, R.string.player_forward) {
+                        callbacks.onForwardClicked()
+                    },
+                    FrameLayout.LayoutParams(
+                        dp(PlayerShellMetrics.CONTROL_ICON_SIZE_DP, density),
+                        dp(PlayerShellMetrics.CONTROL_ICON_SIZE_DP, density),
+                        Gravity.CENTER
+                    ).apply {
+                        setMargins(dp(PlayerShellMetrics.SEEK_BUTTON_OFFSET_DP, density), 0, 0, 0)
+                    }
+                )
+            }
+
+            val rotateButton = createPlayerIcon(
+                if (orientation == PlayerShellOrientation.LANDSCAPE) {
+                    R.drawable.ic_player_fullscreen_exit_modern
+                } else {
+                    R.drawable.ic_player_fullscreen_enter_modern
+                },
+                R.string.player_rotate
+            ) {
+                callbacks.onRotateClicked()
+            }
+            rotateButton.setImageResource(fullscreenIconRes())
+            this.rotateButton = rotateButton
+            iconRow.addView(
+                rotateButton,
+                FrameLayout.LayoutParams(
+                    dp(PlayerShellMetrics.CONTROL_ICON_SIZE_DP, density),
+                    dp(PlayerShellMetrics.CONTROL_ICON_SIZE_DP, density),
+                    Gravity.RIGHT or Gravity.CENTER_VERTICAL
+                ).apply {
+                    setMargins(0, 0, dp(PlayerShellMetrics.ROTATE_BUTTON_RIGHT_MARGIN_DP, density), 0)
+                }
+            )
+
             addView(
                 progressRow,
                 LinearLayout.LayoutParams(
@@ -396,6 +562,16 @@ internal class PlayerControllerSkeleton(
                 )
             )
         }
+    }
+
+    fun updateServerLabel(label: String) {
+        serverPill?.text = label
+    }
+
+    fun setVolumeMuted(isMuted: Boolean) {
+        volumeButton?.setImageResource(
+            if (isMuted) R.drawable.ic_volume_off else R.drawable.ic_volume_up
+        )
     }
 
     private fun createTransportIcon(resourceId: Int, contentDescriptionResId: Int, onClick: () -> Unit): ImageView {

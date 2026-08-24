@@ -194,7 +194,14 @@ internal class PlayerShellLayoutBuilder(
         episodeLabel: String
     ): PlayerShellViews {
         val density = context.resources.displayMetrics.density
-        videoFrame.addView(controller.topBar, FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT))
+        videoFrame.addView(
+            controller.topBar,
+            FrameLayout.LayoutParams(
+                MATCH_PARENT,
+                dp(PlayerShellMetrics.LANDSCAPE_TOP_HEIGHT_DP, density),
+                Gravity.TOP
+            )
+        )
         videoFrame.addView(
             loadingIndicator,
             FrameLayout.LayoutParams(dp(PlayerShellMetrics.LOADING_INDICATOR_SIZE_DP, density), dp(PlayerShellMetrics.LOADING_INDICATOR_SIZE_DP, density), Gravity.CENTER)

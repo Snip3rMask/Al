@@ -1,6 +1,7 @@
 package msr.atsulab.app.player.ui
 
 import android.content.Context
+import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.media.AudioManager
 import android.graphics.Color
@@ -57,6 +58,7 @@ class PlayerActivity : AppCompatActivity() {
     private var controlsLocked = false
     private var gestureHandler: PlayerGestureHandler? = null
     private var playbackBrightness = BRIGHTNESS_MAX
+    private var activeVideoSource: VideoSource? = null
     private val speedMenu: PlayerSpeedMenu by lazy {
         PlayerSpeedMenu(
             this,
@@ -237,6 +239,37 @@ class PlayerActivity : AppCompatActivity() {
                 showPlaybackSpeedMenu()
             }
 
+            override fun onServerClicked() = Unit
+
+            override fun onAudioClicked() = Unit
+
+            override fun onSubtitleClicked() = Unit
+
+            override fun onCastClicked() = Unit
+
+            override fun onEpisodeClicked() = Unit
+
+            override fun onSettingsClicked() = Unit
+
+            override fun onVolumeClicked() = Unit
+
+            override fun onRewindClicked() {
+                seekBy(-GESTURE_SEEK_DURATION_MS)
+            }
+
+            override fun onForwardClicked() {
+                seekBy(GESTURE_SEEK_DURATION_MS)
+            }
+
+            override fun onRotateClicked() {
+                requestedOrientation = if (
+                    resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+                ) {
+                    ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT
+                } else {
+                    ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+                }
+            }
         }
         val title = currentAnime?.title.orEmpty()
         val episodeLabel = getString(R.string.player_shell_status_format, title, requestedEpisode)
@@ -321,6 +354,7 @@ class PlayerActivity : AppCompatActivity() {
         shell.controller.setStatus(statusMessage, statusRetryVisible)
         shell.controller.setLocked(controlsLocked)
         loadingIndicator.visibility = if (waitingForPlayback) View.VISIBLE else View.GONE
+        shell.controller.updateServerLabel(activeVideoSource?.server.orEmpty().ifBlank { "S1" })
         updateTransportControls()
         if (controlsVisible) scheduleControlsAutoHide()
     }
@@ -374,9 +408,12 @@ class PlayerActivity : AppCompatActivity() {
             return
         }
 
+        val videoSource = sources.firstOrNull()
+        activeVideoSource = videoSource
         latestPlaybackState = PlaybackState(speed = playbackSpeed)
         transportVisible = false
         showMessage(R.string.player_starting_playback, arguments = listOf(episode.name), loading = true)
+        shell.controller.updateServerLabel(videoSource?.server.orEmpty().ifBlank { "S1" })
         playbackEngine.prepare(source)
         playbackEngine.setSpeed(playbackSpeed)
         playbackEngine.play()
