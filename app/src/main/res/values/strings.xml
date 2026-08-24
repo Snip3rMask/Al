@@ -580,5 +580,8 @@
     <string name="player_playing">Playing</string>
     <string name="player_ended">Playback ended</string>
     <string name="player_runtime_error">Playback could not be started.</string>
+    <string name="player_previous_episode">Previous episode</string>
+    <string name="player_play_pause">Play or pause</string>
+    <string name="player_next_episode">Next episode</string>
     <string name="retry">Retry</string>
 </resources>

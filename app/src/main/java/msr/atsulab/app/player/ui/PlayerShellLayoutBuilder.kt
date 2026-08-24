@@ -94,6 +94,10 @@ internal class PlayerShellLayoutBuilder(
         val lowerPanel = LinearLayout(context).apply { orientation = LinearLayout.VERTICAL }
         lowerPanel.setPadding(dp(37, density), dp(28, density), dp(37, density), dp(28, density))
         lowerPanel.addView(controller.statusControls)
+        lowerPanel.addView(
+            controller.transportControls,
+            LinearLayout.LayoutParams(MATCH_PARENT, dp(PlayerShellMetrics.TRANSPORT_ROW_HEIGHT_DP, density))
+        )
         lowerScroll.addView(lowerPanel)
 
         val page = LinearLayout(context).apply { orientation = LinearLayout.VERTICAL }
@@ -127,6 +131,14 @@ internal class PlayerShellLayoutBuilder(
         videoFrame.addView(
             controller.statusControls,
             FrameLayout.LayoutParams(MATCH_PARENT, FrameLayout.LayoutParams.WRAP_CONTENT, Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL)
+        )
+        videoFrame.addView(
+            controller.transportControls,
+            FrameLayout.LayoutParams(
+                MATCH_PARENT,
+                dp(PlayerShellMetrics.TRANSPORT_ROW_HEIGHT_DP, density),
+                Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL
+            )
         )
 
         val root = FrameLayout(context).apply { setBackgroundColor(PlayerShellMetrics.PRIMARY_DARK_COLOR) }

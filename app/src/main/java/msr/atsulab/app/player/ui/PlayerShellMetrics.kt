@@ -20,6 +20,8 @@ object PlayerShellMetrics {
     const val SEEK_CONTROL_HEIGHT_DP = 32
     const val CONTROL_ICON_SIZE_DP = 44
     const val BACK_BUTTON_SIZE_DP = 42
+    const val TRANSPORT_ROW_HEIGHT_DP = 58
+    const val TRANSPORT_ICON_OFFSET_DP = 70
     const val LOADING_INDICATOR_SIZE_DP = 58
     const val WATCHING_ROW_HEIGHT_DP = 72
     const val EPISODE_GRID_COLUMN_COUNT = 5

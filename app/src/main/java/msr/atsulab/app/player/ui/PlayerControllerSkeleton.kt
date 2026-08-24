@@ -7,6 +7,7 @@ import android.graphics.drawable.GradientDrawable
 import android.view.Gravity
 import android.view.View
 import android.widget.ImageView
+import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.TextView
 import com.google.android.material.button.MaterialButton
@@ -20,6 +21,9 @@ internal class PlayerControllerSkeleton(
     interface Callbacks {
         fun onBackClicked()
         fun onRetryClicked()
+        fun onPlayPauseClicked()
+        fun onPreviousEpisodeClicked()
+        fun onNextEpisodeClicked()
     }
 
     lateinit var titleView: TextView
@@ -31,8 +35,18 @@ internal class PlayerControllerSkeleton(
     lateinit var retryButton: MaterialButton
         private set
 
+    lateinit var previousEpisodeButton: ImageView
+        private set
+
+    lateinit var playPauseButton: ImageView
+        private set
+
+    lateinit var nextEpisodeButton: ImageView
+        private set
+
     val topBar: LinearLayout = createTopBar()
     val statusControls: LinearLayout = createStatusControls()
+    val transportControls: FrameLayout = createTransportControls()
 
     fun setStatus(message: String, showRetry: Boolean) {
         statusView.text = message
@@ -104,6 +118,74 @@ internal class PlayerControllerSkeleton(
             setPadding(dp(16, density), dp(12, density), dp(16, density), dp(12, density))
             addView(statusView)
             addView(retryButton)
+        }
+    }
+
+    private fun createTransportControls(): FrameLayout {
+        val density = context.resources.displayMetrics.density
+
+        return FrameLayout(context).apply {
+            visibility = View.GONE
+            previousEpisodeButton = createTransportIcon(
+                R.drawable.ic_player_previous_modern,
+                R.string.player_previous_episode
+            ) {
+                callbacks.onPreviousEpisodeClicked()
+            }
+            playPauseButton = createTransportIcon(
+                R.drawable.ic_player_play_modern,
+                R.string.player_play_pause
+            ) {
+                callbacks.onPlayPauseClicked()
+            }
+            nextEpisodeButton = createTransportIcon(
+                R.drawable.ic_player_next_modern,
+                R.string.player_next_episode
+            ) {
+                callbacks.onNextEpisodeClicked()
+            }
+
+            addView(
+                previousEpisodeButton,
+                FrameLayout.LayoutParams(
+                    dp(PlayerShellMetrics.CONTROL_ICON_SIZE_DP, density),
+                    dp(PlayerShellMetrics.CONTROL_ICON_SIZE_DP, density),
+                    Gravity.CENTER
+                ).apply {
+                    setMargins(0, 0, dp(PlayerShellMetrics.TRANSPORT_ICON_OFFSET_DP, density), 0)
+                }
+            )
+            addView(
+                playPauseButton,
+                FrameLayout.LayoutParams(
+                    dp(PlayerShellMetrics.CONTROL_ICON_SIZE_DP, density),
+                    dp(PlayerShellMetrics.CONTROL_ICON_SIZE_DP, density),
+                    Gravity.CENTER
+                )
+            )
+            addView(
+                nextEpisodeButton,
+                FrameLayout.LayoutParams(
+                    dp(PlayerShellMetrics.CONTROL_ICON_SIZE_DP, density),
+                    dp(PlayerShellMetrics.CONTROL_ICON_SIZE_DP, density),
+                    Gravity.CENTER
+                ).apply {
+                    setMargins(dp(PlayerShellMetrics.TRANSPORT_ICON_OFFSET_DP, density), 0, 0, 0)
+                }
+            )
+        }
+    }
+
+    private fun createTransportIcon(resourceId: Int, contentDescriptionResId: Int, onClick: () -> Unit): ImageView {
+        val density = context.resources.displayMetrics.density
+
+        return ImageView(context).apply {
+            setImageResource(resourceId)
+            contentDescription = context.getString(contentDescriptionResId)
+            scaleType = ImageView.ScaleType.FIT_CENTER
+            setPadding(dp(8, density), dp(8, density), dp(8, density), dp(8, density))
+            setBackgroundResource(R.drawable.ripple_circle)
+            setOnClickListener { onClick() }
         }
     }
 

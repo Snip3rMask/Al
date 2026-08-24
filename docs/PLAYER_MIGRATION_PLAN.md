@@ -443,6 +443,13 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - Previous/next targets use list adjacency and do not wrap across boundaries.
 - `PlayerActivity` now retains navigation state and can resolve adjacent episode sources before transport buttons are exposed.
 
+#### Part 7.1 Slice B — Transport Contract — 2026-08-24
+
+- Added the Anifux-shaped centered transport seam: previous → play/pause → next.
+- Ported the original 48dp icon artwork into 44dp controls with circular ripple targets and 70dp center offsets.
+- Added explicit transport callbacks to `PlayerControllerSkeleton`; current shell callbacks remain temporary no-ops.
+- Attached the hidden transport row to both portrait and landscape shells so user-visible behavior remains unchanged until Slice C wires engine actions.
+
 ### 7.2 Lock Controls
 
 - [ ] Lock button and unlock overlay.
@@ -697,6 +704,6 @@ Append dated entries here. Do not delete history.
 
 ## Next Action
 
-1. Complete Part 7.1 Slice B: add the transport callback/controller contract for play/pause and previous/next.
-2. Wire those controls to engine actions and playback state in a later focused slice.
+1. Complete Part 7.1 Slice C: make the hidden transport row visible during stable playback and wire its callbacks to engine/navigation actions.
+2. Preserve play/pause and episode-navigation state across rotation.
 3. Add elapsed time, total/remaining time, buffered indicator, and seekbar drag only after transport buttons are stable.

@@ -23,6 +23,8 @@ class PlayerShellMetricsTest {
         assertEquals(44, PlayerShellMetrics.CONTROL_ICON_SIZE_DP)
         assertEquals(58, PlayerShellMetrics.LOADING_INDICATOR_SIZE_DP)
         assertEquals(72, PlayerShellMetrics.WATCHING_ROW_HEIGHT_DP)
+        assertEquals(58, PlayerShellMetrics.TRANSPORT_ROW_HEIGHT_DP)
+        assertEquals(70, PlayerShellMetrics.TRANSPORT_ICON_OFFSET_DP)
         assertEquals(5, PlayerShellMetrics.EPISODE_GRID_COLUMN_COUNT)
     }
 

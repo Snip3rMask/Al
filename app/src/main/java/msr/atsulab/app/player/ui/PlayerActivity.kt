@@ -132,6 +132,12 @@ class PlayerActivity : AppCompatActivity() {
             override fun onRetryClicked() {
                 loadPlayback()
             }
+
+            override fun onPlayPauseClicked() = Unit
+
+            override fun onPreviousEpisodeClicked() = Unit
+
+            override fun onNextEpisodeClicked() = Unit
         }
         val title = currentAnime?.title.orEmpty()
         val episodeLabel = getString(R.string.player_shell_status_format, title, requestedEpisode)
