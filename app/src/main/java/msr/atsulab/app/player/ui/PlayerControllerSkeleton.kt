@@ -49,7 +49,10 @@ internal class PlayerControllerSkeleton(
         private set
 
     private lateinit var seekBar: SeekBar
+    private lateinit var currentTimeView: TextView
+    private lateinit var totalTimeView: TextView
     private var userSeeking = false
+    private var lastDurationMs = 0L
 
     val topBar: LinearLayout = createTopBar()
     val statusControls: LinearLayout = createStatusControls()
@@ -80,6 +83,9 @@ internal class PlayerControllerSkeleton(
     }
 
     fun updatePlaybackProgress(positionMs: Long, bufferedPositionMs: Long, durationMs: Long) {
+        lastDurationMs = durationMs
+        currentTimeView.text = PlayerTimeFormatter.format(positionMs)
+        totalTimeView.text = PlayerTimeFormatter.format(durationMs)
         seekBar.isEnabled = durationMs > 0L
         if (userSeeking || durationMs <= 0L) return
 
@@ -176,6 +182,17 @@ internal class PlayerControllerSkeleton(
                 setPadding(dp(30, density), 0, dp(30, density), 0)
             }
 
+            currentTimeView = TextView(context).apply {
+                text = PlayerTimeFormatter.format(0L)
+                setTextColor(Color.WHITE)
+                textSize = 14f
+                typeface = Typeface.DEFAULT_BOLD
+            }
+            progressRow.addView(
+                currentTimeView,
+                LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT)
+            )
+
             seekBar = SeekBar(context).apply {
                 max = SEEK_BAR_MAX
                 progressDrawable = createBufferedSeekDrawable(density)
@@ -184,7 +201,11 @@ internal class PlayerControllerSkeleton(
                 splitTrack = false
                 isEnabled = false
                 setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-                    override fun onProgressChanged(bar: SeekBar?, progress: Int, fromUser: Boolean) = Unit
+                    override fun onProgressChanged(bar: SeekBar?, progress: Int, fromUser: Boolean) {
+                        if (!fromUser || lastDurationMs <= 0L) return
+                        val previewPositionMs = lastDurationMs * progress / SEEK_BAR_MAX
+                        currentTimeView.text = PlayerTimeFormatter.format(previewPositionMs)
+                    }
 
                     override fun onStartTrackingTouch(bar: SeekBar?) {
                         userSeeking = true
@@ -198,7 +219,20 @@ internal class PlayerControllerSkeleton(
             }
             progressRow.addView(
                 seekBar,
-                LinearLayout.LayoutParams(MATCH_PARENT, dp(PlayerShellMetrics.SEEK_CONTROL_HEIGHT_DP, density))
+                LinearLayout.LayoutParams(0, dp(PlayerShellMetrics.SEEK_CONTROL_HEIGHT_DP, density), 1f).apply {
+                    setMargins(dp(10, density), 0, dp(10, density), 0)
+                }
+            )
+
+            totalTimeView = TextView(context).apply {
+                text = PlayerTimeFormatter.format(0L)
+                setTextColor(Color.WHITE)
+                textSize = 14f
+                typeface = Typeface.DEFAULT_BOLD
+            }
+            progressRow.addView(
+                totalTimeView,
+                LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT)
             )
 
             val iconRow = FrameLayout(context)
@@ -335,5 +369,6 @@ internal class PlayerControllerSkeleton(
     private companion object {
         const val SEEK_BAR_MAX = 1000
         const val MATCH_PARENT = LinearLayout.LayoutParams.MATCH_PARENT
+        const val WRAP_CONTENT = LinearLayout.LayoutParams.WRAP_CONTENT
     }
 }

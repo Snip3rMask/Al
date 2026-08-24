@@ -431,11 +431,11 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 
 **Goal:** Port controls incrementally. Each group is an independent commit and test cycle.
 
-### 7.1 Basic Transport [~]
+### 7.1 Basic Transport [x]
 
 - [x] Play/pause and previous/next episode controls.
 - [x] Seekbar drag.
-- [ ] Elapsed time, total/remaining time, buffered indicator.
+- [x] Elapsed time, total/remaining time, buffered indicator.
 
 #### Part 7.1 Slice A — Episode Navigation State — 2026-08-24
 
@@ -468,6 +468,15 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - Suppressed automatic progress writes during drag and committed the selected position through `seekTo` only after release.
 - Kept numeric elapsed/total labels deferred to the next focused slice.
 - Fixed portrait placement by moving seekbar/transport buttons from the lower scroll panel into the video-frame bottom overlay, matching Anifux.
+
+#### Part 7.1 Slice E — Time Indicators — 2026-08-24
+
+- Added Anifux-style bold white elapsed and total-time labels on either side of the weighted seekbar.
+- Preserved exact Anifux formatting as zero-padded minutes/seconds and added focused formatter coverage.
+- Updated elapsed/duration labels every 250ms with position, buffer, and duration state.
+- During drag, the elapsed label immediately previews the selected position before playback seeks.
+- Buffered progress remains synchronized through the seekbar's secondary-progress layer.
+- Closed Part 7.1 Basic Transport.
 
 ### 7.2 Lock Controls
 
@@ -721,8 +730,10 @@ Append dated entries here. Do not delete history.
 - User confirmed Release `84` real-device validation on Symphony Z35: portrait, landscape, rotation, back/close, loading/retry, and HLS playback.
 - Closed Part 6 and set the next executable phase to **Part 7.1 Basic Transport**.
 - Completed Part 7.1 Slices A–C: navigation state, transport contract, and working play/pause plus previous/next wiring.
+- Completed Part 7.1 Slices D–E: Anifux-style seekbar drag, portrait overlay fix, elapsed/total labels, and buffered-progress synchronization.
+- Closed Part 7.1 Basic Transport at code level pending Release `94` device validation.
 
 ## Next Action
 
-1. Install Release `91` or newer and verify play/pause, previous/next, boundary-disabled states, drag-to-seek, buffering/buffered movement, rotation persistence, retry/error recovery, and HLS playback.
-2. After validation, complete Part 7.1 with elapsed, total/remaining, and buffered time indicators.
+1. Install Release `94` or newer and verify play/pause, previous/next, boundary-disabled states, drag-to-seek, elapsed/total labels, buffered movement, rotation persistence, retry/error recovery, and HLS playback.
+2. After validation, begin Part 7.2 Lock Controls.
