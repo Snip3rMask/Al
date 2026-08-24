@@ -136,7 +136,11 @@ class PlayerActivity : AppCompatActivity() {
                 when (state.readyState) {
                     PlaybackReadyState.BUFFERING -> {
                         transportVisible = true
-                        showControls()
+                        if (controlsVisible) {
+                            scheduleControlsAutoHide()
+                        } else {
+                            updateTransportControls()
+                        }
                         showMessage(R.string.player_buffering, loading = true)
                     }
                     PlaybackReadyState.READY -> {

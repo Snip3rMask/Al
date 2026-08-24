@@ -497,6 +497,7 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - Separated playback availability from user-facing controls visibility so ready/buffering state no longer forces permanent controls.
 - Restored Anifux behavior: video tap toggles controls, shown controls auto-hide after four seconds, and interactions can restart that window.
 - Locked-state screen taps now reveal the temporary unlock button again after it auto-hides.
+- Buffering no longer force-shows controls; controls remain hidden until playback becomes ready, matching Anifux.
 - Controls are hidden during IDLE/unavailable/source-loading transitions, while retry/status remains available when required.
 - Preserved manual visibility, lock state, and auto-hide scheduling across orientation changes and lifecycle stops.
 
