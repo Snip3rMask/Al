@@ -715,5 +715,5 @@ Append dated entries here. Do not delete history.
 
 ## Next Action
 
-1. Install Release `89` or newer and verify play/pause, previous/next, disabled boundary states, rotation persistence, retry/error recovery, and HLS playback.
+1. Install Release `90` or newer and verify play/pause, previous/next, disabled boundary states, rotation persistence, retry/error recovery, and HLS playback.
 2. After validation, start Part 7.1 Slice D with seekbar drag before adding elapsed/total/buffered time labels.

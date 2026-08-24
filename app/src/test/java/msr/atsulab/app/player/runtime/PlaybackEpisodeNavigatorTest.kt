@@ -51,20 +51,21 @@ class PlaybackEpisodeNavigatorTest {
     @Test
     fun `availability reports adjacent movement without wrapping`() {
         val navigator = PlaybackEpisodeNavigator()
-        val first = PlaybackEpisode(name = "First", url = "first")
-        val second = PlaybackEpisode(name = "Second", url = "second")
-        val third = PlaybackEpisode(name = "Third", url = "third")
+        val first = PlaybackEpisode(name = "First", url = "first", number = 1f)
+        val second = PlaybackEpisode(name = "Second", url = "second", number = 2f)
+        val third = PlaybackEpisode(name = "Third", url = "third", number = 3f)
 
         assertEquals(false, navigator.canMove(-1))
         assertEquals(false, navigator.canMove(1))
 
-        navigator.reset(listOf(first, second, third), requestedNumber = 2)
+        navigator.reset(listOf(first, second, third), requestedNumber = 1)
 
         assertEquals(false, navigator.canMove(-1))
         assertEquals(true, navigator.canMove(1))
         navigator.move(1)
 
         assertEquals(true, navigator.canMove(-1))
+        assertEquals(true, navigator.canMove(1))
         assertEquals(false, navigator.canMove(0))
         navigator.move(1)
 
