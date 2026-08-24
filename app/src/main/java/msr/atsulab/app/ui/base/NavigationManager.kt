@@ -9,6 +9,7 @@ import msr.atsulab.app.data.response.anilist.Media
 import msr.atsulab.app.data.response.anilist.Review
 import msr.atsulab.app.helper.enums.*
 import msr.atsulab.app.helper.utils.DeepLink
+import msr.atsulab.app.player.domain.model.PlaybackAnime
 import msr.atsulab.app.type.ScoreFormat
 
 
@@ -57,6 +58,8 @@ interface NavigationManager {
     fun navigateToCustomise(mediaType: MediaType, action: (customiseResult: ListStyle) -> Unit) {}
 
     fun navigateToEditor(mediaId: Int, fromMediaList: Boolean, action: (() -> Unit)? = null) {}
+
+    fun navigateToPlayer(anime: PlaybackAnime, initialEpisode: Int = 1) {}
 
     fun navigateToMedia(id: Int) {}
     fun navigateToMediaStats(media: Media) {}

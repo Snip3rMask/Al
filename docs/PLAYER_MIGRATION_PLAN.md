@@ -310,7 +310,7 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 
 **Goal:** Connect Media Details to real playback.
 
-- [ ] Extend navigation contract with player navigation.
+- [x] Extend navigation contract with player navigation.
 - [ ] Implement navigation in `DefaultNavigationManager`.
 - [ ] Map AniList `Media` to `PlaybackAnime`.
 - [ ] Pass media ID, title, type, cover image, and initial episode.
@@ -319,6 +319,12 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - [ ] Handle guest mode and unavailable episodes gracefully.
 
 **Exit gate:** Details page opens the player, episodes load, a working source plays, and back navigation returns correctly.
+
+### Part 4 Progress — 2026-08-24
+
+- Added `navigateToPlayer(anime: PlaybackAnime, initialEpisode: Int = 1)` as the player navigation seam.
+- Kept the contract independent from AniList response types so a dedicated mapper can translate `Media` into `PlaybackAnime` next.
+- Deferred `DefaultNavigationManager`, Play-button wiring, and runtime handling to their own focused slices.
 
 ## Part 5 — Continue Watching
 
@@ -597,9 +603,10 @@ Append dated entries here. Do not delete history.
 - Removed the temporary HLS Test launcher, debug provider/application override, and player-specific crash recorder after successful Media3/HLS verification.
 - Published Release `65` from green CI at commit `0104ef44`.
 - Set next executable phase: **Part 4 — AtsuLab Entry Point**.
+- Started Part 4 by adding the playback navigation contract without touching the current Play placeholder.
 
 ## Next Action
 
-1. Extend the navigation contract with player navigation and implement it in `DefaultNavigationManager`.
-2. Add an AniList `Media` → `PlaybackAnime` mapper with media ID, title, type, cover image, and initial episode.
+1. Implement `navigateToPlayer` in `DefaultNavigationManager`.
+2. Add an AniList `Media` → `PlaybackAnime` mapper with media ID, title, cover image, and initial episode.
 3. Replace the Media Details Play placeholder with real player navigation while preserving guest-mode and unavailable-episode handling.
