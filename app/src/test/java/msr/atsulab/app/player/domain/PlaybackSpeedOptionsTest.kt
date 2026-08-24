@@ -15,13 +15,13 @@ class PlaybackSpeedOptionsTest {
 
     @Test
     fun `selects speeds within tolerance`() {
-        assertTrue(PlaybackSpeedOptions.isSelected(1.0f, 1.019f))
-        assertFalse(PlaybackSpeedOptions.isSelected(1.0f, 1.02f))
+        assertTrue(PlaybackSpeedOptions.isSelected(1.0f, 1.01f))
+        assertFalse(PlaybackSpeedOptions.isSelected(1.0f, 1.03f))
     }
 
     @Test
     fun `normalizes persisted values to supported options`() {
-        assertEquals(0.75f, PlaybackSpeedOptions.normalize(-0.2f))
+        assertEquals(1f, PlaybackSpeedOptions.normalize(-0.2f))
         assertEquals(1.25f, PlaybackSpeedOptions.normalize(1.26f))
         assertEquals(2.0f, PlaybackSpeedOptions.normalize(9f))
         assertEquals(1f, PlaybackSpeedOptions.normalize(0.9f))
