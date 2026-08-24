@@ -528,7 +528,7 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - Restored Anifux HUD timing: visible during adjustment, then a 420ms delay followed by a 160ms fade.
 - Kept locked touches isolated from brightness/volume adjustment, single taps, double-tap seeks, and control visibility changes.
 - Rebuilt and attached a fresh HUD during orientation changes while retaining the same shell lifecycle cleanup.
-- Closed Part 7.3 Gestures pending Release `100` real-device validation.
+- Closed Part 7.3 Gestures pending real-device validation of the latest green gesture release.
 
 ### 7.4 Speed Control
 
@@ -778,5 +778,5 @@ Append dated entries here. Do not delete history.
 
 ## Next Action
 
-1. Install Release `100` or newer and verify double-tap left/right seek, landscape left/right vertical brightness/volume, HUD feedback and fade timing, lock-state blocking, single-tap controls, four-second auto-hide, rotation persistence, and HLS playback.
-2. After validation, begin Part 7.3 Gestures.
+1. Install the latest GitHub Release and verify double-tap left/right seek, landscape left/right vertical brightness/volume, HUD feedback and fade timing, lock-state blocking, single-tap controls, four-second auto-hide, rotation persistence, and HLS playback.
+2. After validation, begin Part 7.4 Speed Control.
