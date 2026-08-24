@@ -379,7 +379,7 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 
 **Deferred — 2026-08-24:** Continue Watching is postponed until the full player shell and basic transport controls exist. Saving/resuming progress before those surfaces stabilize would risk repeated runtime and UI refactors.
 
-## Part 6 — Player Shell UI [~]
+## Part 6 — Player Shell UI [x]
 
 **Goal:** Introduce the Anifux-style player shell without advanced controls.
 
@@ -425,7 +425,7 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - Rotation now rebuilds the shell and reattaches the existing playback engine to the new Media3 `PlayerView`.
 - Fixed the remaining builder scope/reference issues and normalized formatted player status arguments.
 - Confirmed green CI and published the shell-skeleton debug build as Release `83`.
-- Device validation is still required before Part 6 can be closed.
+- User confirmed Release `84` device validation for portrait, landscape, rotation, back/close, loading/retry, and HLS playback; Part 6 is closed.
 
 ## Part 7 — Advanced Controls
 
@@ -685,9 +685,10 @@ Append dated entries here. Do not delete history.
 - Deferred Continue Watching and started Part 6 with frozen player shell metrics and unit tests.
 - Completed Part 6 slices 1–3 at code level: frozen metrics, Media3 seam, portrait/landscape shells, controller/status/loading seams, rotation reattachment, and system-bar behavior.
 - Fixed the shell-builder scope issue and mixed positional/named arguments, then confirmed green CI and Release `83`.
-- Kept Part 6 marked in progress pending real-device validation of portrait, landscape, rotation, back/close, loading, retry, and HLS playback.
+- User confirmed Release `84` real-device validation on Symphony Z35: portrait, landscape, rotation, back/close, loading/retry, and HLS playback.
+- Closed Part 6 and set the next executable phase to **Part 7.1 Basic Transport**.
 
 ## Next Action
 
-1. Install Release `83` or newer and verify portrait, landscape, rotation, back/close, loading, retry, and normal HLS playback.
-2. After successful device validation, close Part 6 and begin Part 7.1 Basic Transport.
+1. Begin Part 7.1 with play/pause and previous/next controls before adding seekbar behavior.
+2. Add elapsed time, total/remaining time, buffered indicator, and seekbar drag as separate focused commits/tests.
