@@ -21,7 +21,7 @@ import msr.atsulab.app.player.engine.PlaybackEngineListener
 import msr.atsulab.app.player.engine.PlaybackReadyState
 import msr.atsulab.app.player.engine.PlaybackError
 import msr.atsulab.app.player.engine.PlaybackState
-import msr.atsulab.app.player.runtime.selectPlaybackEpisode
+import msr.atsulab.app.player.runtime.PlaybackEpisodeNavigator
 import org.koin.java.KoinJavaComponent.inject
 
 class PlayerActivity : AppCompatActivity() {
@@ -33,6 +33,8 @@ class PlayerActivity : AppCompatActivity() {
     private lateinit var shell: PlayerShellViews
     private lateinit var playerView: PlayerView
     private lateinit var loadingIndicator: ProgressBar
+
+    private val episodeNavigator = PlaybackEpisodeNavigator()
 
     private var currentAnime: PlaybackAnime? = null
     private var requestedEpisode = DEFAULT_INITIAL_EPISODE
@@ -171,7 +173,7 @@ class PlayerActivity : AppCompatActivity() {
 
         playbackDisposable = episodeRepository.getEpisodes(anime)
             .flatMap { episodes ->
-                val selectedEpisode = episodes.selectPlaybackEpisode(requestedEpisode)
+                val selectedEpisode = episodeNavigator.reset(episodes, requestedEpisode)
                     ?: throw PlaybackUnavailableException()
                 videoSourceRepository.getSources(anime, selectedEpisode)
                     .map { sources -> selectedEpisode to sources }
@@ -195,6 +197,22 @@ class PlayerActivity : AppCompatActivity() {
         showMessage(R.string.player_starting_playback, arguments = listOf(episode.name), loading = true)
         playbackEngine.prepare(source)
         playbackEngine.play()
+    }
+
+    private fun loadAdjacentEpisode(offset: Int) {
+        val anime = currentAnime ?: return
+        val episode = episodeNavigator.move(offset) ?: return
+
+        requestedEpisode = episodeNavigator.selectedIndex + 1
+        showMessage(R.string.player_loading_episode, arguments = listOf(anime.title, requestedEpisode), loading = true)
+        playbackDisposable?.dispose()
+        playbackDisposable = videoSourceRepository.getSources(anime, episode)
+            .map { sources -> episode to sources }
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(
+                { (selectedEpisode, sources) -> startPlayback(selectedEpisode, sources) },
+                { showError() }
+            )
     }
 
     private fun showMessage(

@@ -427,14 +427,21 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - Confirmed green CI and published the shell-skeleton debug build as Release `83`.
 - User confirmed Release `84` device validation for portrait, landscape, rotation, back/close, loading/retry, and HLS playback; Part 6 is closed.
 
-## Part 7 — Advanced Controls
+## Part 7 — Advanced Controls [~]
 
 **Goal:** Port controls incrementally. Each group is an independent commit and test cycle.
 
-### 7.1 Basic Transport
+### 7.1 Basic Transport [~]
 
 - [ ] Play/pause, previous/next, seekbar drag.
 - [ ] Elapsed time, total/remaining time, buffered indicator.
+
+#### Part 7.1 Slice A — Episode Navigation State — 2026-08-24
+
+- Added a tested `PlaybackEpisodeNavigator` that preserves the resolved episode list and current selection index.
+- Selection keeps the existing exact-number-first behavior, then positional fallback.
+- Previous/next targets use list adjacency and do not wrap across boundaries.
+- `PlayerActivity` now retains navigation state and can resolve adjacent episode sources before transport buttons are exposed.
 
 ### 7.2 Lock Controls
 
@@ -690,5 +697,6 @@ Append dated entries here. Do not delete history.
 
 ## Next Action
 
-1. Begin Part 7.1 with play/pause and previous/next controls before adding seekbar behavior.
-2. Add elapsed time, total/remaining time, buffered indicator, and seekbar drag as separate focused commits/tests.
+1. Complete Part 7.1 Slice B: add the transport callback/controller contract for play/pause and previous/next.
+2. Wire those controls to engine actions and playback state in a later focused slice.
+3. Add elapsed time, total/remaining time, buffered indicator, and seekbar drag only after transport buttons are stable.
