@@ -166,7 +166,7 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     private fun loadPlayback(anime: PlaybackAnime) {
-        showMessage(R.string.player_loading_episode, loading = true, anime.title, requestedEpisode)
+        showMessage(R.string.player_loading_episode, arguments = listOf(anime.title, requestedEpisode), loading = true)
         playbackDisposable?.dispose()
 
         playbackDisposable = episodeRepository.getEpisodes(anime)
@@ -192,13 +192,18 @@ class PlayerActivity : AppCompatActivity() {
             return
         }
 
-        showMessage(R.string.player_starting_playback, loading = true, episode.name)
+        showMessage(R.string.player_starting_playback, arguments = listOf(episode.name), loading = true)
         playbackEngine.prepare(source)
         playbackEngine.play()
     }
 
-    private fun showMessage(messageResId: Int, retryVisible: Boolean = false, loading: Boolean = false, vararg args: Any?) {
-        updateStatus(getString(messageResId, *args), retryVisible, loading)
+    private fun showMessage(
+        messageResId: Int,
+        arguments: List<Any?> = emptyList(),
+        retryVisible: Boolean = false,
+        loading: Boolean = false
+    ) {
+        updateStatus(getString(messageResId, *arguments.toTypedArray()), retryVisible, loading)
     }
 
     private fun showUnavailable() {

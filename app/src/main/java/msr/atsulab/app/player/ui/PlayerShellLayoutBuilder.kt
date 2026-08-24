@@ -66,7 +66,7 @@ internal class PlayerShellLayoutBuilder(
         )
 
         val topHeight = dp(
-            if (orientation == PlayerShellOrientation.LANDSCAPE) {
+            if (controller.orientation == PlayerShellOrientation.LANDSCAPE) {
                 PlayerShellMetrics.LANDSCAPE_TOP_HEIGHT_DP
             } else {
                 PlayerShellMetrics.PORTRAIT_TOP_HEIGHT_DP
@@ -132,6 +132,10 @@ internal class PlayerShellLayoutBuilder(
         val root = FrameLayout(context).apply { setBackgroundColor(PlayerShellMetrics.PRIMARY_DARK_COLOR) }
         root.addView(videoFrame, FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT))
         return PlayerShellViews(root, playerView, controller, loadingIndicator)
+    }
+
+    private fun dp(value: Int, density: Float): Int {
+        return (value * density).toInt()
     }
 
     private companion object {
