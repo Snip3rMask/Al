@@ -23,7 +23,7 @@ class FakeEngineMediaPlayer : EngineMediaPlayer {
     var speeds = mutableListOf<Float>()
         private set
 
-    var surfaces = mutableListOf<Any?>()
+    var videoViews = mutableListOf<Any?>()
         private set
 
     var released = false
@@ -51,8 +51,8 @@ class FakeEngineMediaPlayer : EngineMediaPlayer {
         speeds += speed
     }
 
-    override fun setSurfaceView(surfaceView: Any?) {
-        surfaces += surfaceView
+    override fun setVideoView(videoView: Any?) {
+        videoViews += videoView
     }
 
     override fun release() {

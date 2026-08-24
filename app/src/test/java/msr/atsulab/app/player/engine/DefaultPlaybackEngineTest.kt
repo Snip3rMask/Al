@@ -88,16 +88,16 @@ class DefaultPlaybackEngineTest {
     }
 
     @Test
-    fun `surface attachment is delegated before release`() {
+    fun `video view attachment is delegated before release`() {
         val mediaPlayer = FakeEngineMediaPlayer()
         val engine = DefaultPlaybackEngine(mediaPlayer)
-        val surface = Any()
+        val videoView = Any()
 
-        engine.setSurfaceView(surface)
+        engine.setVideoView(videoView)
         engine.release()
-        engine.setSurfaceView(surface)
+        engine.setVideoView(videoView)
 
-        assertEquals(listOf<Any?>(surface), mediaPlayer.surfaces)
-        assertFalse(mediaPlayer.surfaces.size == 2)
+        assertEquals(listOf<Any?>(videoView), mediaPlayer.videoViews)
+        assertFalse(mediaPlayer.videoViews.size == 2)
     }
 }

@@ -53,7 +53,7 @@ interface PlaybackEngine {
 
     fun setSpeed(speed: Float)
 
-    fun setSurfaceView(surfaceView: Any?)
+    fun setVideoView(videoView: Any?)
 
     fun onBackground()
 
@@ -77,7 +77,7 @@ internal interface EngineMediaPlayer {
 
     fun setSpeed(speed: Float)
 
-    fun setSurfaceView(surfaceView: Any?)
+    fun setVideoView(videoView: Any?)
 
     fun release()
 }

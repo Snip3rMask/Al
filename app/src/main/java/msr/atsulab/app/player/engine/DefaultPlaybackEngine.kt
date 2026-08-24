@@ -62,8 +62,8 @@ internal class DefaultPlaybackEngine(
         emitState()
     }
 
-    override fun setSurfaceView(surfaceView: Any?) {
-        if (!released) mediaPlayer.setSurfaceView(surfaceView)
+    override fun setVideoView(videoView: Any?) {
+        if (!released) mediaPlayer.setVideoView(videoView)
     }
 
     override fun onBackground() {

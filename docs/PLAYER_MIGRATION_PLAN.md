@@ -408,6 +408,13 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - Added a pure portrait-height calculation that preserves the original 30% screen ratio and `460px` minimum.
 - Added focused unit coverage for exact shell values, ratio rounding, minimum enforcement, and invalid input.
 
+### Part 6 Slice 2 — PlayerView Seam — 2026-08-24
+
+- Replaced the raw surface-only playback seam with an opaque `setVideoView` contract.
+- Attached and detached Media3 `PlayerView` inside the Media3 engine implementation without exposing ExoPlayer.
+- Migrated the temporary player shell to a Media3 `PlayerView` with controls disabled, keep-screen-on enabled, and FIT resize mode.
+- Updated engine delegation tests for the new video-view lifecycle.
+
 ## Part 7 — Advanced Controls
 
 **Goal:** Port controls incrementally. Each group is an independent commit and test cycle.
@@ -667,5 +674,4 @@ Append dated entries here. Do not delete history.
 
 ## Next Action
 
-1. Adapt the playback engine seam so Media3 `PlayerView` can be attached without exposing ExoPlayer.
-2. Port the video shell, portrait/landscape layout builders, and controller skeleton with back/loading/error behavior.
+1. Port the video shell, portrait/landscape layout builders, and controller skeleton with back/loading/error behavior.

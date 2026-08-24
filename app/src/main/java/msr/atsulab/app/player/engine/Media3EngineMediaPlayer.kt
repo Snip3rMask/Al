@@ -2,7 +2,6 @@ package msr.atsulab.app.player.engine
 
 import android.content.Context
 import android.net.Uri
-import android.view.SurfaceView
 import androidx.media3.common.C
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.MediaItem
@@ -15,12 +14,15 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.hls.HlsMediaSource
 import androidx.media3.exoplayer.source.MergingMediaSource
 import androidx.media3.exoplayer.source.SingleSampleMediaSource
+import androidx.media3.ui.PlayerView
 import msr.atsulab.app.player.domain.model.VideoSource
 
 internal class Media3EngineMediaPlayer(
     private val context: Context,
     private val errorMapper: PlaybackErrorMapper = PlaybackErrorMapper()
 ) : EngineMediaPlayer {
+
+    private var playerView: PlayerView? = null
 
     override var listener: PlaybackEngineListener? = null
 
@@ -112,12 +114,17 @@ internal class Media3EngineMediaPlayer(
         player.playbackParameters = PlaybackParameters(speed)
     }
 
-    override fun setSurfaceView(surfaceView: Any?) {
-        player.setVideoSurfaceView(surfaceView as SurfaceView?)
+    override fun setVideoView(videoView: Any?) {
+        require(videoView is PlayerView) { "A Media3 PlayerView is required" }
+        playerView?.player = null
+        playerView = videoView
+        videoView.player = player
     }
 
     override fun release() {
         listener = null
+        playerView?.player = null
+        playerView = null
         player.release()
     }
 

@@ -3,13 +3,14 @@ package msr.atsulab.app.player.ui
 import android.graphics.Color
 import android.os.Bundle
 import android.view.Gravity
-import android.view.SurfaceView
 import android.view.View
 import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.media3.ui.AspectRatioFrameLayout
+import androidx.media3.ui.PlayerView
 import com.google.android.material.button.MaterialButton
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.disposables.Disposable
@@ -35,7 +36,7 @@ class PlayerActivity : AppCompatActivity() {
 
     private lateinit var statusView: TextView
     private lateinit var retryButton: Button
-    private lateinit var surfaceView: SurfaceView
+    private lateinit var playerView: PlayerView
 
     private var currentAnime: PlaybackAnime? = null
     private var requestedEpisode = DEFAULT_INITIAL_EPISODE
@@ -91,7 +92,7 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     private fun attachEngine(engine: PlaybackEngine) {
-        engine.setSurfaceView(surfaceView)
+        engine.setVideoView(playerView)
         engine.listener = object : PlaybackEngineListener {
             override fun onStateChanged(state: PlaybackState) {
                 when (state.readyState) {
@@ -109,10 +110,14 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     private fun setupContent() {
-        surfaceView = SurfaceView(this)
+        playerView = PlayerView(this).apply {
+            useController = false
+            keepScreenOn = true
+            resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
+        }
         val surfaceHost = FrameLayout(this).apply { setBackgroundColor(Color.BLACK) }
         surfaceHost.addView(
-            surfaceView,
+            playerView,
             FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.MATCH_PARENT,
                 FrameLayout.LayoutParams.MATCH_PARENT
