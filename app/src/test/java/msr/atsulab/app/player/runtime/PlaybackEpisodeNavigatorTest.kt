@@ -38,7 +38,7 @@ class PlaybackEpisodeNavigatorTest {
         val third = PlaybackEpisode(name = "Third", url = "third")
         navigator.reset(listOf(first, second, third), requestedNumber = 2)
 
-        assertEquals(second, navigator.move(-1))
+        assertEquals(first, navigator.move(-1))
         assertEquals(0, navigator.selectedIndex)
         assertNull(navigator.move(-1))
 
