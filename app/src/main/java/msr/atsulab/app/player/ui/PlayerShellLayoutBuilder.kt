@@ -89,6 +89,21 @@ internal class PlayerShellLayoutBuilder(
                 Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL
             )
         )
+        videoFrame.addView(
+            controller.unlockButton,
+            FrameLayout.LayoutParams(
+                dp(PlayerShellMetrics.CONTROL_ICON_SIZE_DP, density),
+                dp(PlayerShellMetrics.CONTROL_ICON_SIZE_DP, density),
+                Gravity.TOP or Gravity.START
+            ).apply {
+                setMargins(
+                    dp(PlayerShellMetrics.UNLOCK_BUTTON_LEFT_MARGIN_DP, density),
+                    dp(PlayerShellMetrics.UNLOCK_BUTTON_PORTRAIT_TOP_MARGIN_DP, density),
+                    0,
+                    0
+                )
+            }
+        )
 
         val watchingView = TextView(context).apply {
             text = episodeLabel
@@ -143,6 +158,21 @@ internal class PlayerShellLayoutBuilder(
                 dp(PlayerShellMetrics.BOTTOM_CONTROLS_HEIGHT_DP, density),
                 Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL
             )
+        )
+        videoFrame.addView(
+            controller.unlockButton,
+            FrameLayout.LayoutParams(
+                dp(PlayerShellMetrics.CONTROL_ICON_SIZE_DP, density),
+                dp(PlayerShellMetrics.CONTROL_ICON_SIZE_DP, density),
+                Gravity.TOP or Gravity.START
+            ).apply {
+                setMargins(
+                    dp(PlayerShellMetrics.UNLOCK_BUTTON_LEFT_MARGIN_DP, density),
+                    dp(PlayerShellMetrics.UNLOCK_BUTTON_LANDSCAPE_TOP_MARGIN_DP, density),
+                    0,
+                    0
+                )
+            }
         )
 
         val root = FrameLayout(context).apply { setBackgroundColor(PlayerShellMetrics.PRIMARY_DARK_COLOR) }

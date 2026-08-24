@@ -25,6 +25,10 @@ class PlayerShellMetricsTest {
         assertEquals(72, PlayerShellMetrics.WATCHING_ROW_HEIGHT_DP)
         assertEquals(58, PlayerShellMetrics.TRANSPORT_ROW_HEIGHT_DP)
         assertEquals(70, PlayerShellMetrics.TRANSPORT_ICON_OFFSET_DP)
+        assertEquals(24, PlayerShellMetrics.LOCK_BUTTON_LEFT_MARGIN_DP)
+        assertEquals(48, PlayerShellMetrics.UNLOCK_BUTTON_LEFT_MARGIN_DP)
+        assertEquals(138, PlayerShellMetrics.UNLOCK_BUTTON_PORTRAIT_TOP_MARGIN_DP)
+        assertEquals(92, PlayerShellMetrics.UNLOCK_BUTTON_LANDSCAPE_TOP_MARGIN_DP)
         assertEquals(5, PlayerShellMetrics.EPISODE_GRID_COLUMN_COUNT)
     }
 

@@ -22,6 +22,10 @@ object PlayerShellMetrics {
     const val BACK_BUTTON_SIZE_DP = 42
     const val TRANSPORT_ROW_HEIGHT_DP = 58
     const val TRANSPORT_ICON_OFFSET_DP = 70
+    const val LOCK_BUTTON_LEFT_MARGIN_DP = 24
+    const val UNLOCK_BUTTON_LEFT_MARGIN_DP = 48
+    const val UNLOCK_BUTTON_PORTRAIT_TOP_MARGIN_DP = 138
+    const val UNLOCK_BUTTON_LANDSCAPE_TOP_MARGIN_DP = 92
     const val LOADING_INDICATOR_SIZE_DP = 58
     const val WATCHING_ROW_HEIGHT_DP = 72
     const val EPISODE_GRID_COLUMN_COUNT = 5

@@ -478,10 +478,21 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - Buffered progress remains synchronized through the seekbar's secondary-progress layer.
 - Closed Part 7.1 Basic Transport.
 
-### 7.2 Lock Controls
+### 7.2 Lock Controls [~]
 
-- [ ] Lock button and unlock overlay.
-- [ ] Block gestures while locked.
+- [x] Lock button and unlock overlay.
+- [x] Block gestures while locked.
+
+#### Part 7.2 Slice A — Playback Lock — 2026-08-24
+
+- Added the Anifux-style left-side lock action and temporary top-left unlock overlay.
+- Ported original lock/unlock artwork, 44dp targets, portrait/landscape unlock offsets, and two-second auto-hide timing.
+- Locking hides top controls, transport row, seekbar/time labels, and retry/status surface while keeping essential loading feedback.
+- Unlocking restores the previously visible transport/status state.
+- Locked state blocks play/pause, previous/next, seekbar commits, and future gesture actions at the central control boundary.
+- Preserved lock state across rotation and cleaned up unlock timers on destruction.
+
+### 7.3 Gestures
 
 ### 7.3 Gestures
 
@@ -732,8 +743,9 @@ Append dated entries here. Do not delete history.
 - Completed Part 7.1 Slices A–C: navigation state, transport contract, and working play/pause plus previous/next wiring.
 - Completed Part 7.1 Slices D–E: Anifux-style seekbar drag, portrait overlay fix, elapsed/total labels, and buffered-progress synchronization.
 - Closed Part 7.1 Basic Transport at code level pending Release `94` device validation.
+- Implemented Part 7.2 playback locking, temporary unlock overlay, control blocking, and rotation persistence.
 
 ## Next Action
 
-1. Install Release `94` or newer and verify play/pause, previous/next, boundary-disabled states, drag-to-seek, elapsed/total labels, buffered movement, rotation persistence, retry/error recovery, and HLS playback.
-2. After validation, begin Part 7.2 Lock Controls.
+1. Install Release `95` or newer and verify all Part 7.1 transport behavior plus lock/unlock, temporary unlock overlay, locked-action blocking, retry/error recovery, rotation persistence, and HLS playback.
+2. After validation, begin Part 7.3 Gestures.

@@ -584,5 +584,7 @@
     <string name="player_previous_episode">Previous episode</string>
     <string name="player_play_pause">Play or pause</string>
     <string name="player_next_episode">Next episode</string>
+    <string name="player_lock_controls">Lock player controls</string>
+    <string name="player_unlock_controls">Unlock player controls</string>
     <string name="retry">Retry</string>
 </resources>

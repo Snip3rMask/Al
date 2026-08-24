@@ -6,6 +6,8 @@ import android.graphics.Typeface
 import android.graphics.drawable.ClipDrawable
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.LayerDrawable
+import android.os.Handler
+import android.os.Looper
 import android.view.Gravity
 import android.view.View
 import android.widget.ImageView
@@ -28,6 +30,8 @@ internal class PlayerControllerSkeleton(
         fun onPreviousEpisodeClicked()
         fun onNextEpisodeClicked()
         fun onSeekFinished(fraction: Float)
+        fun onLockClicked()
+        fun onUnlockClicked()
     }
 
     lateinit var titleView: TextView
@@ -48,6 +52,22 @@ internal class PlayerControllerSkeleton(
     lateinit var nextEpisodeButton: ImageView
         private set
 
+    lateinit var lockButton: ImageView
+        private set
+
+    lateinit var unlockButton: ImageView
+        private set
+
+    var isControlsLocked: Boolean = false
+        private set
+
+    private var statusRetryVisible = false
+    private var transportVisible = false
+    private val unlockHandler = Handler(Looper.getMainLooper())
+    private val hideUnlockRunnable = Runnable {
+        unlockButton.visibility = View.GONE
+    }
+
     private lateinit var seekBar: SeekBar
     private lateinit var currentTimeView: TextView
     private lateinit var totalTimeView: TextView
@@ -57,11 +77,53 @@ internal class PlayerControllerSkeleton(
     val topBar: LinearLayout = createTopBar()
     val statusControls: LinearLayout = createStatusControls()
     val transportControls: LinearLayout = createTransportControls()
+    val unlockButton: ImageView = createUnlockButton()
 
     fun setStatus(message: String, showRetry: Boolean) {
+        statusRetryVisible = showRetry
         statusView.text = message
-        statusControls.visibility = if (showRetry) View.VISIBLE else View.GONE
         retryButton.visibility = if (showRetry) View.VISIBLE else View.GONE
+        statusControls.visibility = if (showRetry && !isControlsLocked) View.VISIBLE else View.GONE
+    }
+
+    fun setLocked(locked: Boolean) {
+        if (isControlsLocked == locked) return
+        isControlsLocked = locked
+
+        if (locked) {
+            topBar.visibility = View.GONE
+            statusControls.visibility = View.GONE
+            transportControls.visibility = View.GONE
+            showUnlockOverlayTemporarily()
+            return
+        }
+
+        unlockHandler.removeCallbacks(hideUnlockRunnable)
+        unlockButton.animate().cancel()
+        unlockButton.visibility = View.GONE
+        unlockButton.alpha = 1f
+        unlockButton.scaleX = 1f
+        unlockButton.scaleY = 1f
+
+        topBar.visibility = View.VISIBLE
+        statusControls.visibility = if (statusRetryVisible) View.VISIBLE else View.GONE
+        transportControls.visibility = if (transportVisible) View.VISIBLE else View.GONE
+    }
+
+    fun release() {
+        unlockHandler.removeCallbacks(hideUnlockRunnable)
+        unlockButton.animate().cancel()
+    }
+
+    fun showUnlockOverlayTemporarily() {
+        if (!isControlsLocked) return
+        unlockHandler.removeCallbacks(hideUnlockRunnable)
+        unlockButton.animate().cancel()
+        unlockButton.alpha = 1f
+        unlockButton.scaleX = 1f
+        unlockButton.scaleY = 1f
+        unlockButton.visibility = View.VISIBLE
+        unlockHandler.postDelayed(hideUnlockRunnable, UNLOCK_AUTO_HIDE_DELAY_MS)
     }
 
     fun setTransportState(
@@ -70,7 +132,9 @@ internal class PlayerControllerSkeleton(
         canShowPrevious: Boolean,
         canShowNext: Boolean
     ) {
-        transportControls.visibility = if (isVisible) View.VISIBLE else View.GONE
+        transportVisible = isVisible
+        val effectiveVisible = isVisible && !isControlsLocked
+        transportControls.visibility = if (effectiveVisible) View.VISIBLE else View.GONE
         playPauseButton.setImageResource(
             if (isPlaying) R.drawable.ic_player_pause_modern else R.drawable.ic_player_play_modern
         )
@@ -254,6 +318,22 @@ internal class PlayerControllerSkeleton(
             ) {
                 callbacks.onNextEpisodeClicked()
             }
+            lockButton = createTransportIcon(
+                R.drawable.ic_unlock,
+                R.string.player_lock_controls
+            ) {
+                callbacks.onLockClicked()
+            }
+            iconRow.addView(
+                lockButton,
+                FrameLayout.LayoutParams(
+                    dp(PlayerShellMetrics.CONTROL_ICON_SIZE_DP, density),
+                    dp(PlayerShellMetrics.CONTROL_ICON_SIZE_DP, density),
+                    Gravity.LEFT or Gravity.CENTER_VERTICAL
+                ).apply {
+                    setMargins(dp(PlayerShellMetrics.LOCK_BUTTON_LEFT_MARGIN_DP, density), 0, 0, 0)
+                }
+            )
             iconRow.addView(
                 previousEpisodeButton,
                 FrameLayout.LayoutParams(
@@ -348,6 +428,22 @@ internal class PlayerControllerSkeleton(
         }
     }
 
+    private fun createUnlockButton(): ImageView {
+        val density = context.resources.displayMetrics.density
+
+        return ImageView(context).apply {
+            setImageResource(R.drawable.ic_unlock)
+            contentDescription = context.getString(R.string.player_unlock_controls)
+            scaleType = ImageView.ScaleType.FIT_CENTER
+            setPadding(dp(8, density), dp(8, density), dp(8, density), dp(8, density))
+            setBackgroundResource(R.drawable.ripple_circle)
+            visibility = View.GONE
+            setOnClickListener {
+                callbacks.onUnlockClicked()
+            }
+        }
+    }
+
     private fun createTopGradient(): GradientDrawable {
         return GradientDrawable(
             GradientDrawable.Orientation.TOP_BOTTOM,
@@ -370,5 +466,6 @@ internal class PlayerControllerSkeleton(
         const val SEEK_BAR_MAX = 1000
         const val MATCH_PARENT = LinearLayout.LayoutParams.MATCH_PARENT
         const val WRAP_CONTENT = LinearLayout.LayoutParams.WRAP_CONTENT
+        const val UNLOCK_AUTO_HIDE_DELAY_MS = 2_000L
     }
 }

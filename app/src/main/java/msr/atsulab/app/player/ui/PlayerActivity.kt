@@ -47,6 +47,7 @@ class PlayerActivity : AppCompatActivity() {
     private var waitingForPlayback = true
     private var latestPlaybackState = PlaybackState()
     private var transportVisible = false
+    private var controlsLocked = false
     private val progressHandler = Handler(Looper.getMainLooper())
     private val progressRunnable = object : Runnable {
         override fun run() {
@@ -107,6 +108,7 @@ class PlayerActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         progressHandler.removeCallbacks(progressRunnable)
+        if (::shell.isInitialized) shell.controller.release()
         playbackDisposable?.dispose()
         if (engineAttached) {
             playbackEngine.release()
@@ -175,6 +177,14 @@ class PlayerActivity : AppCompatActivity() {
             override fun onSeekFinished(fraction: Float) {
                 seekToFraction(fraction)
             }
+
+            override fun onLockClicked() {
+                setControlsLocked(true)
+            }
+
+            override fun onUnlockClicked() {
+                setControlsLocked(false)
+            }
         }
         val title = currentAnime?.title.orEmpty()
         val episodeLabel = getString(R.string.player_shell_status_format, title, requestedEpisode)
@@ -185,6 +195,7 @@ class PlayerActivity : AppCompatActivity() {
         setContentView(shell.root)
         applySystemBars()
         shell.controller.setStatus(statusMessage, statusRetryVisible)
+        shell.controller.setLocked(controlsLocked)
         loadingIndicator.visibility = if (waitingForPlayback) View.VISIBLE else View.GONE
         updateTransportControls()
     }
@@ -246,16 +257,22 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     private fun togglePlayback() {
-        if (!transportVisible) return
+        if (!transportVisible || controlsLocked) return
         if (latestPlaybackState.playWhenReady) playbackEngine.pause() else playbackEngine.play()
+    }
+
+    private fun setControlsLocked(locked: Boolean) {
+        controlsLocked = locked
+        shell.controller.setLocked(locked)
+        updateTransportControls()
     }
 
     private fun updateTransportControls() {
         shell.controller.setTransportState(
             isVisible = transportVisible,
             isPlaying = latestPlaybackState.playWhenReady,
-            canShowPrevious = transportVisible && episodeNavigator.canMove(-1),
-            canShowNext = transportVisible && episodeNavigator.canMove(1)
+            canShowPrevious = transportVisible && !controlsLocked && episodeNavigator.canMove(-1),
+            canShowNext = transportVisible && !controlsLocked && episodeNavigator.canMove(1)
         )
         shell.controller.updatePlaybackProgress(
             positionMs = latestPlaybackState.positionMs,
@@ -265,7 +282,7 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     private fun seekToFraction(fraction: Float) {
-        if (!transportVisible) return
+        if (!transportVisible || controlsLocked) return
         val durationMs = latestPlaybackState.durationMs
         if (durationMs <= 0L) return
 
@@ -292,7 +309,7 @@ class PlayerActivity : AppCompatActivity() {
 
     private fun loadAdjacentEpisode(offset: Int) {
         val anime = currentAnime ?: return
-        if (!transportVisible || !episodeNavigator.canMove(offset)) return
+        if (!transportVisible || controlsLocked || !episodeNavigator.canMove(offset)) return
         val episode = episodeNavigator.move(offset) ?: return
 
         requestedEpisode = episodeNavigator.selectedIndex + 1
