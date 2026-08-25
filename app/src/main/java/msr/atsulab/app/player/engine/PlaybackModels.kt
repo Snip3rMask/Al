@@ -1,6 +1,7 @@
 package msr.atsulab.app.player.engine
 
 import msr.atsulab.app.player.domain.model.SubtitleTrack
+import msr.atsulab.app.player.domain.model.VideoQuality
 import msr.atsulab.app.player.domain.model.VideoSource
 
 internal const val EXTERNAL_SUBTITLE_TRACK_ID = "external"
@@ -29,7 +30,8 @@ data class PlaybackState(
     val bufferedPositionMs: Long = 0L,
     val durationMs: Long = 0L,
     val speed: Float = 1f,
-    val subtitleTracks: List<SubtitleTrack> = emptyList()
+    val subtitleTracks: List<SubtitleTrack> = emptyList(),
+    val videoQualities: List<VideoQuality> = emptyList()
 )
 
 data class PlaybackError(

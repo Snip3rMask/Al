@@ -19,6 +19,7 @@ import androidx.media3.exoplayer.source.MergingMediaSource
 import androidx.media3.exoplayer.source.SingleSampleMediaSource
 import androidx.media3.ui.PlayerView
 import msr.atsulab.app.player.domain.model.SubtitleTrack
+import msr.atsulab.app.player.domain.model.VideoQuality
 import msr.atsulab.app.player.domain.model.VideoSource
 
 internal class Media3EngineMediaPlayer(
@@ -49,7 +50,8 @@ internal class Media3EngineMediaPlayer(
                 bufferedPositionMs = player.bufferedPosition.coerceAtLeast(0L),
                 durationMs = durationMs,
                 speed = player.playbackParameters.speed,
-                subtitleTracks = readSubtitleTracks()
+                subtitleTracks = readSubtitleTracks(),
+                videoQualities = readVideoQualities()
             )
         }
 
@@ -187,6 +189,25 @@ internal class Media3EngineMediaPlayer(
                 )
             }
         }
+    }
+
+    private fun readVideoQualities(): List<VideoQuality> {
+        return VideoQualityMetadata.sorted(
+            player.currentTracks.groups.flatMapIndexed { groupIndex, group ->
+                (0 until group.length).mapNotNull { trackIndex ->
+                    if (group.type != C.TRACK_TYPE_VIDEO) return@mapNotNull null
+                    val format = group.getTrackFormat(trackIndex)
+                    VideoQualityMetadata.create(
+                        id = "$groupIndex:$trackIndex",
+                        fallbackLabel = format.label.orEmpty(),
+                        width = format.width,
+                        height = format.height,
+                        bitrate = format.bitrate.toLong(),
+                        isSelected = group.isTrackSelected(trackIndex)
+                    )
+                }
+            }
+        )
     }
 
     private fun parseTrackId(trackId: String): Pair<Int, Int> {

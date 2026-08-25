@@ -615,11 +615,19 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - Applied the custom typeface through Media3 caption styling while safely falling back to the selected built-in style if a stored file becomes unreadable.
 - Closed Part 7.5 Subtitles.
 
-### 7.6 Quality Selector
+### 7.6 Quality Selector [~]
 
-- [ ] Detect HLS quality variants.
+- [x] Detect HLS quality variants.
 - [ ] Provide AUTO and manual options.
 - [ ] Preserve position on quality switch.
+
+#### Part 7.6 Slice A — HLS Variant Detection — 2026-08-25
+
+- Added a `VideoQuality` snapshot to `PlaybackState` using stable Media3 track IDs and selected state.
+- Detected video variants directly from Media3 `Tracks` without a second HLS master-playlist request.
+- Restored Anifux label behavior: resolution height first, then Anifux's bitrate thresholds, followed by provider-provided labels.
+- Normalized variants into highest-to-lowest order by height, bitrate, and width; focused metadata tests were added.
+- AUTO/manual selection, quality UI, and reset-free switching remain deferred to the next slices.
 
 ### 7.7 Server Selector
 
@@ -863,7 +871,9 @@ Append dated entries here. Do not delete history.
 - Published green releases through Release `121`; the latest documented stable smoke point is Release `120`, where the user confirmed Style Settings no longer crashes.
 - Set next executable phase: **Part 7.6 Quality Selector**, beginning with HLS variant detection after Release `121` device validation.
 
+- Completed Part 7.6 Slice A: Media3 HLS video-quality detection with Anifux-compatible labels and descending normalization.
+
 ## Next Action
 
-1. Install Release `121` and verify subtitle track selection, Off toggle, live styling, custom font import/clearing/restart persistence, chrome positions/icons, speed controls, gestures, lock behavior, rotation persistence, and HLS playback.
-2. After validation, start Part 7.6 Quality Selector with HLS variant detection.
+1. Install the latest GitHub Release and verify subtitle language switching, Off toggle, live styling, custom font import/clearing/restart persistence, chrome positions/icons, speed controls, gestures, lock behavior, rotation persistence, and HLS playback.
+2. After validation, continue Part 7.6 Quality Selector with the AUTO/manual selection panel and reset-free switching.
