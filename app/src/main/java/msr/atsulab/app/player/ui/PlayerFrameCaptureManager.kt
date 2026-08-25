@@ -101,9 +101,9 @@ internal class PlayerFrameCaptureManager(
     ) {
         saveDisposable?.dispose()
         saveDisposable = Single
-            .fromCallable<File?> {
+            .fromCallable {
                 val outputDirectory = outputDirectory(animeTitle)
-                val outputFile = outputDirectory?.let { directory ->
+                val outputFile: File? = outputDirectory?.let { directory ->
                     File(directory, PlayerFrameCaptureNaming.fileName(episodeLabel))
                 }
                 if (outputFile != null) {
