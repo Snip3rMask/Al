@@ -23,7 +23,7 @@ class PlayerEpisodePanelModelTest {
         val episodes = (101..180).map { episode(it.toFloat()) }
         val current = episode(151f)
 
-        assertEquals(150, PlayerEpisodePanelModel.rangeStart(episodes, current))
+        assertEquals(100, PlayerEpisodePanelModel.rangeStart(episodes, current))
     }
 
     @Test
@@ -43,9 +43,9 @@ class PlayerEpisodePanelModelTest {
     @Test
     fun `range label uses selected bounds`() {
         val episodes = (90..210).map { episode(it.toFloat()) }
-        val ranges = PlayerEpisodePanelModel.ranges(episodes, selectedRangeStart = 190)
+        val ranges = PlayerEpisodePanelModel.ranges(episodes, selectedRangeStart = 200)
 
-        assertEquals("EPS: 190-210", PlayerEpisodePanelModel.controlLabel(ranges))
+        assertEquals("EPS: 200-210", PlayerEpisodePanelModel.controlLabel(ranges))
     }
 
     private fun episode(number: Float) = PlaybackEpisode(
