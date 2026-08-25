@@ -22,6 +22,7 @@ internal class PlayerSubtitleMenu(
         fun subtitleTracks(): List<SubtitleTrack>
         fun hasExternalSubtitle(): Boolean
         fun onSubtitleSelected(trackId: String?)
+        fun onStyleSettingsClicked()
         fun onSubtitleMenuDismissed()
     }
 
@@ -86,6 +87,12 @@ internal class PlayerSubtitleMenu(
                 linearRowParams(density)
             )
         }
+        panel.addView(
+            actionRow("Style settings", density) {
+                callbacks.onStyleSettingsClicked()
+            },
+            linearRowParams(density)
+        )
 
         scroll.addView(
             panel,
@@ -129,6 +136,27 @@ internal class PlayerSubtitleMenu(
         if (!notifyCallbacks) currentPopup.setOnDismissListener(null)
         if (currentPopup.isShowing) currentPopup.dismiss()
         popup = null
+    }
+
+    private fun actionRow(label: String, density: Float, onClick: () -> Unit): TextView {
+        return TextView(activity).apply {
+            text = label
+            textSize = 18f
+            typeface = Typeface.DEFAULT_BOLD
+            gravity = Gravity.CENTER
+            setTextColor(PlayerShellMetrics.MENU_TEXT_COLOR)
+            background = GradientDrawable().apply {
+                setColor(PlayerShellMetrics.MENU_BORDER_COLOR)
+                cornerRadius = dp(8, density).toFloat()
+                setStroke(dp(1, density), PlayerShellMetrics.ACCENT_COLOR)
+            }
+            isFocusable = true
+            isFocusableInTouchMode = false
+            setOnFocusChangeListener { view, hasFocus ->
+                view.foreground = if (hasFocus) focusOutline(density) else null
+            }
+            setOnClickListener { onClick() }
+        }
     }
 
     private fun subtitleRow(option: SubtitleTrackOption, density: Float, onClick: () -> Unit): TextView {

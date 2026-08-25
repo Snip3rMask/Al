@@ -3,8 +3,10 @@ package msr.atsulab.app.player.ui
 import android.content.Context
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
-import android.media.AudioManager
 import android.graphics.Color
+import android.graphics.Typeface
+import android.media.AudioManager
+import android.view.ViewGroup
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -13,13 +15,16 @@ import android.view.View
 import android.widget.FrameLayout
 import android.widget.ProgressBar
 import androidx.appcompat.app.AppCompatActivity
+import androidx.media3.ui.CaptionStyleCompat
 import androidx.media3.ui.PlayerView
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.disposables.Disposable
 import msr.atsulab.app.R
 import msr.atsulab.app.player.domain.PlaybackSpeedOptions
+import msr.atsulab.app.player.domain.SubtitleStyleOptions
 import msr.atsulab.app.player.domain.model.PlaybackAnime
 import msr.atsulab.app.player.domain.model.PlaybackEpisode
+import msr.atsulab.app.player.domain.model.SubtitleStyle
 import msr.atsulab.app.player.domain.model.SubtitleTrack
 import msr.atsulab.app.player.domain.model.VideoSource
 import msr.atsulab.app.player.domain.repository.EpisodeRepository
@@ -32,6 +37,7 @@ import msr.atsulab.app.player.engine.PlaybackState
 import msr.atsulab.app.player.runtime.PlaybackEpisodeNavigator
 import msr.atsulab.app.player.storage.PlaybackPreferencesStore
 import org.koin.java.KoinJavaComponent.inject
+import kotlin.math.roundToInt
 
 class PlayerActivity : AppCompatActivity() {
 
@@ -76,6 +82,23 @@ class PlayerActivity : AppCompatActivity() {
             }
         )
     }
+    private val subtitleStylePanel: PlayerSubtitleStylePanel by lazy {
+        PlayerSubtitleStylePanel(
+            this,
+            object : PlayerSubtitleStylePanel.Callbacks {
+                override fun currentSubtitleStyle(): SubtitleStyle = playbackPreferencesStore.getSubtitleStyle()
+
+                override fun onSubtitleStyleChanged(style: SubtitleStyle) {
+                    playbackPreferencesStore.setSubtitleStyle(style)
+                    applySubtitleStyle(style)
+                }
+
+                override fun onSubtitleStyleDismissed() {
+                    scheduleControlsAutoHide()
+                }
+            }
+        )
+    }
     private val subtitleMenu: PlayerSubtitleMenu by lazy {
         PlayerSubtitleMenu(
             this,
@@ -87,6 +110,11 @@ class PlayerActivity : AppCompatActivity() {
 
                 override fun onSubtitleSelected(trackId: String?) {
                     if (engineAttached) playbackEngine.setSubtitleTrack(trackId)
+                }
+
+                override fun onStyleSettingsClicked() {
+                    dismissSubtitleMenus()
+                    subtitleStylePanel.show()
                 }
 
                 override fun onSubtitleMenuDismissed() {
@@ -158,7 +186,7 @@ class PlayerActivity : AppCompatActivity() {
         stopProgressLoop()
         cancelControlsAutoHide()
         speedMenu.dismiss(notifyCallbacks = false)
-        subtitleMenu.dismiss(notifyCallbacks = false)
+        dismissSubtitleMenus()
         if (engineAttached) playbackEngine.onBackground()
         super.onStop()
     }
@@ -167,7 +195,7 @@ class PlayerActivity : AppCompatActivity() {
         progressHandler.removeCallbacks(progressRunnable)
         controlsHandler.removeCallbacks(hideControlsRunnable)
         speedMenu.dismiss(notifyCallbacks = false)
-        subtitleMenu.dismiss(notifyCallbacks = false)
+        dismissSubtitleMenus()
         if (::shell.isInitialized) shell.controller.release()
         playbackDisposable?.dispose()
         if (engineAttached) {
@@ -225,7 +253,7 @@ class PlayerActivity : AppCompatActivity() {
 
     private fun rebuildShell() {
         speedMenu.dismiss(notifyCallbacks = false)
-        subtitleMenu.dismiss(notifyCallbacks = false)
+        dismissSubtitleMenus()
         val callbacks = object : PlayerControllerSkeleton.Callbacks {
             override fun onBackClicked() {
                 finish()
@@ -373,6 +401,7 @@ class PlayerActivity : AppCompatActivity() {
         this.gestureHandler = gestureHandler
         shell.videoFrame.setOnTouchListener(gestureHandler)
         playerView = shell.playerView
+        applySubtitleStyle(playbackPreferencesStore.getSubtitleStyle())
         applyBrightnessScrim()
         loadingIndicator = shell.loadingIndicator
         setContentView(shell.root)
@@ -531,6 +560,39 @@ class PlayerActivity : AppCompatActivity() {
         if (!transportVisible || controlsLocked) return
         cancelControlsAutoHide()
         subtitleMenu.show()
+    }
+
+    private fun dismissSubtitleMenus() {
+        subtitleMenu.dismiss(notifyCallbacks = false)
+        subtitleStylePanel.dismiss(notifyCallbacks = false)
+    }
+
+    private fun applySubtitleStyle(style: SubtitleStyle) {
+        if (!::playerView.isInitialized) return
+        val subtitleView = playerView.subtitleView ?: return
+        val normalizedStyle = SubtitleStyleOptions.normalize(style)
+        subtitleView.setFractionalTextSize(
+            SubtitleStyleOptions.BASE_FRACTIONAL_TEXT_SIZE * normalizedStyle.fontSize
+        )
+        val typeface = when (normalizedStyle.fontStyle) {
+            SubtitleStyle.FONT_STYLE_BOLD -> Typeface.DEFAULT_BOLD
+            SubtitleStyle.FONT_STYLE_ITALIC -> Typeface.defaultFromStyle(Typeface.ITALIC)
+            SubtitleStyle.FONT_STYLE_BOLD_ITALIC -> Typeface.defaultFromStyle(Typeface.BOLD_ITALIC)
+            else -> Typeface.DEFAULT
+        }
+        val captionStyle = CaptionStyleCompat(
+            normalizedStyle.fontColor,
+            SubtitleStyleOptions.backgroundArgb(normalizedStyle),
+            Color.TRANSPARENT,
+            if (normalizedStyle.shadow > 0) CaptionStyleCompat.EDGE_TYPE_DROP_SHADOW else CaptionStyleCompat.EDGE_TYPE_NONE,
+            SubtitleStyleOptions.edgeArgb(normalizedStyle.shadow),
+            typeface
+        )
+        subtitleView.setStyle(captionStyle)
+        (subtitleView.layoutParams as? ViewGroup.MarginLayoutParams)?.let { layoutParams ->
+            layoutParams.bottomMargin = dp((normalizedStyle.bottomPadding * 1.5f).roundToInt())
+            subtitleView.layoutParams = layoutParams
+        }
     }
 
     private fun setPlaybackSpeed(speed: Float) {

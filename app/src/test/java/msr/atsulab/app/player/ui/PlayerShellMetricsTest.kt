@@ -49,6 +49,9 @@ class PlayerShellMetricsTest {
         assertEquals(58, PlayerShellMetrics.SUBTITLE_TITLE_HEIGHT_DP)
         assertEquals(66, PlayerShellMetrics.SUBTITLE_ROW_HEIGHT_DP)
         assertEquals(8, PlayerShellMetrics.SUBTITLE_ROW_MARGIN_DP)
+        assertEquals(380, PlayerShellMetrics.SUBTITLE_STYLE_PANEL_WIDTH_DP)
+        assertEquals(40, PlayerShellMetrics.SUBTITLE_STYLE_SWATCH_SIZE_DP)
+        assertEquals(42, PlayerShellMetrics.SUBTITLE_STYLE_SEGMENT_HEIGHT_DP)
         assertEquals(5, PlayerShellMetrics.EPISODE_GRID_COLUMN_COUNT)
     }
 

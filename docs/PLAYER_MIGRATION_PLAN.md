@@ -572,7 +572,8 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - [x] Embedded subtitle detection.
 - [x] External subtitle attachment.
 - [x] Language selection, toggle, and missing-subtitle fallback.
-- [ ] Styling controls and persisted appearance preferences.
+- [x] Styling controls and persisted appearance preferences.
+- [ ] Custom subtitle font file selection.
 
 #### Part 7.5 Slice B — Selection Menu & Toggle — 2026-08-25
 
@@ -583,6 +584,15 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - Labeled external subtitles as English so they remain selectable after attachment and added a safe English fallback when no usable track snapshot exists yet.
 - Dismissed the subtitle panel on rotation, background, destruction, and shell rebuild; lock/loading boundaries continue to block opening it.
 - Subtitle appearance/style settings remain deferred to a later storage/settings slice.
+
+#### Part 7.5 Slice C — Style & Persistence — 2026-08-25
+
+- Added a persisted `SubtitleStyle` model covering size, font style/color, background color/no-background/opacity, bottom position, and shadow.
+- Restored Anifux defaults and ranges: `50–300%` text size, four style modes, fixed color presets, and `0–100%` padding/shadow/opacity.
+- Added an AtsuLab player-side style panel with Anifux's `380dp` side-panel behavior, sliders, segment chips, color swatches, no-background toggle, and reset action.
+- Applied styles through Media3's `CaptionStyleCompat`, fractional text size, edge shadow, typeface mapping, and subtitle-view bottom margin without reattaching playback.
+- Saved every change immediately in the existing playback preference store and reapplied the normalized style after rotation or shell rebuild.
+- Custom `.ttf` file selection remains the final Part 7.5 follow-up because it needs document/file-picker lifecycle handling.
 
 ### 7.6 Quality Selector
 
@@ -821,8 +831,9 @@ Append dated entries here. Do not delete history.
 - Started Part 7.5 Subtitles with Media3 embedded-track snapshots, track-change emissions, normalized metadata, and focused tests.
 - Completed a player chrome parity pass with Anifux icon/order/offset restoration and corrected compact landscape top placement.
 - Completed Part 7.5 Slice B: embedded subtitle selection, Off toggle, external-subtitle fallback, and the exact Anifux right-side panel.
+- Completed Part 7.5 Slice C: persisted live subtitle styling controls with direct Media3 caption application.
 
 ## Next Action
 
 1. Install the latest GitHub Release and verify player chrome positions/icons against Anifux, landscape server pill, rewind/forward, rotate, speed menu, persistence, reset-free speed changes, vertical brightness/volume HUD, lock blocking, tap/auto-hide controls, and HLS playback.
-2. After validation, continue Part 7.5 with subtitle styling controls and persisted appearance preferences.
+2. After validation, complete Part 7.5 with custom subtitle font file selection.
