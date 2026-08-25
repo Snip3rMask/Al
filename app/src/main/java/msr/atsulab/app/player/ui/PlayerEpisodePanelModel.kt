@@ -59,8 +59,7 @@ internal object PlayerEpisodePanelModel {
         currentEpisode: PlaybackEpisode?,
         selectedRangeStart: Int
     ): List<PlayerEpisodeGridOption> {
-        val minimum = minEpisodeNumber(episodes)
-        val normalizedStart = max(minimum, selectedRangeStart)
+        val normalizedStart = max(0, selectedRangeStart)
         val endNumber = normalizedStart + RANGE_SIZE - 1
         val currentNumber = episodeNumber(currentEpisode)
         return episodes.mapNotNull { episode ->
