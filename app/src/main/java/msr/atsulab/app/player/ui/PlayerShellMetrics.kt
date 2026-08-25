@@ -21,6 +21,11 @@ object PlayerShellMetrics {
     const val BOTTOM_CONTROLS_HEIGHT_DP = 112
     const val PROGRESS_ROW_HEIGHT_DP = 38
     const val SEEK_CONTROL_HEIGHT_DP = 32
+    const val SKIP_BUTTON_BOTTOM_MARGIN_DP = 130
+    const val SKIP_BUTTON_END_MARGIN_DP = 20
+    const val SKIP_BUTTON_HEIGHT_DP = 40
+    const val SKIP_BUTTON_HORIZONTAL_PADDING_DP = 18
+    const val SKIP_MARKER_HEIGHT_DP = 5
     const val CONTROL_ICON_SIZE_DP = 44
     const val BACK_BUTTON_SIZE_DP = 42
     const val TRANSPORT_ROW_HEIGHT_DP = 58

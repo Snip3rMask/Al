@@ -59,6 +59,26 @@ class DefaultSkipTimeRepositoryTest {
     }
 
     @Test
+    fun `caches parsed skip times for the same episode and duration`() {
+        server.enqueue(
+            MockResponse().setBody(
+                """{"found":true,"results":[{"skipType":"ed","interval":{"startTime":1300,"endTime":1380}}]}"""
+            )
+        )
+        val anime = PlaybackAnime(aniListId = 21, malId = 12345, title = "AtsuLab Anime")
+        val episode = PlaybackEpisode(name = "Episode 3", url = "ep-3", number = 3f)
+
+        val first = repository.getSkipIntervals(anime, episode, 1_440_000)
+            .test().await().values().single()
+        val second = repository.getSkipIntervals(anime, episode, 1_440_000)
+            .test().await().values().single()
+
+        assertEquals(first, second)
+        assertEquals(1380000L, second.single().endMs)
+        assertEquals(1, server.requestCount)
+    }
+
+    @Test
     fun `resolves cleaned title through anilist then caches mal id`() {
         server.enqueue(MockResponse().setBody("""{"data":{"Media":{"idMal":987}}}"""))
         server.enqueue(MockResponse().setBody("""{"found":false}"""))

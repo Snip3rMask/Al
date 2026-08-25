@@ -3,6 +3,7 @@ package msr.atsulab.app.player.ui
 import android.content.Context
 import android.graphics.Color
 import android.graphics.Typeface
+import android.graphics.drawable.GradientDrawable
 import android.view.Gravity
 import android.view.View
 import android.widget.FrameLayout
@@ -21,7 +22,9 @@ internal data class PlayerShellViews(
     val brightnessScrimView: View,
     val controller: PlayerControllerSkeleton,
     val loadingIndicator: ProgressBar,
-    val gestureHudView: PlayerGestureHudView
+    val gestureHudView: PlayerGestureHudView,
+    val skipButton: TextView,
+    val skipMarkerView: PlayerSkipMarkerView
 )
 
 internal class PlayerShellLayoutBuilder(
@@ -45,6 +48,25 @@ internal class PlayerShellLayoutBuilder(
         }
         val loadingIndicator = ProgressBar(context).apply { visibility = View.GONE }
         val gestureHudView = PlayerGestureHudView(context).apply { visibility = View.GONE }
+        val density = context.resources.displayMetrics.density
+        val skipMarkerView = PlayerSkipMarkerView(context).apply { visibility = View.GONE }
+        val skipButton = TextView(context).apply {
+            background = GradientDrawable().apply {
+                setColor(PlayerShellMetrics.ACCENT_COLOR)
+                cornerRadius =
+                    dp(PlayerShellMetrics.SKIP_BUTTON_HEIGHT_DP, density) / 2f
+            }
+            setTextColor(Color.WHITE)
+            typeface = Typeface.DEFAULT_BOLD
+            setPadding(
+                dp(PlayerShellMetrics.SKIP_BUTTON_HORIZONTAL_PADDING_DP, density),
+                0,
+                dp(PlayerShellMetrics.SKIP_BUTTON_HORIZONTAL_PADDING_DP, density),
+                0
+            )
+            gravity = Gravity.CENTER
+            visibility = View.GONE
+        }
         val videoFrame = FrameLayout(context).apply {
             setBackgroundColor(Color.BLACK)
             isClickable = true
@@ -69,6 +91,8 @@ internal class PlayerShellLayoutBuilder(
                 controller,
                 loadingIndicator,
                 gestureHudView,
+                skipButton,
+                skipMarkerView,
                 episodeLabel
             )
         } else {
@@ -79,6 +103,8 @@ internal class PlayerShellLayoutBuilder(
                 controller,
                 loadingIndicator,
                 gestureHudView,
+                skipButton,
+                skipMarkerView,
                 episodeLabel
             )
         }
@@ -91,6 +117,8 @@ internal class PlayerShellLayoutBuilder(
         controller: PlayerControllerSkeleton,
         loadingIndicator: ProgressBar,
         gestureHudView: PlayerGestureHudView,
+        skipButton: TextView,
+        skipMarkerView: PlayerSkipMarkerView,
         episodeLabel: String
     ): PlayerShellViews {
         val density = context.resources.displayMetrics.density
@@ -149,6 +177,22 @@ internal class PlayerShellLayoutBuilder(
             }
         )
 
+        videoFrame.addView(
+            skipButton,
+            FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.WRAP_CONTENT,
+                dp(PlayerShellMetrics.SKIP_BUTTON_HEIGHT_DP, density),
+                Gravity.BOTTOM or Gravity.END
+            ).apply {
+                setMargins(
+                    0,
+                    0,
+                    dp(PlayerShellMetrics.SKIP_BUTTON_END_MARGIN_DP, density),
+                    dp(PlayerShellMetrics.SKIP_BUTTON_BOTTOM_MARGIN_DP, density)
+                )
+            }
+        )
+
         val watchingView = TextView(context).apply {
             text = episodeLabel
             gravity = Gravity.CENTER
@@ -180,7 +224,9 @@ internal class PlayerShellLayoutBuilder(
             brightnessScrimView,
             controller,
             loadingIndicator,
-            gestureHudView
+            gestureHudView,
+            skipButton,
+            skipMarkerView
         )
     }
 
@@ -191,6 +237,8 @@ internal class PlayerShellLayoutBuilder(
         controller: PlayerControllerSkeleton,
         loadingIndicator: ProgressBar,
         gestureHudView: PlayerGestureHudView,
+        skipButton: TextView,
+        skipMarkerView: PlayerSkipMarkerView,
         episodeLabel: String
     ): PlayerShellViews {
         val density = context.resources.displayMetrics.density
@@ -247,6 +295,22 @@ internal class PlayerShellLayoutBuilder(
             }
         )
 
+        videoFrame.addView(
+            skipButton,
+            FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.WRAP_CONTENT,
+                dp(PlayerShellMetrics.SKIP_BUTTON_HEIGHT_DP, density),
+                Gravity.BOTTOM or Gravity.END
+            ).apply {
+                setMargins(
+                    0,
+                    0,
+                    dp(PlayerShellMetrics.SKIP_BUTTON_END_MARGIN_DP, density),
+                    dp(PlayerShellMetrics.SKIP_BUTTON_BOTTOM_MARGIN_DP, density)
+                )
+            }
+        )
+
         val root = FrameLayout(context).apply { setBackgroundColor(PlayerShellMetrics.PRIMARY_DARK_COLOR) }
         root.addView(videoFrame, FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT))
         return PlayerShellViews(
@@ -256,7 +320,9 @@ internal class PlayerShellLayoutBuilder(
             brightnessScrimView,
             controller,
             loadingIndicator,
-            gestureHudView
+            gestureHudView,
+            skipButton,
+            skipMarkerView
         )
     }
 

@@ -29,11 +29,13 @@ import msr.atsulab.app.player.domain.PlaybackSpeedOptions
 import msr.atsulab.app.player.domain.SubtitleStyleOptions
 import msr.atsulab.app.player.domain.model.PlaybackAnime
 import msr.atsulab.app.player.domain.model.PlaybackEpisode
+import msr.atsulab.app.player.domain.model.SkipInterval
 import msr.atsulab.app.player.domain.model.SubtitleStyle
 import msr.atsulab.app.player.domain.model.SubtitleTrack
 import msr.atsulab.app.player.domain.model.VideoQuality
 import msr.atsulab.app.player.domain.model.VideoSource
 import msr.atsulab.app.player.domain.repository.EpisodeRepository
+import msr.atsulab.app.player.domain.repository.SkipTimeRepository
 import msr.atsulab.app.player.domain.repository.VideoSourceRepository
 import msr.atsulab.app.player.engine.PlaybackEngine
 import msr.atsulab.app.player.engine.PlaybackEngineListener
@@ -49,6 +51,7 @@ class PlayerActivity : AppCompatActivity() {
 
     private val episodeRepository: EpisodeRepository by inject(EpisodeRepository::class.java)
     private val videoSourceRepository: VideoSourceRepository by inject(VideoSourceRepository::class.java)
+    private val skipTimeRepository: SkipTimeRepository by inject(SkipTimeRepository::class.java)
     private val playbackEngine: PlaybackEngine by inject(PlaybackEngine::class.java)
     private val playbackPreferencesStore: PlaybackPreferencesStore by inject(PlaybackPreferencesStore::class.java)
 
@@ -63,6 +66,7 @@ class PlayerActivity : AppCompatActivity() {
     private var engineAttached = false
     private var playbackDisposable: Disposable? = null
     private var moreServersDisposable: Disposable? = null
+    private var skipTimesDisposable: Disposable? = null
     private var statusMessage = ""
     private var statusRetryVisible = false
     private var waitingForPlayback = true
@@ -79,6 +83,8 @@ class PlayerActivity : AppCompatActivity() {
     private var areMoreServersLoading = false
     private var hasAllServersFailed = false
     private val failedSourceIndexes = mutableSetOf<Int>()
+    private var skipIntervals: List<SkipInterval> = emptyList()
+    private var skipFetchKey = ""
     private var selectedQualityTrackId: String? = null
     private val customFontPicker = registerForActivityResult(
         ActivityResultContracts.GetContent()
@@ -282,6 +288,7 @@ class PlayerActivity : AppCompatActivity() {
         if (::shell.isInitialized) shell.controller.release()
         playbackDisposable?.dispose()
         moreServersDisposable?.dispose()
+        skipTimesDisposable?.dispose()
         if (engineAttached) {
             playbackEngine.release()
             engineAttached = false
@@ -317,6 +324,7 @@ class PlayerActivity : AppCompatActivity() {
                         hasAllServersFailed = false
                         failedSourceIndexes.remove(selectedSourceIndex)
                         showMessage(R.string.player_playing)
+                        loadSkipTimes(state.durationMs)
                     }
                     PlaybackReadyState.ENDED -> {
                         transportVisible = true
@@ -342,6 +350,9 @@ class PlayerActivity : AppCompatActivity() {
         dismissSubtitleMenus()
         serverMenu.dismiss(notifyCallbacks = false)
         qualityMenu.dismiss(notifyCallbacks = false)
+        if (::shell.isInitialized) {
+            shell.skipButton.setOnClickListener { skipActiveSection() }
+        }
         val callbacks = object : PlayerControllerSkeleton.Callbacks {
             override fun onBackClicked() {
                 finish()
@@ -513,6 +524,7 @@ class PlayerActivity : AppCompatActivity() {
         )
         updateTransportControls()
         if (controlsVisible) scheduleControlsAutoHide()
+        updateSkipViews()
     }
 
     private fun applySystemBars() {
@@ -544,6 +556,7 @@ class PlayerActivity : AppCompatActivity() {
         areMoreServersLoading = false
         hasAllServersFailed = false
         failedSourceIndexes.clear()
+        resetSkipTimes()
 
         playbackDisposable = episodeRepository.getEpisodes(anime)
             .flatMap { episodes ->
@@ -700,6 +713,77 @@ class PlayerActivity : AppCompatActivity() {
                 { additionalSources -> finishLoadingMoreServers(additionalSources) },
                 { finishLoadingMoreServers(emptyList()) }
             )
+}
+
+    private fun loadSkipTimes(durationMs: Long) {
+        val anime = currentAnime ?: return
+        val episode = episodeNavigator.currentEpisode ?: return
+        if (durationMs <= 0L) return
+
+        val seconds = durationMs / 1000L
+        val fetchKey = "${anime.aniListId}|${episode.url}|${episode.number.toInt()}|$seconds"
+        if (fetchKey == skipFetchKey) return
+
+        skipTimesDisposable?.dispose()
+        skipFetchKey = fetchKey
+        skipIntervals = emptyList()
+        updateSkipViews()
+        skipTimesDisposable = skipTimeRepository.getSkipIntervals(anime, episode, durationMs)
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(
+                { intervals ->
+                    if (skipFetchKey == fetchKey) {
+                        skipIntervals = intervals
+                        updateSkipViews()
+                    }
+                },
+                {
+                    if (skipFetchKey == fetchKey) {
+                        skipIntervals = emptyList()
+                        updateSkipViews()
+                    }
+                }
+            )
+    }
+
+    private fun resetSkipTimes() {
+        skipTimesDisposable?.dispose()
+        skipTimesDisposable = null
+        skipFetchKey = ""
+        skipIntervals = emptyList()
+        if (::shell.isInitialized) updateSkipViews()
+    }
+
+    private fun skipActiveSection() {
+        val interval = PlayerSkipController.activeInterval(
+            skipIntervals,
+            latestPlaybackState.positionMs
+        ) ?: return
+
+        playbackEngine.seekTo(interval.endMs)
+        latestPlaybackState = latestPlaybackState.copy(positionMs = interval.endMs)
+        if (!latestPlaybackState.playWhenReady) playbackEngine.play()
+        updateTransportControls()
+    }
+
+    private fun updateSkipViews() {
+        if (!::shell.isInitialized) return
+        shell.skipMarkerView.setData(skipIntervals, latestPlaybackState.durationMs)
+
+        val activeInterval = PlayerSkipController.activeInterval(
+            skipIntervals,
+            latestPlaybackState.positionMs
+        )
+        shell.skipButton.text = activeInterval
+            ?.let(PlayerSkipController::titleResource)
+            ?.let { resource -> getString(resource) }
+            .orEmpty()
+        shell.skipButton.visibility = if (
+            activeInterval != null &&
+            transportVisible &&
+            controlsVisible &&
+            !controlsLocked
+        ) View.VISIBLE else View.GONE
     }
 
     private fun finishLoadingMoreServers(additionalSources: List<VideoSource>) {
@@ -921,6 +1005,7 @@ class PlayerActivity : AppCompatActivity() {
             bufferedPositionMs = latestPlaybackState.bufferedPositionMs,
             durationMs = latestPlaybackState.durationMs
         )
+        updateSkipViews()
     }
 
     private fun seekToFraction(fraction: Float) {
@@ -960,6 +1045,7 @@ class PlayerActivity : AppCompatActivity() {
         areMoreServersLoading = false
         hasAllServersFailed = false
         failedSourceIndexes.clear()
+        resetSkipTimes()
         transportVisible = false
         showMessage(R.string.player_loading_episode, arguments = listOf(anime.title, requestedEpisode), loading = true)
         playbackDisposable?.dispose()

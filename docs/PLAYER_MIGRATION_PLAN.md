@@ -677,13 +677,22 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - Preserved active playback indexes while appending background sources and added focused repository coverage for provider merging and recovery.
 - Closed Part 7.7 at code level with green CI (`aa07e863`); real-device validation remains required.
 
-### 7.8 Skip Intro/Outro
+### 7.8 Skip Intro/Outro [x]
 
-- [ ] Resolve MAL ID through AniList.
-- [ ] Fetch AniSkip intervals.
-- [ ] Show/hide skip buttons by interval.
-- [ ] Add seekbar marker.
-- [ ] Cache skip data per episode.
+- [x] Resolve MAL ID through AniList.
+- [x] Fetch AniSkip intervals.
+- [x] Show/hide skip buttons by interval.
+- [x] Add seekbar marker.
+- [x] Cache skip data per episode.
+
+#### Part 7.8 — Skip Intro/Outro — 2026-08-25
+
+- Reused the existing AniSkip repository flow for MAL-ID resolution, OP/ED lookup, request headers, parser validation, and thread-safe MAL-ID caching.
+- Added a process-local interval cache keyed by anime, provider/episode identity, episode number, and requested duration so source switches do not re-fetch the same skip data.
+- Loaded intervals once playback reports a valid duration, cleared state safely when episodes or sources reload, and ignored stale async responses after episode changes.
+- Added an Anifux-style rounded Skip Intro/Skip Outro control positioned above the transport row; it seeks exactly to the interval end and resumes playback without changing persisted speed.
+- Added accent-colored seekbar markers that map each valid interval onto the current duration and hide automatically for empty or unknown-duration results.
+- Kept skip controls hidden while controls are hidden or playback is locked, and suppressed the button during the final second of its interval to avoid a useless tap.
 
 ### 7.9 Frame Capture
 
@@ -920,7 +929,7 @@ Append dated entries here. Do not delete history.
 
 ## Next Action
 
-1. Install the latest server-selection release and confirm the server pill still opens Select Server while Audio owns SUB/DUB.
-2. Keep the server panel open during background provider loading and verify the animated Loading more servers row appears, then disappears after merge.
-3. Force or simulate a bad source if available and verify AtsuLab remembers it, tries another same-language server, preserves position/speed where possible, and never repeats the failed index automatically.
-4. Verify the No working server + Retry terminal flow, episode/source reload clears failure state, and rotation/background does not duplicate loaders or leak panels.
+1. Install the latest green release and confirm AUTO/manual quality switching still works without resetting position or speed.
+2. Confirm Audio owns SUB/DUB switching while the server pill opens Select Server, background servers merge into the panel, and failure/retry behavior is stable.
+3. Play an anime with known AniSkip data: verify the seekbar markers appear and Skip Intro/Skip Outro appears only inside its interval.
+4. Tap each skip control, verify playback resumes at the interval end with position/speed preserved, then rotate/background/reopen and ensure controls and markers remain stable.

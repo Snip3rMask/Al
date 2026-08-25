@@ -94,6 +94,8 @@ internal class PlayerControllerSkeleton(
     }
 
     private lateinit var seekBar: SeekBar
+    lateinit var skipMarkerView: PlayerSkipMarkerView
+        private set
     private lateinit var currentTimeView: TextView
     private lateinit var totalTimeView: TextView
     private var userSeeking = false
@@ -426,8 +428,29 @@ internal class PlayerControllerSkeleton(
                     }
                 })
             }
+
+            skipMarkerView = PlayerSkipMarkerView(context).apply {
+                visibility = View.GONE
+                importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
+            }
+            val seekBarHost = FrameLayout(context).apply {
+                addView(
+                    seekBar,
+                    FrameLayout.LayoutParams(
+                        FrameLayout.LayoutParams.MATCH_PARENT,
+                        FrameLayout.LayoutParams.MATCH_PARENT
+                    )
+                )
+                addView(
+                    skipMarkerView,
+                    FrameLayout.LayoutParams(
+                        FrameLayout.LayoutParams.MATCH_PARENT,
+                        FrameLayout.LayoutParams.MATCH_PARENT
+                    )
+                )
+            }
             progressRow.addView(
-                seekBar,
+                seekBarHost,
                 LinearLayout.LayoutParams(0, dp(PlayerShellMetrics.SEEK_CONTROL_HEIGHT_DP, density), 1f).apply {
                     setMargins(dp(10, density), 0, dp(10, density), 0)
                 }

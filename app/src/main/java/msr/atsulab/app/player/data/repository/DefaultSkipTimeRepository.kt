@@ -20,7 +20,8 @@ class DefaultSkipTimeRepository(
     private val anilistUrl: String = ANILIST_URL,
     private val aniSkipUrl: String = ANISKIP_URL,
     private val ioScheduler: Scheduler = Schedulers.io(),
-    private val malIdCache: MutableMap<String, Int> = ConcurrentHashMap()
+    private val malIdCache: MutableMap<String, Int> = ConcurrentHashMap(),
+    private val intervalCache: MutableMap<String, List<SkipInterval>> = ConcurrentHashMap()
 ) : SkipTimeRepository {
 
     override fun getSkipIntervals(
@@ -30,6 +31,8 @@ class DefaultSkipTimeRepository(
     ): Single<List<SkipInterval>> {
         return Single.fromCallable {
             if (episode.number.toInt() <= 0) return@fromCallable emptyList<SkipInterval>()
+            val cacheKey = intervalCacheKey(anime, episode, durationMs)
+            intervalCache[cacheKey]?.let { return@fromCallable it }
             val malId = anime.malId?.takeIf { it > 0 } ?: resolveMalId(anime.title)
             if (malId <= 0) return@fromCallable emptyList<SkipInterval>()
 
@@ -38,8 +41,26 @@ class DefaultSkipTimeRepository(
                 "?types=op&types=ed&episodeLength=$seconds"
             val json = getText(buildRequest(url).get().build())
                 ?: return@fromCallable emptyList<SkipInterval>()
-            AniSkipResponseParser.parseIntervals(json)
+            AniSkipResponseParser.parseIntervals(json).also { intervals ->
+                intervalCache[cacheKey] = intervals
+            }
         }.subscribeOn(ioScheduler)
+    }
+
+    private fun intervalCacheKey(
+        anime: PlaybackAnime,
+        episode: PlaybackEpisode,
+        durationMs: Long
+    ): String {
+        val seconds = (durationMs / 1000).coerceAtLeast(0L)
+        return listOf(
+            anime.aniListId,
+            episode.providerId.orEmpty(),
+            episode.playbackId,
+            episode.url,
+            episode.number.toInt(),
+            seconds
+        ).joinToString(separator = "|")
     }
 
     private fun resolveMalId(title: String): Int {
