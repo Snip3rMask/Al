@@ -639,10 +639,20 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 
 ### 7.7 Server Selector
 
-- [ ] SUB/DUB tabs and server list.
-- [ ] Active server indicator and loading-more state.
-- [ ] Switch server with minimal progress loss.
+- [x] SUB/DUB tabs and server list.
+- [x] Active server indicator.
+- [ ] Loading-more state.
+- [x] Switch server with minimal progress loss.
 - [ ] Clear all-servers-failed state.
+
+#### Part 7.7 Slice A — Language Tabs & Server List — 2026-08-25
+
+- Added the Anifux-style 340dp “Audio” panel with SUB/DUB tabs, a muted Servers heading, and exact row/focus styling.
+- Kept the full source snapshot in the player and filtered it into language modes without deleting alternate sources.
+- Grouped servers by display name with stable numbering and highlighted the active source.
+- Wired the landscape server pill to the panel, replacing generic S1 labels with provider/server names.
+- Switched servers by reusing Media3 preparation at the latest captured position, then restored persisted speed without restarting the episode from zero.
+- Guarded empty SUB/DUB modes and dismissed the panel safely across rotation, backgrounding, and destruction.
 
 ### 7.8 Skip Intro/Outro
 
@@ -881,9 +891,11 @@ Append dated entries here. Do not delete history.
 
 - Completed Part 7.6 Slice A: Media3 HLS video-quality detection with Anifux-compatible labels and descending normalization.
 - Completed Part 7.6 Slice B: AUTO/manual quality UI, Media3 track overrides, reset-free switching, rotation/source-reset handling, and focused unit tests.
+- Completed Part 7.7 Slice A: SUB/DUB filtering, grouped/numbered server rows, active-server highlighting, and position-preserving source switches with focused model tests.
 
 ## Next Action
 
-1. Push Slice B, wait for green CI, install the resulting debug release, and verify quality pill placement/labels.
-2. On a real HLS stream, open Choose quality, switch AUTO/manual repeatedly, confirm position is preserved, rotate during selection, then change episodes and verify selection returns to AUTO.
-3. Re-check subtitle language/Off, styling/custom font, speed, gestures, locking, navigation, and baseline playback after the quality changes.
+1. Install Release `125` and verify quality pill placement/labels; open Choose quality, switch AUTO/manual repeatedly, confirm position is preserved, rotate during selection, then change episodes and verify selection returns to AUTO.
+2. Re-check subtitle language/Off, styling/custom font, speed, gestures, locking, navigation, and baseline playback after the quality changes.
+3. Push Part 7.7 Slice A when CI-ready, install its release, open the server pill, verify SUB/DUB filtering and active-server highlighting.
+4. Switch servers while playback has progressed, confirm resume position/speed/subtitles remain sane, rotate/background during the panel, change episodes, and confirm source state resets cleanly.

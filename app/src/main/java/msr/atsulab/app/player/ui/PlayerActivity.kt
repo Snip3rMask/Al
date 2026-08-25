@@ -72,6 +72,9 @@ class PlayerActivity : AppCompatActivity() {
     private var gestureHandler: PlayerGestureHandler? = null
     private var playbackBrightness = BRIGHTNESS_MAX
     private var activeVideoSource: VideoSource? = null
+    private var availableVideoSources: List<VideoSource> = emptyList()
+    private var selectedSourceIndex = INVALID_SOURCE_INDEX
+    private var showDubSources = false
     private var selectedQualityTrackId: String? = null
     private val customFontPicker = registerForActivityResult(
         ActivityResultContracts.GetContent()
@@ -164,6 +167,31 @@ class PlayerActivity : AppCompatActivity() {
             }
         )
     }
+    private val serverMenu: PlayerServerMenu by lazy {
+        PlayerServerMenu(
+            this,
+            object : PlayerServerMenu.Callbacks {
+                override fun videoSources(): List<VideoSource> = availableVideoSources
+
+                override fun selectedSourceIndex(): Int = selectedSourceIndex
+
+                override fun showDub(): Boolean = showDubSources
+
+                override fun onLanguageModeSelected(showDub: Boolean) {
+                    selectLanguageMode(showDub)
+                }
+
+                override fun onServerSelected(sourceIndex: Int) {
+                    selectVideoSource(sourceIndex)
+                }
+
+                override fun onServerMenuDismissed() {
+                    applySystemBars()
+                    scheduleControlsAutoHide()
+                }
+            }
+        )
+    }
     private var playbackSpeed = PlaybackSpeedOptions.DEFAULT
     private val progressHandler = Handler(Looper.getMainLooper())
     private val controlsHandler = Handler(Looper.getMainLooper())
@@ -227,6 +255,7 @@ class PlayerActivity : AppCompatActivity() {
         cancelControlsAutoHide()
         speedMenu.dismiss(notifyCallbacks = false)
         dismissSubtitleMenus()
+        serverMenu.dismiss(notifyCallbacks = false)
         if (engineAttached) playbackEngine.onBackground()
         super.onStop()
     }
@@ -236,6 +265,7 @@ class PlayerActivity : AppCompatActivity() {
         controlsHandler.removeCallbacks(hideControlsRunnable)
         speedMenu.dismiss(notifyCallbacks = false)
         dismissSubtitleMenus()
+        serverMenu.dismiss(notifyCallbacks = false)
         qualityMenu.dismiss(notifyCallbacks = false)
         if (::shell.isInitialized) shell.controller.release()
         playbackDisposable?.dispose()
@@ -295,6 +325,7 @@ class PlayerActivity : AppCompatActivity() {
     private fun rebuildShell() {
         speedMenu.dismiss(notifyCallbacks = false)
         dismissSubtitleMenus()
+        serverMenu.dismiss(notifyCallbacks = false)
         qualityMenu.dismiss(notifyCallbacks = false)
         val callbacks = object : PlayerControllerSkeleton.Callbacks {
             override fun onBackClicked() {
@@ -337,7 +368,9 @@ class PlayerActivity : AppCompatActivity() {
                 showQualityMenu()
             }
 
-            override fun onServerClicked() = Unit
+            override fun onServerClicked() {
+                showServerMenu()
+            }
 
             override fun onAudioClicked() = Unit
 
@@ -455,7 +488,9 @@ class PlayerActivity : AppCompatActivity() {
         shell.controller.setStatus(statusMessage, statusRetryVisible)
         shell.controller.setLocked(controlsLocked)
         loadingIndicator.visibility = if (waitingForPlayback) View.VISIBLE else View.GONE
-        shell.controller.updateServerLabel(activeVideoSource?.server.orEmpty().ifBlank { "S1" })
+        shell.controller.updateServerLabel(
+            PlayerServerMenuModel.controlLabel(availableVideoSources, selectedSourceIndex)
+        )
         shell.controller.updateQualityLabel(
             PlayerQualityMenuModel.controlLabel(latestPlaybackState.videoQualities, selectedQualityTrackId)
         )
@@ -513,12 +548,17 @@ class PlayerActivity : AppCompatActivity() {
         }
 
         val videoSource = sources.firstOrNull()
+        availableVideoSources = sources
+        selectedSourceIndex = 0
         activeVideoSource = videoSource
+        showDubSources = videoSource?.let(PlayerServerMenuModel::isDub) == true
         selectedQualityTrackId = null
         latestPlaybackState = PlaybackState(speed = playbackSpeed)
         transportVisible = false
         showMessage(R.string.player_starting_playback, arguments = listOf(episode.name), loading = true)
-        shell.controller.updateServerLabel(videoSource?.server.orEmpty().ifBlank { "S1" })
+        shell.controller.updateServerLabel(
+            PlayerServerMenuModel.controlLabel(sources, selectedSourceIndex)
+        )
         shell.controller.updateQualityLabel("AUTO")
         playbackEngine.prepare(source)
         playbackEngine.setSpeed(playbackSpeed)
@@ -620,6 +660,35 @@ class PlayerActivity : AppCompatActivity() {
         if (!transportVisible || controlsLocked) return
         cancelControlsAutoHide()
         qualityMenu.show()
+    }
+
+    private fun showServerMenu() {
+        if (!transportVisible || controlsLocked || availableVideoSources.isEmpty()) return
+        cancelControlsAutoHide()
+        serverMenu.show()
+    }
+
+    private fun selectLanguageMode(showDub: Boolean) {
+        val hasMode = availableVideoSources.any { PlayerServerMenuModel.isDub(it) == showDub }
+        if (!hasMode) return
+        showDubSources = showDub
+    }
+
+    private fun selectVideoSource(sourceIndex: Int) {
+        val source = availableVideoSources.getOrNull(sourceIndex) ?: return
+        if (sourceIndex == selectedSourceIndex || !engineAttached) return
+
+        val resumePositionMs = latestPlaybackState.positionMs.coerceAtLeast(0L)
+        selectedSourceIndex = sourceIndex
+        activeVideoSource = source
+        showDubSources = PlayerServerMenuModel.isDub(source)
+        selectedQualityTrackId = null
+        latestPlaybackState = PlaybackState(speed = playbackSpeed, positionMs = resumePositionMs)
+        shell.controller.updateServerLabel(PlayerServerMenuModel.controlLabel(availableVideoSources, sourceIndex))
+        shell.controller.updateQualityLabel("AUTO")
+        playbackEngine.prepare(source, resumePositionMs)
+        playbackEngine.setSpeed(playbackSpeed)
+        playbackEngine.play()
     }
 
     private fun selectVideoQuality(trackId: String?) {
@@ -837,6 +906,7 @@ class PlayerActivity : AppCompatActivity() {
         internal const val INVALID_MAL_ID = 0
         internal const val INVALID_TOTAL_EPISODES = 0
         internal const val DEFAULT_INITIAL_EPISODE = 1
+        private const val INVALID_SOURCE_INDEX = -1
         private const val PROGRESS_UPDATE_INTERVAL_MS = 250L
         internal const val CONTROLS_AUTO_HIDE_DELAY_MS = 4_000L
         private const val CUSTOM_SUBTITLE_FONT_DIRECTORY = "fonts"
