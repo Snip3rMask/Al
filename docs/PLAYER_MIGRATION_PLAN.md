@@ -707,7 +707,7 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 ### 7.9 Frame Capture [x]
 
 - [x] Capture current frame.
-- [x] Save/share captured frame.
+- [x] Save captured frame.
 - [x] Respect settings toggle and API-level differences.
 
 **Exit gate:** Every control works independently, survives rotation, does not conflict with lock/gesture state, and causes no leak after repeated open/close.
@@ -736,6 +736,13 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - Added persisted `frame_capture_always_visible` support: normal mode keeps the button tied to visible controls, while Always Show leaves it on top of the video even when chrome is hidden.
 - Added a right-side player settings panel with dedicated Frame Capture and Always Show switches; both apply immediately and survive backgrounding.
 - Kept capture disabled in portrait, matching Anifux's current player behavior.
+
+#### Capture Settings Page & Save Folder — 2026-08-26
+
+- Added a dedicated Capture Settings page to the main Settings screen for capture enablement, always-show behavior, save location, and button-position reset.
+- Added a persisted SAF tree-uri preference with a folder picker and retained read/write permissions.
+- Saved frames into an anime-named subfolder inside the selected SAF directory, matching Anifux document-provider structure.
+- Kept scoped app-private storage as the default and fallback location when a selected provider or permission becomes unavailable.
 
 #### Continuous Capture Fix — 2026-08-26
 
@@ -967,9 +974,18 @@ Append dated entries here. Do not delete history.
 - Fixed Part 7.7 entry routing and language switching: Audio owns SUB/DUB, server pill owns server-only selection, and selecting a valid language immediately switches to that mode without silent fallback.
 - Completed Part 7.7 Slice C: background more-sources merging, animated panel loading, automatic same-language fallback, retryable all-failed state, and focused recovery tests.
 
+### 2026-08-26
+
+- Completed the dedicated Capture Settings page and persisted its enable, always-visible, save-location, and button-reset preferences.
+- Added SAF folder selection with retained write access, anime-named destination folders, and safe app-private fallback.
+- Removed the automatic post-capture share sheet so repeated frame captures are not interrupted.
+- Fixed the first Capture Settings CI failure and published green Release `146` from commit `a48a14c6`.
+- Kept Part 7 open pending real-device validation of quality, servers, skip controls, and the completed capture flow.
+
 ## Next Action
 
-1. Install the latest green release and confirm AUTO/manual quality switching still works without resetting position or speed.
-2. Confirm Audio owns SUB/DUB switching while the server pill opens Select Server, background servers merge into the panel, and failure/retry behavior is stable.
-3. Play an anime with known AniSkip data: verify the seekbar markers appear and Skip Intro/Skip Outro appears only inside its interval.
-4. Tap each skip control, verify playback resumes at the interval end with position/speed preserved, then rotate/background/reopen and ensure controls and markers remain stable.
+1. Install Release `146` and confirm AUTO/manual quality switching keeps position and speed stable.
+2. Confirm Audio owns SUB/DUB switching while the server pill opens Select Server, background servers merge, and retry/failure recovery remains stable.
+3. Play an anime with known AniSkip data and verify markers plus Skip Intro/Skip Outro seek exactly to interval ends across rotation/backgrounding.
+4. Validate Capture Settings toggles, SAF folder selection, anime-named saves, private fallback, and uninterrupted repeated captures.
+5. After this Part 7 regression pass, start **Part 8 — Episode Panel & Navigation** with the episode grid and range selector.
