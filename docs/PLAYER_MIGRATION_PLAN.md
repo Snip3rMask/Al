@@ -719,7 +719,7 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - Captured `TextureView` frames directly on all supported APIs and used `PixelCopy` for `SurfaceView` output on Android 8+, with an explicit unsupported message for older SurfaceView combinations.
 - Saved sanitized PNG files under the app-private `Pictures/AtsuLab/{anime title}` directory and exposed them through a scoped FileProvider share chooser, avoiding broad storage permissions.
 - Added persisted capture-enabled preference, saving/saved/failure feedback, repeated-capture guarding, rotation-safe controller ownership, and disposal-safe bitmap handling.
-- Covered filename sanitization and segment limits with focused unit tests; compile and APK validation are delegated to GitHub Actions per project workflow.
+- Covered filename sanitization and segment limits with focused unit tests. GitHub Actions completed unit tests, the debug APK build, and Release `139` with green status at `cec345e3`.
 
 ## Part 8 — Episode Panel & Navigation
 
