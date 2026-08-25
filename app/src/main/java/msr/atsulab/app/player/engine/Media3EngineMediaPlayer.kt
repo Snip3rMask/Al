@@ -9,6 +9,8 @@ import androidx.media3.common.PlaybackException
 import androidx.media3.common.PlaybackParameters
 import androidx.media3.common.Player
 import androidx.media3.common.Tracks
+import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
+import androidx.media3.exoplayer.trackselection.TrackSelectionOverride
 import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.exoplayer.ExoPlayer
@@ -25,6 +27,7 @@ internal class Media3EngineMediaPlayer(
 ) : EngineMediaPlayer {
 
     private var playerView: PlayerView? = null
+    private val trackSelector = DefaultTrackSelector(context.applicationContext)
 
     override var listener: PlaybackEngineListener? = null
 
@@ -52,6 +55,7 @@ internal class Media3EngineMediaPlayer(
 
     private val player: ExoPlayer = ExoPlayer.Builder(context.applicationContext)
         .setAudioAttributes(AudioAttributes.DEFAULT, true)
+        .setTrackSelector(trackSelector)
         .setHandleAudioBecomingNoisy(true)
         .setWakeMode(C.WAKE_MODE_NETWORK)
         .build()
@@ -92,7 +96,8 @@ internal class Media3EngineMediaPlayer(
         } else {
             val subtitleConfiguration = MediaItem.SubtitleConfiguration.Builder(Uri.parse(subtitleUrl))
                 .setMimeType(SubtitleMimeTypes.fromUrl(subtitleUrl))
-                .setLanguage("und")
+                .setLabel("English")
+                .setLanguage("en")
                 .setSelectionFlags(C.SELECTION_FLAG_DEFAULT)
                 .build()
             val subtitleSource = SingleSampleMediaSource.Factory(dataSourceFactory)
@@ -119,6 +124,32 @@ internal class Media3EngineMediaPlayer(
 
     override fun setSpeed(speed: Float) {
         player.playbackParameters = PlaybackParameters(speed)
+    }
+
+    override fun setSubtitleTrack(trackId: String?) {
+        val parametersBuilder = trackSelector.buildUponParameters()
+            .setRendererDisabled(C.TRACK_TYPE_TEXT, trackId == null)
+
+        if (trackId != null) {
+            if (trackId == EXTERNAL_SUBTITLE_TRACK_ID) {
+                trackSelector.setParameters(
+                    trackSelector.buildUponParameters()
+                        .setRendererDisabled(C.TRACK_TYPE_TEXT, false)
+                        .clearOverridesOfType(C.TRACK_TYPE_TEXT)
+                )
+                return
+            }
+            val (groupIndex, trackIndex) = parseTrackId(trackId)
+            val group = player.currentTracks.groups.getOrNull(groupIndex)
+            if (group == null || group.type != C.TRACK_TYPE_TEXT || trackIndex >= group.length) {
+                return
+            }
+            parametersBuilder.setOverrideForType(
+                TrackSelectionOverride(group.mediaTrackGroup, trackIndex)
+            )
+        }
+
+        trackSelector.setParameters(parametersBuilder)
     }
 
     override fun setVideoView(videoView: Any?) {
@@ -155,6 +186,13 @@ internal class Media3EngineMediaPlayer(
                 )
             }
         }
+    }
+
+    private fun parseTrackId(trackId: String): Pair<Int, Int> {
+        val indexes = trackId.split(":")
+        val groupIndex = indexes.getOrNull(0)?.toIntOrNull() ?: return -1 to -1
+        val trackIndex = indexes.getOrNull(1)?.toIntOrNull() ?: return -1 to -1
+        return groupIndex to trackIndex
     }
 
     private fun createDataSourceFactory(source: VideoSource): DefaultDataSource.Factory {

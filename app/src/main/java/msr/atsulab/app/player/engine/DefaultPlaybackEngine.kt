@@ -65,6 +65,12 @@ internal class DefaultPlaybackEngine(
         emitState()
     }
 
+    override fun setSubtitleTrack(trackId: String?) {
+        if (released) return
+        mediaPlayer.setSubtitleTrack(trackId)
+        emitState()
+    }
+
     override fun setVideoView(videoView: Any?) {
         if (!released) mediaPlayer.setVideoView(videoView)
     }

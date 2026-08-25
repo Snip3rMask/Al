@@ -570,15 +570,19 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 ### 7.5 Subtitles [~]
 
 - [x] Embedded subtitle detection.
-- [ ] External subtitle attachment.
-- [ ] Language selection, styling, toggle, and missing-subtitle fallback.
+- [x] External subtitle attachment.
+- [x] Language selection, toggle, and missing-subtitle fallback.
+- [ ] Styling controls and persisted appearance preferences.
 
-#### Part 7.5 Slice A — Embedded Track Detection — 2026-08-25
+#### Part 7.5 Slice B — Selection Menu & Toggle — 2026-08-25
 
-- Added an engine-level subtitle-track snapshot containing stable IDs, display labels, languages, and selected state.
-- Media3 now emits playback-state updates when text tracks change so HLS embedded subtitles are detected without polling.
-- Normalized track labels using Anifux's label/language behavior while skipping tracks with no usable metadata.
-- Added focused metadata coverage; track selection UI, styling, toggling, and fallback remain deferred to the next slices.
+- Added a public engine seam that selects a stable embedded text-track override or disables the text renderer for Off.
+- Added Anifux's full-height right-side subtitle panel at `340dp`, including scrim, slide/fade animation, title, focus outlines, and dismiss behavior.
+- Restored Anifux row geometry: `66dp` buttons with `8dp` margins, selected accent fill, unselected surface fill, exact panel padding, and `Off` last.
+- Wired detected embedded tracks into the menu and applied selections directly through `DefaultTrackSelector` without repreparing playback.
+- Labeled external subtitles as English so they remain selectable after attachment and added a safe English fallback when no usable track snapshot exists yet.
+- Dismissed the subtitle panel on rotation, background, destruction, and shell rebuild; lock/loading boundaries continue to block opening it.
+- Subtitle appearance/style settings remain deferred to a later storage/settings slice.
 
 ### 7.6 Quality Selector
 
@@ -816,8 +820,9 @@ Append dated entries here. Do not delete history.
 - Completed Part 7.4 Speed Control: exact landscape popup, persistent normalized speed, direct Media3 application without stream reset, and safe rotation/lifecycle dismissal.
 - Started Part 7.5 Subtitles with Media3 embedded-track snapshots, track-change emissions, normalized metadata, and focused tests.
 - Completed a player chrome parity pass with Anifux icon/order/offset restoration and corrected compact landscape top placement.
+- Completed Part 7.5 Slice B: embedded subtitle selection, Off toggle, external-subtitle fallback, and the exact Anifux right-side panel.
 
 ## Next Action
 
 1. Install the latest GitHub Release and verify player chrome positions/icons against Anifux, landscape server pill, rewind/forward, rotate, speed menu, persistence, reset-free speed changes, vertical brightness/volume HUD, lock blocking, tap/auto-hide controls, and HLS playback.
-2. After validation, continue Part 7.5 with the subtitle selection menu.
+2. After validation, continue Part 7.5 with subtitle styling controls and persisted appearance preferences.

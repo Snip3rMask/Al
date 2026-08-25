@@ -20,6 +20,7 @@ import msr.atsulab.app.R
 import msr.atsulab.app.player.domain.PlaybackSpeedOptions
 import msr.atsulab.app.player.domain.model.PlaybackAnime
 import msr.atsulab.app.player.domain.model.PlaybackEpisode
+import msr.atsulab.app.player.domain.model.SubtitleTrack
 import msr.atsulab.app.player.domain.model.VideoSource
 import msr.atsulab.app.player.domain.repository.EpisodeRepository
 import msr.atsulab.app.player.domain.repository.VideoSourceRepository
@@ -70,6 +71,26 @@ class PlayerActivity : AppCompatActivity() {
                 }
 
                 override fun onSpeedMenuDismissed() {
+                    scheduleControlsAutoHide()
+                }
+            }
+        )
+    }
+    private val subtitleMenu: PlayerSubtitleMenu by lazy {
+        PlayerSubtitleMenu(
+            this,
+            object : PlayerSubtitleMenu.Callbacks {
+                override fun subtitleTracks(): List<SubtitleTrack> = latestPlaybackState.subtitleTracks
+
+                override fun hasExternalSubtitle(): Boolean =
+                    activeVideoSource?.subtitleUrl?.isNotBlank() == true
+
+                override fun onSubtitleSelected(trackId: String?) {
+                    if (engineAttached) playbackEngine.setSubtitleTrack(trackId)
+                }
+
+                override fun onSubtitleMenuDismissed() {
+                    applySystemBars()
                     scheduleControlsAutoHide()
                 }
             }
@@ -137,6 +158,7 @@ class PlayerActivity : AppCompatActivity() {
         stopProgressLoop()
         cancelControlsAutoHide()
         speedMenu.dismiss(notifyCallbacks = false)
+        subtitleMenu.dismiss(notifyCallbacks = false)
         if (engineAttached) playbackEngine.onBackground()
         super.onStop()
     }
@@ -145,6 +167,7 @@ class PlayerActivity : AppCompatActivity() {
         progressHandler.removeCallbacks(progressRunnable)
         controlsHandler.removeCallbacks(hideControlsRunnable)
         speedMenu.dismiss(notifyCallbacks = false)
+        subtitleMenu.dismiss(notifyCallbacks = false)
         if (::shell.isInitialized) shell.controller.release()
         playbackDisposable?.dispose()
         if (engineAttached) {
@@ -202,6 +225,7 @@ class PlayerActivity : AppCompatActivity() {
 
     private fun rebuildShell() {
         speedMenu.dismiss(notifyCallbacks = false)
+        subtitleMenu.dismiss(notifyCallbacks = false)
         val callbacks = object : PlayerControllerSkeleton.Callbacks {
             override fun onBackClicked() {
                 finish()
@@ -243,7 +267,9 @@ class PlayerActivity : AppCompatActivity() {
 
             override fun onAudioClicked() = Unit
 
-            override fun onSubtitleClicked() = Unit
+            override fun onSubtitleClicked() {
+                showSubtitleMenu()
+            }
 
             override fun onCastClicked() = Unit
 
@@ -499,6 +525,12 @@ class PlayerActivity : AppCompatActivity() {
         if (!transportVisible || controlsLocked) return
         cancelControlsAutoHide()
         speedMenu.show()
+    }
+
+    private fun showSubtitleMenu() {
+        if (!transportVisible || controlsLocked) return
+        cancelControlsAutoHide()
+        subtitleMenu.show()
     }
 
     private fun setPlaybackSpeed(speed: Float) {

@@ -1,7 +1,8 @@
 package msr.atsulab.app.player.engine
 
-import msr.atsulab.app.player.domain.model.SubtitleTrack
 import msr.atsulab.app.player.domain.model.VideoSource
+
+internal const val EXTERNAL_SUBTITLE_TRACK_ID = "external"
 
 enum class PlaybackReadyState {
     IDLE,
@@ -57,6 +58,8 @@ interface PlaybackEngine {
 
     fun setSpeed(speed: Float)
 
+    fun setSubtitleTrack(trackId: String?)
+
     fun setVideoView(videoView: Any?)
 
     fun onBackground()
@@ -80,6 +83,8 @@ internal interface EngineMediaPlayer {
     fun seekTo(positionMs: Long)
 
     fun setSpeed(speed: Float)
+
+    fun setSubtitleTrack(trackId: String?)
 
     fun setVideoView(videoView: Any?)
 
