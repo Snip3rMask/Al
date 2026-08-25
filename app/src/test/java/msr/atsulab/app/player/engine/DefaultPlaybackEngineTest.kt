@@ -73,6 +73,20 @@ class DefaultPlaybackEngineTest {
     }
 
     @Test
+    fun `subtitle selection delegates without repreparing source`() {
+        val mediaPlayer = FakeEngineMediaPlayer()
+        val engine = DefaultPlaybackEngine(mediaPlayer)
+
+        engine.prepare(source)
+        engine.setSubtitleTrack("1:2")
+        engine.setSubtitleTrack(EXTERNAL_SUBTITLE_TRACK_ID)
+        engine.setSubtitleTrack(null)
+
+        assertEquals(1, mediaPlayer.preparedSources.size)
+        assertEquals(listOf("1:2", EXTERNAL_SUBTITLE_TRACK_ID, null), mediaPlayer.subtitleTracks)
+    }
+
+    @Test
     fun `speed change does not reprepare or reset playback position`() {
         val mediaPlayer = FakeEngineMediaPlayer()
         val engine = DefaultPlaybackEngine(mediaPlayer)
@@ -110,8 +124,13 @@ class DefaultPlaybackEngineTest {
         engine.prepare(source)
 
         assertTrue(mediaPlayer.released)
+
+        engine.setSubtitleTrack("1:2")
+
+        assertTrue(mediaPlayer.released)
         assertEquals(0, mediaPlayer.playCount)
         assertEquals(0, mediaPlayer.preparedSources.size)
+        assertTrue(mediaPlayer.subtitleTracks.isEmpty())
     }
 
     @Test
