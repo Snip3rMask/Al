@@ -30,6 +30,7 @@ import msr.atsulab.app.player.engine.PlaybackState
 import msr.atsulab.app.player.storage.PlaybackPreferencesStore
 import java.io.File
 import java.io.IOException
+import kotlin.math.abs
 
 internal class PlayerFrameCaptureManager(
     private val context: Context,
