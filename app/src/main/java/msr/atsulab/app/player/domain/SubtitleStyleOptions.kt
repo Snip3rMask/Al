@@ -48,7 +48,7 @@ object SubtitleStyleOptions {
 
     fun backgroundArgb(style: SubtitleStyle): Int {
         if (style.hasNoBackground) return 0x00000000
-        val alpha = clampPercent(style.backgroundOpacity)
+        val alpha = clampPercent(style.backgroundOpacity) * 255 / 100
         return ColorChannels.argb(alpha, style.backgroundColor)
     }
 
