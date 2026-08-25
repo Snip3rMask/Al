@@ -51,7 +51,6 @@ internal class PlayerPortraitContent(
     }
 
     val view: View = buildView()
-        private set
 
     private val density = context.resources.displayMetrics.density
     private lateinit var subTab: TextView
@@ -250,7 +249,7 @@ internal class PlayerPortraitContent(
                     setTextColor(Color.WHITE)
                     background = GradientDrawable().apply {
                         setColor(PlayerShellMetrics.ACCENT_COLOR)
-                        cornerRadius = dp(100, density).toFloat()
+                        cornerRadius = dp(100).toFloat()
                     }
                 }
             } else {
@@ -262,8 +261,8 @@ internal class PlayerPortraitContent(
                     setTextColor(PlayerShellMetrics.MENU_TEXT_COLOR)
                     background = GradientDrawable().apply {
                         setColor(Color.TRANSPARENT)
-                        cornerRadius = dp(100, density).toFloat()
-                        setStroke(dp(2, density), PlayerShellMetrics.MENU_BORDER_COLOR)
+                        cornerRadius = dp(100).toFloat()
+                        setStroke(dp(2), PlayerShellMetrics.MENU_BORDER_COLOR)
                     }
                     setOnClickListener { callbacks.onServerSelected(option.sourceIndex) }
                 }
@@ -364,8 +363,8 @@ internal class PlayerPortraitContent(
         val search = FrameLayout(context).apply {
             background = GradientDrawable().apply {
                 setColor(PlayerShellMetrics.MENU_SURFACE_COLOR)
-                cornerRadius = dp(27, density).toFloat()
-                setStroke(dp(1, density), PlayerShellMetrics.MENU_BORDER_COLOR)
+                cornerRadius = dp(27).toFloat()
+                setStroke(dp(1), PlayerShellMetrics.MENU_BORDER_COLOR)
             }
         }
         val searchIcon = ImageView(context).apply {
@@ -448,7 +447,7 @@ internal class PlayerPortraitContent(
                 setTextColor(Color.WHITE)
                 background = GradientDrawable().apply {
                     setColor(if (option.isSelected) PlayerShellMetrics.ACCENT_COLOR else PlayerShellMetrics.MENU_BORDER_COLOR)
-                    cornerRadius = dp(10, density).toFloat()
+                    cornerRadius = dp(10).toFloat()
                 }
                 setOnClickListener { callbacks.onEpisodeSelected(option.episode) }
             }
@@ -465,14 +464,14 @@ internal class PlayerPortraitContent(
             orientation = LinearLayout.VERTICAL
             background = GradientDrawable().apply {
                 setColor(PlayerShellMetrics.MENU_BORDER_COLOR)
-                cornerRadius = dp(8, density).toFloat()
+                cornerRadius = dp(8).toFloat()
             }
             setPadding(dp(20), dp(18), dp(20), dp(18))
             layoutParams = LinearLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, dp(126)).apply {
                 topMargin = dp(28)
             }
             addView(TextView(context).apply {
-                text = context.getString(R.string.comments)
+                text = context.getString(R.string.player_comments_title)
                 textSize = 16f
                 typeface = Typeface.DEFAULT_BOLD
                 setTextColor(Color.WHITE)
@@ -496,7 +495,7 @@ internal class PlayerPortraitContent(
             setPadding(0, dp(8), 0, dp(8))
             background = GradientDrawable().apply {
                 setColor(PlayerShellMetrics.MENU_SURFACE_COLOR)
-                cornerRadius = dp(16, density).toFloat()
+                cornerRadius = dp(16).toFloat()
             }
         }
         val list = LinearLayout(context).apply { orientation = LinearLayout.VERTICAL }
@@ -508,7 +507,7 @@ internal class PlayerPortraitContent(
                 if (range.isSelected) {
                     background = GradientDrawable().apply {
                         setColor(PlayerShellMetrics.MENU_SURFACE_COLOR)
-                        cornerRadius = dp(10, density).toFloat()
+                        cornerRadius = dp(10).toFloat()
                     }
                 }
                 setOnClickListener {
@@ -536,7 +535,7 @@ internal class PlayerPortraitContent(
         val maxHeight = minOf(dp(420), context.resources.displayMetrics.heightPixels / 2)
         val popup = PopupWindow(popupScroll, dp(280), minOf(maxHeight, ranges.size * dp(56) + dp(16)), true).apply {
             isOutsideTouchable = true
-            elevation = dp(16, density).toFloat()
+            elevation = dp(16).toFloat()
             setOnDismissListener { rangePopup = null }
         }
         rangePopup = popup

@@ -603,6 +603,7 @@
     <string name="player_list_of_episodes">List of episodes</string>
     <string name="player_number_of_episode">Number of Ep</string>
     <string name="player_comments_preview">Comments need a database to sync.</string>
+    <string name="player_comments_title">Comments</string>
     <string name="player_settings">Player settings</string>
     <string name="player_volume">Volume</string>
     <string name="player_mute">Mute</string>

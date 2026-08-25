@@ -211,7 +211,7 @@ internal class PlayerShellLayoutBuilder(
         } else {
             null
         }
-        portraitContent?.let(lowerPanel::addView)
+        portraitContent?.let { lowerPanel.addView(it) }
         lowerScroll.addView(lowerPanel)
 
         val page = LinearLayout(context).apply { orientation = LinearLayout.VERTICAL }
