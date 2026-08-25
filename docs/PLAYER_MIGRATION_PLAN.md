@@ -770,6 +770,7 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - Added automatic next-episode playback at natural completion with re-entry protection and safe dismissal of the open episode panel.
 - Episode switches now clear stale source, quality, retry, more-server, and skip state; they intentionally reset playback position while retaining persisted speed and subtitle preferences.
 - Refreshed the portrait watching row after an episode change and covered range snapping/bounds/filtering plus explicit navigator selection with focused unit tests.
+- GitHub Actions completed unit tests, the debug APK build, and Release `152` with green status at `ef14c42b`.
 
 ## Part 9 — Source Selection Screen
 
@@ -994,7 +995,7 @@ Append dated entries here. Do not delete history.
 
 ## Next Action
 
-1. Install Release `146` and confirm AUTO/manual quality switching keeps position and speed stable.
+1. Install Release `152` and confirm AUTO/manual quality switching keeps position and speed stable.
 2. Confirm Audio owns SUB/DUB switching while the server pill opens Select Server, background servers merge, and retry/failure recovery remains stable.
 3. Play an anime with known AniSkip data and verify markers plus Skip Intro/Skip Outro seek exactly to interval ends across rotation/backgrounding.
 4. Validate Capture Settings toggles, SAF folder selection, anime-named saves, private fallback, and uninterrupted repeated captures.
