@@ -27,7 +27,7 @@ class PlayerServerMenuModelTest {
 
         assertEquals(listOf("Zoro 1", "Zoro 2"), subOptions.map { it.label })
         assertEquals(listOf(0, 2), subOptions.map { it.sourceIndex })
-        assertEquals(listOf(false, false), subOptions.map { it.isSelected })
+        assertEquals(listOf(false, true), subOptions.map { it.isSelected })
         assertEquals(listOf("Mega 1"), dubOptions.map { it.label })
         assertEquals(listOf(true), dubOptions.map { it.isSelected })
     }
