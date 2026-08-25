@@ -79,7 +79,7 @@ internal class PlayerSubtitleStylePanel(
                 maximum = SubtitleStyleOptions.MAX_FONT_SIZE_PERCENT,
                 suffix = "%",
                 density = density,
-                onSelected = { value ->
+                onChanged = { value ->
                     val percent = SubtitleStyleOptions.fontSizeToPercent(
                         SubtitleStyleOptions.percentToFontSize(value)
                     )

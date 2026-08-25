@@ -73,6 +73,7 @@ object SubtitleStyleOptions {
     const val MAX_PERCENT = 100
     const val MIN_FONT_SIZE_PERCENT = 50
     const val MAX_FONT_SIZE_PERCENT = 300
+    const val MAX_ALPHA = 255
     const val BASE_FRACTIONAL_TEXT_SIZE = 0.0533f
     private const val ALPHA_SHIFT = 24
     private const val RGB_MASK = 0x00FFFFFF
