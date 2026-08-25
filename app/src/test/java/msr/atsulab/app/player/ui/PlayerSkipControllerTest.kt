@@ -11,7 +11,7 @@ class PlayerSkipControllerTest {
     fun `active interval includes start and excludes final second`() {
         val intervals = listOf(SkipInterval(startMs = 1_000L, endMs = 11_000L))
 
-        assertEquals(1_000L, PlayerSkipController.activeInterval(intervals, 999L)?.startMs)
+        assertEquals(1_000L, PlayerSkipController.activeInterval(intervals, 1_000L)?.startMs)
         assertEquals(1_000L, PlayerSkipController.activeInterval(intervals, 9_999L)?.startMs)
         assertEquals(null, PlayerSkipController.activeInterval(intervals, 10_000L))
         assertEquals(null, PlayerSkipController.activeInterval(intervals, 11_000L))
