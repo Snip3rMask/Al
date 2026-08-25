@@ -12,6 +12,11 @@ class PlayerServerMenuModelTest {
     fun `detects dub from source metadata`() {
         assertTrue(PlayerServerMenuModel.isDub(source(language = "English Dub")))
         assertFalse(PlayerServerMenuModel.isDub(source(language = "Japanese Sub")))
+        assertFalse(
+            PlayerServerMenuModel.isDub(
+                source(language = "Sub", displayName = "Provider Dub List")
+            )
+        )
     }
 
     @Test
@@ -43,6 +48,19 @@ class PlayerServerMenuModelTest {
             )
         )
         assertEquals("Source", PlayerServerMenuModel.controlLabel(emptyList(), 0))
+    }
+
+    @Test
+    fun `preferred source keeps active language or selects requested mode`() {
+        val sources = listOf(
+            source(language = "Sub"),
+            source(language = "English Dub"),
+            source(language = "Japanese")
+        )
+
+        assertEquals(2, PlayerServerMenuModel.preferredSourceIndex(sources, 2, showDub = false))
+        assertEquals(1, PlayerServerMenuModel.preferredSourceIndex(sources, 0, showDub = true))
+        assertEquals(-1, PlayerServerMenuModel.preferredSourceIndex(sources.take(1), 0, showDub = true))
     }
 
     private fun source(

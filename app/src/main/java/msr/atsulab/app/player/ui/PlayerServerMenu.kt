@@ -29,7 +29,7 @@ internal class PlayerServerMenu(
 
     private var popup: PopupWindow? = null
 
-    fun show() {
+    fun show(showLanguageTabs: Boolean) {
         dismiss()
         val density = activity.resources.displayMetrics.density
         val root = FrameLayout(activity).apply {
@@ -61,7 +61,7 @@ internal class PlayerServerMenu(
 
         panel.addView(
             TextView(activity).apply {
-                text = "Audio"
+                text = if (showLanguageTabs) "Audio" else "Select Server"
                 textSize = 22f
                 typeface = Typeface.DEFAULT_BOLD
                 setTextColor(Color.WHITE)
@@ -74,18 +74,16 @@ internal class PlayerServerMenu(
         )
 
         val showDub = callbacks.showDub()
-        panel.addView(actionRow("SUB", isSelected = !showDub, density) {
-            if (callbacks.videoSources().any { !PlayerServerMenuModel.isDub(it) }) {
+        if (showLanguageTabs) {
+            panel.addView(actionRow("SUB", isSelected = !showDub, density) {
                 callbacks.onLanguageModeSelected(false)
                 dismiss()
-            }
-        }, linearRowParams(density))
-        panel.addView(actionRow("DUB", isSelected = showDub, density) {
-            if (callbacks.videoSources().any(PlayerServerMenuModel::isDub)) {
+            }, linearRowParams(density))
+            panel.addView(actionRow("DUB", isSelected = showDub, density) {
                 callbacks.onLanguageModeSelected(true)
                 dismiss()
-            }
-        }, linearRowParams(density))
+            }, linearRowParams(density))
+        }
 
         panel.addView(
             TextView(activity).apply {

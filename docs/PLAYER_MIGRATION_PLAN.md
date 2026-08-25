@@ -654,6 +654,13 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - Switched servers by reusing Media3 preparation at the latest captured position, then restored persisted speed without restarting the episode from zero.
 - Guarded empty SUB/DUB modes and dismissed the panel safely across rotation, backgrounding, and destruction.
 
+#### Part 7.7 Slice B — Audio Entry & Language Switch Fix — 2026-08-25
+
+- Moved the SUB/DUB “Audio” panel to the audio icon and made the server pill open a separate “Select Server” list without tabs.
+- Changed SUB/DUB selection from filter-only behavior into Anifux-compatible playback switching: the active source is retained when it already matches, otherwise the first matching source starts at the preserved position.
+- Kept the previous language active when its requested opposite mode has no sources, showed an explicit no-server toast, and prevented silent fallback to the other language.
+- Aligned dub detection with Anifux by using language/server/quality metadata only, avoiding false classification from provider display names.
+
 ### 7.8 Skip Intro/Outro
 
 - [ ] Resolve MAL ID through AniList.
@@ -892,10 +899,12 @@ Append dated entries here. Do not delete history.
 - Completed Part 7.6 Slice A: Media3 HLS video-quality detection with Anifux-compatible labels and descending normalization.
 - Completed Part 7.6 Slice B: AUTO/manual quality UI, Media3 track overrides, reset-free switching, rotation/source-reset handling, and focused unit tests.
 - Completed Part 7.7 Slice A: SUB/DUB filtering, grouped/numbered server rows, active-server highlighting, and position-preserving source switches with focused model tests.
+- Fixed Part 7.7 entry routing and language switching: Audio owns SUB/DUB, server pill owns server-only selection, and selecting a valid language immediately switches to that mode without silent fallback.
 
 ## Next Action
 
 1. Install Release `125` and verify quality pill placement/labels; open Choose quality, switch AUTO/manual repeatedly, confirm position is preserved, rotate during selection, then change episodes and verify selection returns to AUTO.
 2. Re-check subtitle language/Off, styling/custom font, speed, gestures, locking, navigation, and baseline playback after the quality changes.
-3. Push Part 7.7 Slice A when CI-ready, install its release, open the server pill, verify SUB/DUB filtering and active-server highlighting.
-4. Switch servers while playback has progressed, confirm resume position/speed/subtitles remain sane, rotate/background during the panel, change episodes, and confirm source state resets cleanly.
+3. Install the latest server-selector release: confirm Audio opens SUB/DUB, while the server pill opens Select Server only.
+4. Switch between SUB and DUB on a multi-language episode, then verify playback changes to the requested language, preserves position/speed, and never silently falls back when the requested mode is unavailable.
+5. Switch servers from the pill while playback has progressed, rotate/background during panels, change episodes, and confirm source state resets cleanly.

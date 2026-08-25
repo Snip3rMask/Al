@@ -369,10 +369,12 @@ class PlayerActivity : AppCompatActivity() {
             }
 
             override fun onServerClicked() {
-                showServerMenu()
+                showServerMenu(showLanguageTabs = false)
             }
 
-            override fun onAudioClicked() = Unit
+            override fun onAudioClicked() {
+                showServerMenu(showLanguageTabs = true)
+            }
 
             override fun onSubtitleClicked() {
                 showSubtitleMenu()
@@ -662,16 +664,27 @@ class PlayerActivity : AppCompatActivity() {
         qualityMenu.show()
     }
 
-    private fun showServerMenu() {
+    private fun showServerMenu(showLanguageTabs: Boolean) {
         if (!transportVisible || controlsLocked || availableVideoSources.isEmpty()) return
         cancelControlsAutoHide()
-        serverMenu.show()
+        serverMenu.show(showLanguageTabs)
     }
 
     private fun selectLanguageMode(showDub: Boolean) {
-        val hasMode = availableVideoSources.any { PlayerServerMenuModel.isDub(it) == showDub }
-        if (!hasMode) return
+        val preferredIndex = PlayerServerMenuModel.preferredSourceIndex(
+            sources = availableVideoSources,
+            currentSourceIndex = selectedSourceIndex,
+            showDub = showDub
+        )
+        if (preferredIndex < 0 || preferredIndex >= availableVideoSources.size) {
+            showToast(if (showDub) R.string.player_no_dub_servers else R.string.player_no_sub_servers)
+            return
+        }
+
         showDubSources = showDub
+        if (preferredIndex != selectedSourceIndex) {
+            selectVideoSource(preferredIndex)
+        }
     }
 
     private fun selectVideoSource(sourceIndex: Int) {

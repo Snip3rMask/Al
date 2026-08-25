@@ -11,9 +11,19 @@ internal data class ServerOption(
 internal object PlayerServerMenuModel {
 
     fun isDub(source: VideoSource): Boolean {
-        return listOf(source.language, source.server, source.quality, source.displayName).any {
+        return listOf(source.language, source.server, source.quality).any {
             it.contains("dub", ignoreCase = true)
         }
+    }
+
+    fun preferredSourceIndex(
+        sources: List<VideoSource>,
+        currentSourceIndex: Int,
+        showDub: Boolean
+    ): Int {
+        val currentIndex = sources.getOrNull(currentSourceIndex)
+        if (currentIndex != null && isDub(currentIndex) == showDub) return currentSourceIndex
+        return sources.indexOfFirst { isDub(it) == showDub }
     }
 
     fun controlLabel(

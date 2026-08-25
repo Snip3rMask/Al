@@ -585,6 +585,8 @@
     <string name="player_play_pause">Play or pause</string>
     <string name="player_next_episode">Next episode</string>
     <string name="player_audio">Audio</string>
+    <string name="player_no_dub_servers">No DUB servers are available</string>
+    <string name="player_no_sub_servers">No SUB servers are available</string>
     <string name="player_subtitles">Subtitles</string>
     <string name="player_custom_subtitle_font_added">Custom subtitle font added</string>
     <string name="player_custom_subtitle_font_cleared">Custom subtitle font cleared</string>
