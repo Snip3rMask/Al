@@ -12,6 +12,8 @@ internal class PlaybackEpisodeNavigator {
     val currentEpisode: PlaybackEpisode?
         get() = episodes.getOrNull(selectedIndex)
 
+    fun episodes(): List<PlaybackEpisode> = episodes.toList()
+
     fun reset(episodes: List<PlaybackEpisode>, requestedNumber: Int): PlaybackEpisode? {
         this.episodes = episodes.toList()
         val selectedEpisode = episodes.selectPlaybackEpisode(requestedNumber)
@@ -31,6 +33,16 @@ internal class PlaybackEpisodeNavigator {
 
         val targetIndex = selectedIndex + offset
         if (targetIndex !in episodes.indices) return null
+
+        selectedIndex = targetIndex
+        return currentEpisode
+    }
+
+    fun select(target: PlaybackEpisode): PlaybackEpisode? {
+        val targetIndex = episodes.indexOfFirst { episode ->
+            episode.url == target.url && episode.number == target.number
+        }
+        if (targetIndex == INVALID_INDEX) return null
 
         selectedIndex = targetIndex
         return currentEpisode

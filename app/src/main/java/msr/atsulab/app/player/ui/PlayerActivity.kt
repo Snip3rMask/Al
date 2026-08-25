@@ -59,6 +59,33 @@ class PlayerActivity : AppCompatActivity() {
         PlayerFrameCaptureManager(this, playbackPreferencesStore)
     }
 
+    private val episodePanel by lazy {
+        PlayerEpisodePanel(
+            this,
+            object : PlayerEpisodePanel.Callbacks {
+                override fun episodes(): List<PlaybackEpisode> = episodeNavigator.episodes()
+
+                override fun currentEpisode(): PlaybackEpisode? = episodeNavigator.currentEpisode
+
+                override fun rangeStart(): Int = episodeRangeStart
+
+                override fun onRangeSelected(rangeStart: Int) {
+                    episodeRangeStart = rangeStart
+                    episodePanel.refreshIfShowing()
+                }
+
+                override fun onEpisodeSelected(episode: PlaybackEpisode) {
+                    loadSelectedEpisode(episode)
+                }
+
+                override fun onEpisodePanelDismissed() {
+                    applySystemBars()
+                    scheduleControlsAutoHide()
+                }
+            }
+        )
+    }
+
     private lateinit var shell: PlayerShellViews
     private lateinit var playerView: PlayerView
     private lateinit var loadingIndicator: ProgressBar
@@ -90,6 +117,8 @@ class PlayerActivity : AppCompatActivity() {
     private var skipIntervals: List<SkipInterval> = emptyList()
     private var skipFetchKey = ""
     private var selectedQualityTrackId: String? = null
+    private var episodeRangeStart = DEFAULT_INITIAL_EPISODE
+    private var isAutoNextRequested = false
     private val customFontPicker = registerForActivityResult(
         ActivityResultContracts.GetContent()
     ) { uri ->
@@ -288,6 +317,7 @@ class PlayerActivity : AppCompatActivity() {
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
+        episodePanel.dismiss(notifyCallbacks = false)
         rebuildShell()
 
         if (engineAttached) {
@@ -310,6 +340,7 @@ class PlayerActivity : AppCompatActivity() {
         frameCaptureSettingsMenu.dismiss(notifyCallbacks = false)
         dismissSubtitleMenus()
         serverMenu.dismiss(notifyCallbacks = false)
+        episodePanel.dismiss(notifyCallbacks = false)
         if (engineAttached) playbackEngine.onBackground()
         super.onStop()
     }
@@ -322,6 +353,7 @@ class PlayerActivity : AppCompatActivity() {
         dismissSubtitleMenus()
         serverMenu.dismiss(notifyCallbacks = false)
         qualityMenu.dismiss(notifyCallbacks = false)
+        episodePanel.dismiss(notifyCallbacks = false)
         if (::shell.isInitialized) shell.controller.release()
         playbackDisposable?.dispose()
         moreServersDisposable?.dispose()
@@ -368,6 +400,7 @@ class PlayerActivity : AppCompatActivity() {
                         transportVisible = true
                         showControls()
                         showMessage(R.string.player_ended)
+                        playNextEpisodeIfAvailable()
                     }
                     PlaybackReadyState.IDLE -> {
                         transportVisible = false
@@ -386,6 +419,7 @@ class PlayerActivity : AppCompatActivity() {
     private fun rebuildShell() {
         speedMenu.dismiss(notifyCallbacks = false)
         frameCaptureSettingsMenu.dismiss(notifyCallbacks = false)
+        episodePanel.dismiss(notifyCallbacks = false)
         dismissSubtitleMenus()
         serverMenu.dismiss(notifyCallbacks = false)
         qualityMenu.dismiss(notifyCallbacks = false)
@@ -444,7 +478,9 @@ class PlayerActivity : AppCompatActivity() {
 
             override fun onCastClicked() = Unit
 
-            override fun onEpisodeClicked() = Unit
+            override fun onEpisodeClicked() {
+                showEpisodePanel()
+            }
 
             override fun onSettingsClicked() {
                 showFrameCaptureSettings()
@@ -616,6 +652,7 @@ class PlayerActivity : AppCompatActivity() {
             .flatMap { episodes ->
                 val selectedEpisode = episodeNavigator.reset(episodes, requestedEpisode)
                     ?: throw PlaybackUnavailableException()
+                updateEpisodeSelectionState()
                 videoSourceRepository.getSources(anime, selectedEpisode)
                     .map { sources -> selectedEpisode to sources }
             }
@@ -636,6 +673,7 @@ class PlayerActivity : AppCompatActivity() {
         }
 
         val videoSource = sources.firstOrNull()
+        isAutoNextRequested = false
         availableVideoSources = sources
         areMoreServersLoading = false
         hasAllServersFailed = false
@@ -647,6 +685,11 @@ class PlayerActivity : AppCompatActivity() {
         latestPlaybackState = PlaybackState(speed = playbackSpeed)
         transportVisible = false
         showMessage(R.string.player_starting_playback, arguments = listOf(episode.name), loading = true)
+        shell.watchingView?.text = getString(
+            R.string.player_watching_episode,
+            currentAnime?.title.orEmpty(),
+            episode.number.roundToInt().coerceAtLeast(0)
+        )
         shell.controller.updateServerLabel(
             PlayerServerMenuModel.controlLabel(sources, selectedSourceIndex)
         )
@@ -1107,12 +1150,49 @@ class PlayerActivity : AppCompatActivity() {
         updateTransportControls()
     }
 
+    private fun showEpisodePanel() {
+        if (
+            PlayerShellOrientation.fromConfiguration(resources.configuration) != PlayerShellOrientation.LANDSCAPE ||
+            episodeNavigator.currentEpisode == null
+        ) {
+            return
+        }
+        cancelControlsAutoHide()
+        controlsVisible = true
+        updateTransportControls()
+        episodePanel.show()
+    }
+
+    private fun loadSelectedEpisode(target: PlaybackEpisode) {
+        val anime = currentAnime ?: return
+        val episode = episodeNavigator.select(target) ?: return
+        loadEpisode(anime, episode)
+    }
+
+    private fun playNextEpisodeIfAvailable() {
+        val anime = currentAnime ?: return
+        if (isAutoNextRequested || !episodeNavigator.canMove(1)) return
+        val episode = episodeNavigator.move(1) ?: return
+        isAutoNextRequested = true
+        episodePanel.dismiss(notifyCallbacks = false)
+        loadEpisode(anime, episode, resetAutoNext = false)
+    }
+
     private fun loadAdjacentEpisode(offset: Int) {
         val anime = currentAnime ?: return
         if (!transportVisible || controlsLocked || !episodeNavigator.canMove(offset)) return
         val episode = episodeNavigator.move(offset) ?: return
+        loadEpisode(anime, episode)
+    }
 
+    private fun loadEpisode(
+        anime: PlaybackAnime,
+        episode: PlaybackEpisode,
+        resetAutoNext: Boolean = true
+    ) {
         requestedEpisode = episodeNavigator.selectedIndex + 1
+        if (resetAutoNext) isAutoNextRequested = false
+        updateEpisodeSelectionState()
         latestPlaybackState = PlaybackState()
         moreServersDisposable?.dispose()
         areMoreServersLoading = false
@@ -1129,6 +1209,13 @@ class PlayerActivity : AppCompatActivity() {
                 { (selectedEpisode, sources) -> startPlayback(selectedEpisode, sources) },
                 { showError() }
             )
+    }
+
+    private fun updateEpisodeSelectionState() {
+        episodeRangeStart = PlayerEpisodePanelModel.rangeStart(
+            episodes = episodeNavigator.episodes(),
+            currentEpisode = episodeNavigator.currentEpisode
+        )
     }
 
     private fun showMessage(

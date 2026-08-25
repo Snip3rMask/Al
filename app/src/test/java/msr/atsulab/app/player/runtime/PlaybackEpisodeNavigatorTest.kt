@@ -91,3 +91,26 @@ class PlaybackEpisodeNavigatorTest {
         assertNull(navigator.move(1))
     }
 }
+
+    @Test
+    fun `select chooses matching url and number then updates movement`() {
+        val navigator = PlaybackEpisodeNavigator()
+        val first = PlaybackEpisode(name = "First", url = "first", number = 1f)
+        val second = PlaybackEpisode(name = "Second", url = "second", number = 2f)
+        val third = PlaybackEpisode(name = "Third", url = "third", number = 3f)
+        navigator.reset(listOf(first, second, third), requestedNumber = 1)
+
+        assertEquals(second, navigator.select(second.copy(name = "Selected")))
+        assertEquals(1, navigator.selectedIndex)
+        assertEquals(third, navigator.move(1))
+    }
+
+    @Test
+    fun `select rejects unknown episode without changing selection`() {
+        val navigator = PlaybackEpisodeNavigator()
+        val first = PlaybackEpisode(name = "First", url = "first", number = 1f)
+        navigator.reset(listOf(first), requestedNumber = 1)
+
+        assertEquals(null, navigator.select(PlaybackEpisode(name = "Unknown", url = "unknown")))
+        assertEquals(first, navigator.currentEpisode)
+    }

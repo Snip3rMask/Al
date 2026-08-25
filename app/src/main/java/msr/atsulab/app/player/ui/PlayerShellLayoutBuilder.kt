@@ -25,7 +25,8 @@ internal data class PlayerShellViews(
     val loadingIndicator: ProgressBar,
     val gestureHudView: PlayerGestureHudView,
     val skipButton: TextView,
-    val captureButton: ImageView?
+    val captureButton: ImageView?,
+    val watchingView: TextView?
 )
 
 internal class PlayerShellLayoutBuilder(
@@ -223,7 +224,8 @@ internal class PlayerShellLayoutBuilder(
             loadingIndicator,
             gestureHudView,
             skipButton,
-            null
+            null,
+            watchingView
         )
     }
 
@@ -337,7 +339,8 @@ internal class PlayerShellLayoutBuilder(
             loadingIndicator,
             gestureHudView,
             skipButton,
-            captureButton
+            captureButton,
+            null
         )
     }
 

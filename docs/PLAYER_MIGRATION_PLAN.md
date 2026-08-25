@@ -749,17 +749,27 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - Removed the automatic system share sheet after frame saves so repeated captures are not interrupted.
 - Kept silent background saving and the saved/failed toast as the completion signal.
 
-## Part 8 — Episode Panel & Navigation
+## Part 8 — Episode Panel & Navigation [~]
 
 **Goal:** Provide full episode browsing inside the player.
 
-- [ ] Port episode grid and range selector.
-- [ ] Highlight current episode and select episodes manually.
-- [ ] Load full episode list efficiently.
-- [ ] Implement previous, next, and auto-play next behavior.
-- [ ] Preserve expected progress behavior on episode switch.
+- [x] Port episode grid and range selector.
+- [x] Highlight current episode and select episodes manually.
+- [x] Load full episode list efficiently.
+- [x] Implement previous, next, and auto-play next behavior.
+- [x] Preserve expected progress behavior on episode switch.
 
 **Exit gate:** Long lists scroll smoothly, ranges work, current episode is obvious, and boundaries/auto-play behave correctly.
+
+#### Part 8 Slice A — Episode Panel & Auto Navigation — 2026-08-26
+
+- Added the Anifux-style landscape right-slide Episodes panel with a dimmed backdrop, four-column fixed-width grid, total count, and active-episode highlight.
+- Added 100-episode range selection with selected-range emphasis, per-range counts, exact bounds, and filtered grid rendering so large lists avoid building every cell at once.
+- Reused the single full episode-list fetch already owned by `EpisodeRepository`, then kept panel state synchronized with the existing playback navigator.
+- Extended navigation to support explicit episode selection in addition to bounded previous/next movement.
+- Added automatic next-episode playback at natural completion with re-entry protection and safe dismissal of the open episode panel.
+- Episode switches now clear stale source, quality, retry, more-server, and skip state; they intentionally reset playback position while retaining persisted speed and subtitle preferences.
+- Refreshed the portrait watching row after an episode change and covered range snapping/bounds/filtering plus explicit navigator selection with focused unit tests.
 
 ## Part 9 — Source Selection Screen
 
