@@ -46,7 +46,11 @@ class DefaultPlaybackPreferencesStore(
                     BOTTOM_PADDING_KEY,
                     SubtitleStyle.DEFAULT_BOTTOM_PADDING
                 ),
-                shadow = preferences.getInt(SHADOW_KEY, SubtitleStyle.DEFAULT_SHADOW)
+                shadow = preferences.getInt(SHADOW_KEY, SubtitleStyle.DEFAULT_SHADOW),
+                customFontPath = preferences.getString(
+                    CUSTOM_FONT_PATH_KEY,
+                    SubtitleStyle().customFontPath
+                ).orEmpty()
             )
         )
     }
@@ -62,6 +66,7 @@ class DefaultPlaybackPreferencesStore(
             putBoolean(NO_BACKGROUND_KEY, normalizedStyle.hasNoBackground)
             putInt(BOTTOM_PADDING_KEY, normalizedStyle.bottomPadding)
             putInt(SHADOW_KEY, normalizedStyle.shadow)
+            putString(CUSTOM_FONT_PATH_KEY, normalizedStyle.customFontPath)
         }
     }
 
@@ -76,5 +81,6 @@ class DefaultPlaybackPreferencesStore(
         const val NO_BACKGROUND_KEY = "subtitle_bg_none"
         const val BOTTOM_PADDING_KEY = "subtitle_bottom_padding"
         const val SHADOW_KEY = "subtitle_shadow"
+        const val CUSTOM_FONT_PATH_KEY = "subtitle_custom_font_path"
     }
 }

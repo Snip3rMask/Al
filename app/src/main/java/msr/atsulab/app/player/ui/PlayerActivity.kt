@@ -2,6 +2,11 @@ package msr.atsulab.app.player.ui
 
 import android.content.Context
 import android.content.pm.ActivityInfo
+import java.io.File
+import java.io.IOException
+import android.net.Uri
+import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import android.content.res.Configuration
 import android.graphics.Color
 import android.graphics.Typeface
@@ -66,6 +71,11 @@ class PlayerActivity : AppCompatActivity() {
     private var gestureHandler: PlayerGestureHandler? = null
     private var playbackBrightness = BRIGHTNESS_MAX
     private var activeVideoSource: VideoSource? = null
+    private val customFontPicker = registerForActivityResult(
+        ActivityResultContracts.GetContent()
+    ) { uri ->
+        if (uri != null) importCustomSubtitleFont(uri)
+    }
     private val speedMenu: PlayerSpeedMenu by lazy {
         PlayerSpeedMenu(
             this,
@@ -91,6 +101,15 @@ class PlayerActivity : AppCompatActivity() {
                 override fun onSubtitleStyleChanged(style: SubtitleStyle) {
                     playbackPreferencesStore.setSubtitleStyle(style)
                     applySubtitleStyle(style)
+                }
+
+                override fun onCustomFontClicked() {
+                    subtitleStylePanel.dismiss(notifyCallbacks = false)
+                    customFontPicker.launch("*/*")
+                }
+
+                override fun onClearCustomFontClicked() {
+                    clearCustomSubtitleFont()
                 }
 
                 override fun onSubtitleStyleDismissed() {
@@ -537,6 +556,9 @@ class PlayerActivity : AppCompatActivity() {
         updateTransportControls()
     }
 
+    private val customSubtitleFontFile: File
+        get() = File(File(filesDir, CUSTOM_SUBTITLE_FONT_DIRECTORY), CUSTOM_SUBTITLE_FONT_FILE_NAME)
+
     private val audioManager: AudioManager
         get() = getSystemService(Context.AUDIO_SERVICE) as AudioManager
 
@@ -567,6 +589,50 @@ class PlayerActivity : AppCompatActivity() {
         subtitleStylePanel.dismiss(notifyCallbacks = false)
     }
 
+    private fun importCustomSubtitleFont(uri: Uri) {
+        val targetFile = customSubtitleFontFile
+        val temporaryFile = File(cacheDir, CUSTOM_SUBTITLE_FONT_TEMP_NAME)
+        try {
+            contentResolver.openInputStream(uri)?.use { input ->
+                temporaryFile.outputStream().use(input::copyTo)
+            } ?: throw IOException("Selected font stream unavailable")
+
+            runCatching { Typeface.createFromFile(temporaryFile) }
+                .onFailure { throw IOException("Selected file is not a supported font", it) }
+
+            targetFile.parentFile?.mkdirs()
+            if (targetFile.exists() && !targetFile.delete()) throw IOException("Existing font could not be replaced")
+            if (!temporaryFile.renameTo(targetFile)) throw IOException("Selected font could not be saved")
+
+            val style = playbackPreferencesStore.getSubtitleStyle()
+                .copy(customFontPath = targetFile.absolutePath)
+            playbackPreferencesStore.setSubtitleStyle(style)
+            applySubtitleStyle(style)
+            showToast(R.string.player_custom_subtitle_font_added)
+        } catch (_: Exception) {
+            temporaryFile.delete()
+            showToast(R.string.player_invalid_subtitle_font)
+        }
+        refreshSubtitleStylePanelAfterPicker()
+    }
+
+    private fun clearCustomSubtitleFont() {
+        val style = playbackPreferencesStore.getSubtitleStyle().copy(customFontPath = "")
+        playbackPreferencesStore.setSubtitleStyle(style)
+        customSubtitleFontFile.delete()
+        applySubtitleStyle(style)
+        showToast(R.string.player_custom_subtitle_font_cleared)
+        refreshSubtitleStylePanelAfterPicker()
+    }
+
+    private fun refreshSubtitleStylePanelAfterPicker() {
+        if (transportVisible && !controlsLocked) subtitleStylePanel.show()
+    }
+
+    private fun showToast(messageResId: Int) {
+        Toast.makeText(this, messageResId, Toast.LENGTH_SHORT).show()
+    }
+
     private fun applySubtitleStyle(style: SubtitleStyle) {
         if (!::playerView.isInitialized) return
         val subtitleView = playerView.subtitleView ?: return
@@ -580,13 +646,16 @@ class PlayerActivity : AppCompatActivity() {
             SubtitleStyle.FONT_STYLE_BOLD_ITALIC -> Typeface.defaultFromStyle(Typeface.BOLD_ITALIC)
             else -> Typeface.DEFAULT
         }
+        val effectiveTypeface = normalizedStyle.customFontPath.takeIf(String::isNotBlank)
+            ?.let { path -> runCatching { Typeface.createFromFile(path) }.getOrNull() }
+            ?: typeface
         val captionStyle = CaptionStyleCompat(
             normalizedStyle.fontColor,
             SubtitleStyleOptions.backgroundArgb(normalizedStyle),
             Color.TRANSPARENT,
             if (normalizedStyle.shadow > 0) CaptionStyleCompat.EDGE_TYPE_DROP_SHADOW else CaptionStyleCompat.EDGE_TYPE_NONE,
             SubtitleStyleOptions.edgeArgb(normalizedStyle.shadow),
-            typeface
+            effectiveTypeface
         )
         subtitleView.setStyle(captionStyle)
         (subtitleView.layoutParams as? ViewGroup.MarginLayoutParams)?.let { layoutParams ->
@@ -720,6 +789,9 @@ class PlayerActivity : AppCompatActivity() {
         internal const val DEFAULT_INITIAL_EPISODE = 1
         private const val PROGRESS_UPDATE_INTERVAL_MS = 250L
         internal const val CONTROLS_AUTO_HIDE_DELAY_MS = 4_000L
+        private const val CUSTOM_SUBTITLE_FONT_DIRECTORY = "fonts"
+        private const val CUSTOM_SUBTITLE_FONT_FILE_NAME = "custom_subtitle_font.ttf"
+        private const val CUSTOM_SUBTITLE_FONT_TEMP_NAME = "custom_subtitle_font.tmp"
     }
 
     private class PlaybackUnavailableException : IllegalStateException()

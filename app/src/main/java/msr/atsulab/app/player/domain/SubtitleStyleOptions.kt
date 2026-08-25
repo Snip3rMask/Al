@@ -42,7 +42,8 @@ object SubtitleStyleOptions {
             backgroundColor = opaque(style.backgroundColor),
             backgroundOpacity = style.backgroundOpacity.coerceIn(MIN_PERCENT, MAX_PERCENT),
             bottomPadding = style.bottomPadding.coerceIn(MIN_PERCENT, MAX_PERCENT),
-            shadow = style.shadow.coerceIn(MIN_PERCENT, MAX_PERCENT)
+            shadow = style.shadow.coerceIn(MIN_PERCENT, MAX_PERCENT),
+            customFontPath = style.customFontPath.trim()
         )
     }
 

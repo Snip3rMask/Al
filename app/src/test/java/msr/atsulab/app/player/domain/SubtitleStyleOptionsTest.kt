@@ -17,7 +17,8 @@ class SubtitleStyleOptionsTest {
                 backgroundOpacity = 240,
                 hasNoBackground = true,
                 bottomPadding = -5,
-                shadow = 480
+                shadow = 480,
+                customFontPath = " /fonts/custom.ttf "
             )
         )
 
@@ -29,6 +30,7 @@ class SubtitleStyleOptionsTest {
         assertEquals(true, normalized.hasNoBackground)
         assertEquals(0, normalized.bottomPadding)
         assertEquals(100, normalized.shadow)
+        assertEquals("/fonts/custom.ttf", normalized.customFontPath)
     }
 
     @Test

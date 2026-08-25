@@ -8,7 +8,8 @@ data class SubtitleStyle(
     val backgroundOpacity: Int = DEFAULT_BACKGROUND_OPACITY,
     val hasNoBackground: Boolean = false,
     val bottomPadding: Int = DEFAULT_BOTTOM_PADDING,
-    val shadow: Int = DEFAULT_SHADOW
+    val shadow: Int = DEFAULT_SHADOW,
+    val customFontPath: String = ""
 ) {
     companion object {
         const val FONT_STYLE_NORMAL = 0

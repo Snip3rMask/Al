@@ -567,13 +567,13 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - Closed Part 7.4 Speed Control pending real-device validation of the latest green release.
 
 
-### 7.5 Subtitles [~]
+### 7.5 Subtitles [x]
 
 - [x] Embedded subtitle detection.
 - [x] External subtitle attachment.
 - [x] Language selection, toggle, and missing-subtitle fallback.
 - [x] Styling controls and persisted appearance preferences.
-- [ ] Custom subtitle font file selection.
+- [x] Custom subtitle font file selection.
 
 #### Part 7.5 Slice B — Selection Menu & Toggle — 2026-08-25
 
@@ -594,6 +594,14 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - Saved every change immediately in the existing playback preference store and reapplied the normalized style after rotation or shell rebuild.
 - Custom `.ttf` file selection remains the final Part 7.5 follow-up because it needs document/file-picker lifecycle handling.
 - Fixed the real-device style-panel crash by attaching each slider value label only to its slider row instead of first adding it to both the panel and row.
+
+#### Part 7.5 Slice D — Custom Font — 2026-08-25
+
+- Added custom font selection and clear actions to the persisted subtitle style panel.
+- Used the system content picker without runtime storage permissions, then validated and copied the selected TTF/OTF into app-private storage.
+- Persisted the copied font path with the existing playback preference store so it survives rotation, process death, and restarts.
+- Applied the custom typeface through Media3 caption styling while safely falling back to the selected built-in style if a stored file becomes unreadable.
+- Closed Part 7.5 Subtitles.
 
 ### 7.6 Quality Selector
 
@@ -834,8 +842,9 @@ Append dated entries here. Do not delete history.
 - Completed Part 7.5 Slice B: embedded subtitle selection, Off toggle, external-subtitle fallback, and the exact Anifux right-side panel.
 - Completed Part 7.5 Slice C: persisted live subtitle styling controls with direct Media3 caption application.
 - Fixed Release `119` subtitle-style-panel crash caused by a duplicate parent attachment in slider rows.
+- Completed Part 7.5 Slice D: permission-free custom font import, persistence, validation, clearing, and Media3 caption application.
 
 ## Next Action
 
-1. Install the latest GitHub Release and verify player chrome positions/icons against Anifux, landscape server pill, rewind/forward, rotate, speed menu, persistence, reset-free speed changes, vertical brightness/volume HUD, lock blocking, tap/auto-hide controls, and HLS playback.
-2. After validation, complete Part 7.5 with custom subtitle font file selection.
+1. Install the latest GitHub Release and verify subtitle track selection, Off toggle, live styling, custom font import/clearing, chrome positions/icons, speed controls, gestures, lock behavior, rotation persistence, and HLS playback.
+2. After validation, start Part 7.6 Quality Selector with HLS variant detection.

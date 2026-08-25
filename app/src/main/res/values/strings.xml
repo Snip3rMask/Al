@@ -586,6 +586,9 @@
     <string name="player_next_episode">Next episode</string>
     <string name="player_audio">Audio</string>
     <string name="player_subtitles">Subtitles</string>
+    <string name="player_custom_subtitle_font_added">Custom subtitle font added</string>
+    <string name="player_custom_subtitle_font_cleared">Custom subtitle font cleared</string>
+    <string name="player_invalid_subtitle_font">Selected file is not a valid subtitle font</string>
     <string name="player_cast">Cast</string>
     <string name="player_episodes">Episodes</string>
     <string name="player_settings">Player settings</string>

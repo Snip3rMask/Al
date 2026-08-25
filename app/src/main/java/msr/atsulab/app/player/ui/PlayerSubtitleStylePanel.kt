@@ -24,6 +24,8 @@ internal class PlayerSubtitleStylePanel(
     interface Callbacks {
         fun currentSubtitleStyle(): SubtitleStyle
         fun onSubtitleStyleChanged(style: SubtitleStyle)
+        fun onCustomFontClicked()
+        fun onClearCustomFontClicked()
         fun onSubtitleStyleDismissed()
     }
 
@@ -170,6 +172,17 @@ internal class PlayerSubtitleStylePanel(
             callbacks.onSubtitleStyleChanged(style)
         }
 
+        panel.addView(sectionLabel("Custom Font"), sectionMargin(density, 26))
+        panel.addActionButton("Choose font (.ttf/.otf)", true, density) {
+            callbacks.onCustomFontClicked()
+        }
+        panel.addActionButton(
+            "Clear custom font",
+            style.customFontPath.isNotBlank(),
+            density
+        ) {
+            callbacks.onClearCustomFontClicked()
+        }
         panel.addResetButton(density) {
             style = SubtitleStyleOptions.normalize(SubtitleStyle())
             callbacks.onSubtitleStyleChanged(style)
@@ -336,6 +349,24 @@ internal class PlayerSubtitleStylePanel(
             addView(top, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, dp(26, density)))
             addView(seekBar, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, dp(40, density)))
         }
+    }
+
+    private fun LinearLayout.addActionButton(label: String, enabled: Boolean, density: Float, onClick: () -> Unit) {
+        val button = TextView(activity).apply {
+            text = label
+            textSize = 14f
+            typeface = Typeface.DEFAULT_BOLD
+            gravity = Gravity.CENTER
+            setTextColor(PlayerShellMetrics.MENU_TEXT_COLOR)
+            alpha = if (enabled) 1f else 0.35f
+            isEnabled = enabled
+            isFocusable = enabled
+            setOnFocusChangeListener { view, hasFocus ->
+                view.foreground = if (hasFocus && enabled) focusOutline(density) else null
+            }
+            setOnClickListener { onClick() }
+        }
+        addView(button, linearHeightParams(dp(46, density), topMargin = 10))
     }
 
     private fun LinearLayout.addResetButton(density: Float, onClick: () -> Unit) {
