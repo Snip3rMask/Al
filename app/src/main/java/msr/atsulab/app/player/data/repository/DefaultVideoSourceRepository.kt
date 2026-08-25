@@ -1,5 +1,6 @@
 package msr.atsulab.app.player.data.repository
 
+import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Single
 import msr.atsulab.app.player.diagnostics.NoOpPlaybackDiagnostics
 import msr.atsulab.app.player.diagnostics.PlaybackDiagnostics
@@ -25,6 +26,20 @@ class DefaultVideoSourceRepository(
             .map { sources -> sortByPreferences(sources, preferredLanguage, preferredServer) }
     }
 
+    override fun getMoreSources(
+        anime: PlaybackAnime,
+        episode: PlaybackEpisode
+    ): Single<List<VideoSource>> {
+        val remainingProviders = orderedProviders(episode.providerId)
+            .filter { it.id != episode.providerId }
+        if (remainingProviders.isEmpty()) return Single.just(emptyList())
+
+        return Observable.fromIterable(remainingProviders)
+            .flatMapSingle { provider -> resolveProviderSources(provider, anime, episode) }
+            .toList()
+            .map { sources -> sortByPreferences(sources, preferredLanguage = null, preferredServer = null) }
+    }
+
     private fun orderedProviders(providerId: String?): List<SourceProvider> {
         if (providerId.isNullOrBlank()) return providers
         val target = providers.firstOrNull { it.id == providerId } ?: return providers
@@ -38,7 +53,20 @@ class DefaultVideoSourceRepository(
         index: Int = 0
     ): Single<List<VideoSource>> {
         if (index >= providers.size) return Single.just(emptyList())
-        val provider = providers[index]
+
+        return resolveProviderSources(providers[index], anime, episode, index)
+            .flatMap { sources ->
+                if (sources.isEmpty()) resolveFromProviders(providers, anime, episode, index + 1)
+                else Single.just(sources)
+            }
+    }
+
+    private fun resolveProviderSources(
+        provider: SourceProvider,
+        anime: PlaybackAnime,
+        episode: PlaybackEpisode,
+        providerIndex: Int = 0
+    ): Single<List<VideoSource>> {
         val candidate = SourceCandidate(
             id = episode.playbackId.ifBlank { anime.aniListId.toString() },
             title = episode.postTitle.ifBlank { anime.title },
@@ -51,23 +79,21 @@ class DefaultVideoSourceRepository(
                 if (sources.isEmpty()) {
                     diagnostics.onSourceProviderSkipped(
                         providerId = provider.id,
-                        providerIndex = index,
+                        providerIndex = providerIndex,
                         playbackId = episode.playbackId.ifBlank { anime.aniListId.toString() },
                         reason = "no-sources"
                     )
-                    resolveFromProviders(providers, anime, episode, index + 1)
-                } else {
-                    Single.just(sources)
                 }
+                Single.just(sources)
             }
             .onErrorResumeNext { error ->
                 diagnostics.onSourceProviderFailed(
                     providerId = provider.id,
-                    providerIndex = index,
+                    providerIndex = providerIndex,
                     playbackId = episode.playbackId.ifBlank { anime.aniListId.toString() },
                     error = error
                 )
-                resolveFromProviders(providers, anime, episode, index + 1)
+                Single.just(emptyList())
             }
     }
 

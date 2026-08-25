@@ -93,4 +93,27 @@ class DefaultVideoSourceRepositoryTest {
 
         assertEquals(listOf("server-sub", "other-dub"), sources.map { it.url })
     }
+
+    @Test
+    fun `more sources merge remaining providers and skip failures`() {
+        val mkissa = FakeSourceProvider(id = "mkissa")
+        val anifux = FakeSourceProvider(
+            id = "anifux",
+            sources = listOf(VideoSource(quality = "1080p", url = "https://cdn.example/anifux.m3u8"))
+        )
+        val daki = FakeSourceProvider(
+            id = "daki",
+            sources = listOf(VideoSource(quality = "HLS", url = "https://cdn.example/daki.m3u8"))
+        )
+        val repository = DefaultVideoSourceRepository(listOf(mkissa, anifux, daki))
+
+        val sources = repository.getMoreSources(anime, episode.copy(providerId = "anifux"))
+            .test().await().values().single()
+
+        assertEquals(0, anifux.sourceCalls)
+        assertEquals(1, mkissa.sourceCalls)
+        assertEquals(1, daki.sourceCalls)
+        assertEquals(listOf("https://cdn.example/daki.m3u8"), sources.map { it.url })
+        assertEquals("daki", sources.single().providerId)
+    }
 }

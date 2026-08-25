@@ -62,6 +62,7 @@ class PlayerActivity : AppCompatActivity() {
     private var requestedEpisode = DEFAULT_INITIAL_EPISODE
     private var engineAttached = false
     private var playbackDisposable: Disposable? = null
+    private var moreServersDisposable: Disposable? = null
     private var statusMessage = ""
     private var statusRetryVisible = false
     private var waitingForPlayback = true
@@ -75,6 +76,9 @@ class PlayerActivity : AppCompatActivity() {
     private var availableVideoSources: List<VideoSource> = emptyList()
     private var selectedSourceIndex = INVALID_SOURCE_INDEX
     private var showDubSources = false
+    private var areMoreServersLoading = false
+    private var hasAllServersFailed = false
+    private val failedSourceIndexes = mutableSetOf<Int>()
     private var selectedQualityTrackId: String? = null
     private val customFontPicker = registerForActivityResult(
         ActivityResultContracts.GetContent()
@@ -185,6 +189,14 @@ class PlayerActivity : AppCompatActivity() {
                     selectVideoSource(sourceIndex)
                 }
 
+                override fun isMoreServersLoading(): Boolean = areMoreServersLoading
+
+                override fun hasAllServersFailed(): Boolean = hasAllServersFailed
+
+                override fun onRetryServersClicked() {
+                    retryServerSources()
+                }
+
                 override fun onServerMenuDismissed() {
                     applySystemBars()
                     scheduleControlsAutoHide()
@@ -269,6 +281,7 @@ class PlayerActivity : AppCompatActivity() {
         qualityMenu.dismiss(notifyCallbacks = false)
         if (::shell.isInitialized) shell.controller.release()
         playbackDisposable?.dispose()
+        moreServersDisposable?.dispose()
         if (engineAttached) {
             playbackEngine.release()
             engineAttached = false
@@ -301,6 +314,8 @@ class PlayerActivity : AppCompatActivity() {
                         if (!PlaybackSpeedOptions.isSelected(state.speed, playbackSpeed)) {
                             playbackEngine.setSpeed(playbackSpeed)
                         }
+                        hasAllServersFailed = false
+                        failedSourceIndices.remove(selectedSourceIndex)
                         showMessage(R.string.player_playing)
                     }
                     PlaybackReadyState.ENDED -> {
@@ -317,7 +332,7 @@ class PlayerActivity : AppCompatActivity() {
             }
 
             override fun onError(error: PlaybackError) {
-                showError()
+                handlePlaybackError()
             }
         }
     }
@@ -525,6 +540,10 @@ class PlayerActivity : AppCompatActivity() {
     private fun loadPlayback(anime: PlaybackAnime) {
         showMessage(R.string.player_loading_episode, arguments = listOf(anime.title, requestedEpisode), loading = true)
         playbackDisposable?.dispose()
+        moreServersDisposable?.dispose()
+        areMoreServersLoading = false
+        hasAllServersFailed = false
+        failedSourceIndices.clear()
 
         playbackDisposable = episodeRepository.getEpisodes(anime)
             .flatMap { episodes ->
@@ -551,6 +570,9 @@ class PlayerActivity : AppCompatActivity() {
 
         val videoSource = sources.firstOrNull()
         availableVideoSources = sources
+        areMoreServersLoading = false
+        hasAllServersFailed = false
+        failedSourceIndices.clear()
         selectedSourceIndex = 0
         activeVideoSource = videoSource
         showDubSources = videoSource?.let(PlayerServerMenuModel::isDub) == true
@@ -565,6 +587,7 @@ class PlayerActivity : AppCompatActivity() {
         playbackEngine.prepare(source)
         playbackEngine.setSpeed(playbackSpeed)
         playbackEngine.play()
+        loadMoreSources(episode)
     }
 
     private fun handlePlayerTap() {
@@ -662,6 +685,80 @@ class PlayerActivity : AppCompatActivity() {
         if (!transportVisible || controlsLocked) return
         cancelControlsAutoHide()
         qualityMenu.show()
+    }
+
+    private fun loadMoreSources(episode: PlaybackEpisode) {
+        if (areMoreServersLoading && !force) return
+        if (!engineAttached) return
+        val anime = currentAnime ?: return
+
+        moreServersDisposable?.dispose()
+        areMoreServersLoading = true
+        moreServersDisposable = videoSourceRepository.getMoreSources(anime, episode)
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(
+                { additionalSources -> finishLoadingMoreServers(additionalSources) },
+                { finishLoadingMoreServers(emptyList()) }
+            )
+    }
+
+    private fun finishLoadingMoreServers(additionalSources: List<VideoSource>) {
+        val knownUrls = availableVideoSources.mapTo(mutableSetOf(), VideoSource::url)
+        val uniqueSources = additionalSources.filter { source ->
+            source.url.isNotBlank() && knownUrls.add(source.url)
+        }
+        if (uniqueSources.isNotEmpty()) {
+            availableVideoSources += uniqueSources
+        }
+        areMoreServersLoading = false
+        serverMenu.refreshIfShowing()
+
+        if (selectedSourceIndex in failedSourceIndexes) {
+            tryRecoverFromFailedSource()
+        }
+    }
+
+    private fun retryServerSources() {
+        hasAllServersFailed = false
+        areMoreServersLoading = false
+        failedSourceIndices.clear()
+        loadPlayback()
+    }
+
+    private fun handlePlaybackError() {
+        if (availableVideoSources.isEmpty() || selectedSourceIndex !in availableVideoSources.indices) {
+            showError()
+            return
+        }
+
+        failedSourceIndexes += selectedSourceIndex
+        if (areMoreServersLoading) {
+            showMessage(R.string.player_trying_another_server)
+            return
+        }
+        tryRecoverFromFailedSource()
+    }
+
+    private fun tryRecoverFromFailedSource() {
+        val fallbackIndex = PlayerServerMenuModel.fallbackSourceIndex(
+            sources = availableVideoSources,
+            currentSourceIndex = selectedSourceIndex,
+            failedSourceIndexes = failedSourceIndexes,
+            showDub = showDubSources
+        )
+        if (fallbackIndex >= 0) {
+            selectVideoSource(fallbackIndex)
+            return
+        }
+        markAllServersFailed()
+    }
+
+    private fun markAllServersFailed() {
+        hasAllServersFailed = true
+        areMoreServersLoading = false
+        transportVisible = false
+        serverMenu.refreshIfShowing()
+        showMessage(R.string.player_no_working_source, retryVisible = true)
     }
 
     private fun showServerMenu(showLanguageTabs: Boolean) {
@@ -859,6 +956,10 @@ class PlayerActivity : AppCompatActivity() {
 
         requestedEpisode = episodeNavigator.selectedIndex + 1
         latestPlaybackState = PlaybackState()
+        moreServersDisposable?.dispose()
+        areMoreServersLoading = false
+        hasAllServersFailed = false
+        failedSourceIndices.clear()
         transportVisible = false
         showMessage(R.string.player_loading_episode, arguments = listOf(anime.title, requestedEpisode), loading = true)
         playbackDisposable?.dispose()

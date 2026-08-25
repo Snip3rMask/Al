@@ -63,6 +63,24 @@ class PlayerServerMenuModelTest {
         assertEquals(-1, PlayerServerMenuModel.preferredSourceIndex(sources.take(1), 0, showDub = true))
     }
 
+    @Test
+    fun `fallback prefers same language and skips failed indexes`() {
+        val sources = listOf(
+            source(language = "Sub"),
+            source(language = "English Dub"),
+            source(language = "Japanese")
+        )
+
+        val index = PlayerServerMenuModel.fallbackSourceIndex(
+            sources = sources,
+            currentSourceIndex = 0,
+            failedSourceIndexes = setOf(2),
+            showDub = false
+        )
+
+        assertEquals(1, index)
+    }
+
     private fun source(
         displayName: String = "",
         language: String = "Sub",

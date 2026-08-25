@@ -637,13 +637,13 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - Blocked selections for missing track IDs and added focused coverage for option ordering, label mapping, engine delegation, and position preservation.
 - Marked Part 7.6 code-complete pending Release device validation.
 
-### 7.7 Server Selector
+### 7.7 Server Selector [~]
 
 - [x] SUB/DUB tabs and server list.
 - [x] Active server indicator.
-- [ ] Loading-more state.
+- [x] Loading-more state.
 - [x] Switch server with minimal progress loss.
-- [ ] Clear all-servers-failed state.
+- [x] Clear all-servers-failed state.
 
 #### Part 7.7 Slice A — Language Tabs & Server List — 2026-08-25
 
@@ -660,6 +660,15 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - Changed SUB/DUB selection from filter-only behavior into Anifux-compatible playback switching: the active source is retained when it already matches, otherwise the first matching source starts at the preserved position.
 - Kept the previous language active when its requested opposite mode has no sources, showed an explicit no-server toast, and prevented silent fallback to the other language.
 - Aligned dub detection with Anifux by using language/server/quality metadata only, avoiding false classification from provider display names.
+
+#### Part 7.7 Slice C — More Servers & Failure Recovery — 2026-08-25
+
+- Added a secondary source-resolution contract that queries remaining providers without re-querying the provider that produced the current episode.
+- Kept first playback startup fast, merged additional provider sources in the background, deduplicated URLs, and preserved active-source indexes while appending rows.
+- Added the Anifux-style animated “Loading more servers...” row to the server panel.
+- Added automatic playback fallback: a failed source is remembered, the first usable same-language source is tried next, and other-language sources are used only when needed.
+- Added explicit “No working server” terminal state with retry, cleared failed state on successful READY/manual selection/new episode/reload, and refreshed an open panel when loading or failure state changes.
+- Covered remaining-provider merging, provider failure isolation, same-language fallback priority, and failed-index handling with focused tests.
 
 ### 7.8 Skip Intro/Outro
 
@@ -900,11 +909,11 @@ Append dated entries here. Do not delete history.
 - Completed Part 7.6 Slice B: AUTO/manual quality UI, Media3 track overrides, reset-free switching, rotation/source-reset handling, and focused unit tests.
 - Completed Part 7.7 Slice A: SUB/DUB filtering, grouped/numbered server rows, active-server highlighting, and position-preserving source switches with focused model tests.
 - Fixed Part 7.7 entry routing and language switching: Audio owns SUB/DUB, server pill owns server-only selection, and selecting a valid language immediately switches to that mode without silent fallback.
+- Completed Part 7.7 Slice C: background more-sources merging, animated panel loading, automatic same-language fallback, retryable all-failed state, and focused recovery tests.
 
 ## Next Action
 
-1. Install Release `125` and verify quality pill placement/labels; open Choose quality, switch AUTO/manual repeatedly, confirm position is preserved, rotate during selection, then change episodes and verify selection returns to AUTO.
-2. Re-check subtitle language/Off, styling/custom font, speed, gestures, locking, navigation, and baseline playback after the quality changes.
-3. Install the latest server-selector release: confirm Audio opens SUB/DUB, while the server pill opens Select Server only.
-4. Switch between SUB and DUB on a multi-language episode, then verify playback changes to the requested language, preserves position/speed, and never silently falls back when the requested mode is unavailable.
-5. Switch servers from the pill while playback has progressed, rotate/background during panels, change episodes, and confirm source state resets cleanly.
+1. Install the latest server-selection release and confirm the server pill still opens Select Server while Audio owns SUB/DUB.
+2. Keep the server panel open during background provider loading and verify the animated Loading more servers row appears, then disappears after merge.
+3. Force or simulate a bad source if available and verify AtsuLab remembers it, tries another same-language server, preserves position/speed where possible, and never repeats the failed index automatically.
+4. Verify the No working server + Retry terminal flow, episode/source reload clears failure state, and rotation/background does not duplicate loaders or leak panels.

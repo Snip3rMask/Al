@@ -12,4 +12,9 @@ interface VideoSourceRepository {
         preferredLanguage: String? = null,
         preferredServer: String? = null
     ): Single<List<VideoSource>>
+
+    fun getMoreSources(
+        anime: PlaybackAnime,
+        episode: PlaybackEpisode
+    ): Single<List<VideoSource>> = Single.just(emptyList())
 }

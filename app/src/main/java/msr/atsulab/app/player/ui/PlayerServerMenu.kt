@@ -1,10 +1,12 @@
 package msr.atsulab.app.player.ui
 
 import android.app.Activity
+import android.animation.ValueAnimator
 import android.graphics.Color
 import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
 import android.view.Gravity
+import android.view.View
 import android.view.WindowManager
 import android.widget.FrameLayout
 import android.widget.LinearLayout
@@ -24,6 +26,9 @@ internal class PlayerServerMenu(
         fun showDub(): Boolean
         fun onLanguageModeSelected(showDub: Boolean)
         fun onServerSelected(sourceIndex: Int)
+        fun isMoreServersLoading(): Boolean
+        fun hasAllServersFailed(): Boolean
+        fun onRetryServersClicked()
         fun onServerMenuDismissed()
     }
 
@@ -111,6 +116,56 @@ internal class PlayerServerMenu(
                     callbacks.onServerSelected(option.sourceIndex)
                     dismiss()
                 }
+            }, linearRowParams(density))
+        }
+
+        if (callbacks.isMoreServersLoading()) {
+            val loadingText = TextView(activity).apply {
+                text = "Loading more servers..."
+                textSize = 12f
+                setTextColor(PlayerShellMetrics.MENU_TEXT_COLOR)
+                gravity = Gravity.CENTER_VERTICAL
+                setPadding(dp(16, density), dp(10, density), dp(16, density), dp(10, density))
+                alpha = 0.45f
+            }
+            val animator = ValueAnimator.ofFloat(0.45f, 1f).apply {
+                duration = 700
+                repeatMode = ValueAnimator.REVERSE
+                repeatCount = ValueAnimator.INFINITE
+                addUpdateListener { animation -> loadingText.alpha = animation.animatedValue as Float }
+            }
+            loadingText.addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
+                override fun onViewAttachedToWindow(view: View) = animator.start()
+                override fun onViewDetachedFromWindow(view: View) = animator.cancel()
+            })
+            if (loadingText.isAttachedToWindow) animator.start()
+            panel.addView(
+                loadingText,
+                LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, dp(54, density))
+            )
+        }
+
+        val hasOptions = PlayerServerMenuModel.options(
+            sources = callbacks.videoSources(),
+            selectedIndex = callbacks.selectedSourceIndex(),
+            showDub = callbacks.showDub()
+        ).isNotEmpty()
+        if (!hasOptions) {
+            panel.addView(
+                TextView(activity).apply {
+                    text = if (callbacks.hasAllServersFailed()) "No working sources" else "No servers available"
+                    textSize = 16f
+                    typeface = Typeface.DEFAULT_BOLD
+                    setTextColor(PlayerShellMetrics.MENU_TEXT_COLOR)
+                    gravity = Gravity.CENTER_VERTICAL
+                },
+                LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, dp(54, density))
+            )
+        }
+        if (callbacks.hasAllServersFailed()) {
+            panel.addView(actionRow("Retry", isSelected = false, density) {
+                callbacks.onRetryServersClicked()
+                dismiss()
             }, linearRowParams(density))
         }
 

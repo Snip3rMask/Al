@@ -26,6 +26,20 @@ internal object PlayerServerMenuModel {
         return sources.indexOfFirst { isDub(it) == showDub }
     }
 
+    fun fallbackSourceIndex(
+        sources: List<VideoSource>,
+        currentSourceIndex: Int,
+        failedSourceIndexes: Set<Int>,
+        showDub: Boolean
+    ): Int {
+        val candidates = sources.indices.filter { index ->
+            index != currentSourceIndex && index !in failedSourceIndexes
+        }
+        return candidates.firstOrNull { isDub(sources[it]) == showDub }
+            ?: candidates.firstOrNull()
+            ?: -1
+    }
+
     fun controlLabel(
         sources: List<VideoSource>,
         selectedIndex: Int

@@ -581,6 +581,8 @@
     <string name="player_playing">Playing</string>
     <string name="player_ended">Playback ended</string>
     <string name="player_runtime_error">Playback could not be started.</string>
+    <string name="player_trying_another_server">Trying another server…</string>
+    <string name="player_no_working_source">No working server was found.</string>
     <string name="player_previous_episode">Previous episode</string>
     <string name="player_play_pause">Play or pause</string>
     <string name="player_next_episode">Next episode</string>
