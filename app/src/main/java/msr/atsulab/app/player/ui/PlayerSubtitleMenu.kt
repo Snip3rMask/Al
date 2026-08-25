@@ -42,7 +42,7 @@ internal class PlayerSubtitleMenu(
         }
 
         val scroll = ScrollView(activity).apply {
-            verticalScrollBarEnabled = false
+            isVerticalScrollBarEnabled = false
             isFocusable = false
             clipToPadding = false
             setPadding(0, 0, 0, dp(PlayerShellMetrics.SUBTITLE_PANEL_BOTTOM_PADDING_DP, density))
@@ -89,7 +89,7 @@ internal class PlayerSubtitleMenu(
 
         scroll.addView(
             panel,
-            ScrollView.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.WRAP_CONTENT)
+            FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.WRAP_CONTENT)
         )
         root.addView(
             scroll,

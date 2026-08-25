@@ -21,7 +21,7 @@ internal object PlayerSubtitleMenuModel {
                 label = track.label,
                 isSelected = track.isSelected
             )
-        }
+        }.toMutableList()
         if (subtitleOptions.isEmpty() && hasExternalSubtitle) {
             subtitleOptions += SubtitleTrackOption(
                 id = EXTERNAL_SUBTITLE_TRACK_ID,
@@ -35,6 +35,6 @@ internal object PlayerSubtitleMenuModel {
             label = "Off",
             isSelected = subtitleOptions.none(SubtitleTrackOption::isSelected)
         )
-    }
 
+}
 }
