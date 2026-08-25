@@ -23,4 +23,6 @@ internal object PlayerSkipController {
             R.string.player_skip_intro
         }
     }
+
+    private const val ACTIVE_TAIL_MS = 1_000L
 }
