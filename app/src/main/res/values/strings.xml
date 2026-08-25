@@ -606,5 +606,13 @@
     <string name="player_unlock_controls">Unlock player controls</string>
     <string name="player_skip_intro">Skip intro</string>
     <string name="player_skip_outro">Skip outro</string>
+    <string name="player_capture_frame">Capture frame</string>
+    <string name="player_capture_saving">Saving frame…</string>
+    <string name="player_capture_saved">Frame saved</string>
+    <string name="player_capture_failed">Frame capture failed</string>
+    <string name="player_capture_unsupported">Frame capture is not supported on this Android version</string>
+    <string name="player_capture_share">Share frame</string>
+    <string name="player_capture_enabled">Frame capture enabled</string>
+    <string name="player_capture_disabled">Frame capture disabled</string>
     <string name="retry">Retry</string>
 </resources>

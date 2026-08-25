@@ -40,6 +40,8 @@ internal class PlayerControllerSkeleton(
         fun onCastClicked()
         fun onEpisodeClicked()
         fun onSettingsClicked()
+        fun onFrameCaptureClicked()
+        fun onFrameCaptureToggleClicked()
         fun onVolumeClicked()
         fun onRewindClicked()
         fun onForwardClicked()
@@ -80,6 +82,12 @@ internal class PlayerControllerSkeleton(
         private set
 
     var rotateButton: ImageView? = null
+        private set
+
+    var captureButton: ImageView? = null
+        private set
+
+    var isFrameCaptureEnabled: Boolean = true
         private set
 
     var isControlsLocked: Boolean = false
@@ -166,6 +174,8 @@ internal class PlayerControllerSkeleton(
         val effectiveVisible = isVisible && controlsShown && !isControlsLocked
         topBar.visibility = if (effectiveVisible) View.VISIBLE else View.GONE
         transportControls.visibility = if (effectiveVisible) View.VISIBLE else View.GONE
+        captureButton?.visibility =
+            if (effectiveVisible && isFrameCaptureEnabled) View.VISIBLE else View.GONE
         playPauseButton.setImageResource(
             if (isPlaying) R.drawable.ic_player_pause_modern else R.drawable.ic_player_play_modern
         )
@@ -189,6 +199,13 @@ internal class PlayerControllerSkeleton(
             seekBar.progress,
             progressFraction(bufferedPositionMs, durationMs)
         )
+    }
+
+    fun setFrameCaptureEnabled(enabled: Boolean) {
+        isFrameCaptureEnabled = enabled
+        val effectiveVisible = transportVisible && controlsVisible && !isControlsLocked
+        captureButton?.visibility =
+            if (effectiveVisible && enabled) View.VISIBLE else View.GONE
     }
 
     private fun progressFraction(positionMs: Long, durationMs: Long): Int {
@@ -291,6 +308,17 @@ internal class PlayerControllerSkeleton(
                 )
             }
 
+            addView(
+                createPlayerIcon(R.drawable.ic_player_capture_modern, R.string.player_capture_frame) {
+                    callbacks.onFrameCaptureClicked()
+                }.apply {
+                    setOnLongClickListener {
+                        callbacks.onFrameCaptureToggleClicked()
+                        true
+                    }
+                }.also { captureButton = it },
+                topIconParams(density)
+            )
             addView(
                 createPlayerIcon(R.drawable.ic_player_audio_modern, R.string.player_audio) {
                     callbacks.onAudioClicked()

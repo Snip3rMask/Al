@@ -7,6 +7,10 @@ interface PlaybackPreferencesStore {
 
     fun setSpeed(speed: Float)
 
+    fun isFrameCaptureEnabled(): Boolean
+
+    fun setFrameCaptureEnabled(enabled: Boolean)
+
     fun getSubtitleStyle(): SubtitleStyle
 
     fun setSubtitleStyle(style: SubtitleStyle)

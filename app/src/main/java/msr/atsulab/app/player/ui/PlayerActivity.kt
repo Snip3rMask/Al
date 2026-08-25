@@ -55,6 +55,10 @@ class PlayerActivity : AppCompatActivity() {
     private val playbackEngine: PlaybackEngine by inject(PlaybackEngine::class.java)
     private val playbackPreferencesStore: PlaybackPreferencesStore by inject(PlaybackPreferencesStore::class.java)
 
+    private val frameCaptureManager by lazy {
+        PlayerFrameCaptureManager(this, playbackPreferencesStore)
+    }
+
     private lateinit var shell: PlayerShellViews
     private lateinit var playerView: PlayerView
     private lateinit var loadingIndicator: ProgressBar
@@ -293,6 +297,7 @@ class PlayerActivity : AppCompatActivity() {
             playbackEngine.release()
             engineAttached = false
         }
+        frameCaptureManager.release()
         super.onDestroy()
     }
 
@@ -407,7 +412,17 @@ class PlayerActivity : AppCompatActivity() {
 
             override fun onEpisodeClicked() = Unit
 
-            override fun onSettingsClicked() = Unit
+            override fun onSettingsClicked() {
+                toggleFrameCapture()
+            }
+
+            override fun onFrameCaptureClicked() {
+                captureCurrentFrame()
+            }
+
+            override fun onFrameCaptureToggleClicked() {
+                toggleFrameCapture()
+            }
 
             override fun onVolumeClicked() = Unit
 
@@ -433,6 +448,9 @@ class PlayerActivity : AppCompatActivity() {
         val episodeLabel = getString(R.string.player_shell_status_format, title, requestedEpisode)
 
         shell = PlayerShellLayoutBuilder(this, callbacks).build(title, episodeLabel)
+        shell.controller.setFrameCaptureEnabled(
+            playbackPreferencesStore.isFrameCaptureEnabled()
+        )
         shell.skipButton.setOnClickListener { skipActiveSection() }
         val gestureHandler = PlayerGestureHandler(
             this,
@@ -762,6 +780,29 @@ class PlayerActivity : AppCompatActivity() {
         latestPlaybackState = latestPlaybackState.copy(positionMs = interval.endMs)
         if (!latestPlaybackState.playWhenReady) playbackEngine.play()
         updateTransportControls()
+    }
+
+    private fun toggleFrameCapture() {
+        val isEnabled = !playbackPreferencesStore.isFrameCaptureEnabled()
+        playbackPreferencesStore.setFrameCaptureEnabled(isEnabled)
+        if (::shell.isInitialized) {
+            shell.controller.setFrameCaptureEnabled(isEnabled)
+        }
+        showToast(
+            if (isEnabled) R.string.player_capture_enabled else R.string.player_capture_disabled
+        )
+    }
+
+    private fun captureCurrentFrame() {
+        if (!transportVisible || controlsLocked) return
+        val anime = currentAnime ?: return
+        val episode = episodeNavigator.currentEpisode
+        frameCaptureManager.captureCurrentFrame(
+            playerView = playerView,
+            playbackState = latestPlaybackState,
+            animeTitle = anime.title,
+            episodeLabel = episode?.name ?: requestedEpisode.toString()
+        )
     }
 
     private fun updateSkipViews() {

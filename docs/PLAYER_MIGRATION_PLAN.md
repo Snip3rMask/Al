@@ -700,13 +700,26 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - Matched the Anifux marker layering, white translucent color, rounded shape, and compact marker height.
 - Attached the click listener after each shell rebuild so rotation cannot leave the visible skip button without an action handler.
 
-### 7.9 Frame Capture
+#### Gesture Direction Fix — 2026-08-25
 
-- [ ] Capture current frame.
-- [ ] Save/share captured frame.
-- [ ] Respect settings toggle and API-level differences.
+- Corrected double-tap seek direction so taps on the right half move playback forward and taps on the left half move it backward.
+
+### 7.9 Frame Capture [x]
+
+- [x] Capture current frame.
+- [x] Save/share captured frame.
+- [x] Respect settings toggle and API-level differences.
 
 **Exit gate:** Every control works independently, survives rotation, does not conflict with lock/gesture state, and causes no leak after repeated open/close.
+
+#### Part 7.9 — Frame Capture — 2026-08-25
+
+- Added a player capture control in both orientations. Tapping captures the active video surface; long-pressing toggles whether frame capture is available.
+- Reused the landscape settings control as a frame-capture toggle while dedicated player settings remain deferred.
+- Captured `TextureView` frames directly on all supported APIs and used `PixelCopy` for `SurfaceView` output on Android 8+, with an explicit unsupported message for older SurfaceView combinations.
+- Saved sanitized PNG files under the app-private `Pictures/AtsuLab/{anime title}` directory and exposed them through a scoped FileProvider share chooser, avoiding broad storage permissions.
+- Added persisted capture-enabled preference, saving/saved/failure feedback, repeated-capture guarding, rotation-safe controller ownership, and disposal-safe bitmap handling.
+- Covered filename sanitization and segment limits with focused unit tests; compile and APK validation are delegated to GitHub Actions per project workflow.
 
 ## Part 8 — Episode Panel & Navigation
 

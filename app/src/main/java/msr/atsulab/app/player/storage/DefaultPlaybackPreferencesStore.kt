@@ -24,6 +24,16 @@ class DefaultPlaybackPreferencesStore(
         }
     }
 
+    override fun isFrameCaptureEnabled(): Boolean {
+        return preferences.getBoolean(FRAME_CAPTURE_ENABLED_KEY, true)
+    }
+
+    override fun setFrameCaptureEnabled(enabled: Boolean) {
+        preferences.edit {
+            putBoolean(FRAME_CAPTURE_ENABLED_KEY, enabled)
+        }
+    }
+
     override fun getSubtitleStyle(): SubtitleStyle {
         return SubtitleStyleOptions.normalize(
             SubtitleStyle(
@@ -73,6 +83,7 @@ class DefaultPlaybackPreferencesStore(
     private companion object {
         const val PREFERENCES_NAME = "atsu_playback_preferences"
         const val SPEED_KEY = "playback_speed"
+        const val FRAME_CAPTURE_ENABLED_KEY = "frame_capture_enabled"
         const val FONT_SIZE_KEY = "subtitle_font_size"
         const val FONT_COLOR_KEY = "subtitle_font_color"
         const val FONT_STYLE_KEY = "subtitle_font_style"
