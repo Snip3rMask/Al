@@ -14,7 +14,7 @@ import android.view.TextureView
 import android.widget.Toast
 import androidx.core.content.FileProvider
 import androidx.media3.ui.PlayerView
-import io.reactivex.rxjava3.core.Single
+import io.reactivex.rxjava3.core.Maybe
 import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.schedulers.Schedulers
 import msr.atsulab.app.R
@@ -22,6 +22,7 @@ import msr.atsulab.app.player.engine.PlaybackReadyState
 import msr.atsulab.app.player.engine.PlaybackState
 import msr.atsulab.app.player.storage.PlaybackPreferencesStore
 import java.io.File
+import java.io.IOException
 
 internal class PlayerFrameCaptureManager(
     private val context: Context,
@@ -100,16 +101,17 @@ internal class PlayerFrameCaptureManager(
         episodeLabel: String
     ) {
         saveDisposable?.dispose()
-        saveDisposable = Single
+        saveDisposable = Maybe
             .fromCallable {
                 val outputDirectory = outputDirectory(animeTitle)
-                val outputFile: File? = outputDirectory?.let { directory ->
-                    File(directory, PlayerFrameCaptureNaming.fileName(episodeLabel))
-                }
-                if (outputFile != null) {
-                    outputFile.outputStream().use { stream ->
-                        bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
-                    }
+                val directory = outputDirectory
+                    ?: throw IOException("Frame capture pictures directory is unavailable")
+                val outputFile = File(
+                    directory,
+                    PlayerFrameCaptureNaming.fileName(episodeLabel)
+                )
+                outputFile.outputStream().use { stream ->
+                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
                 }
                 outputFile
             }
@@ -118,12 +120,8 @@ internal class PlayerFrameCaptureManager(
             .observeOn(io.reactivex.rxjava3.android.schedulers.AndroidSchedulers.mainThread())
             .subscribe(
                 { outputFile ->
-                    if (outputFile == null) {
-                        finishCapture(success = false, recycle = bitmap)
-                    } else {
-                        finishCapture(success = true, recycle = bitmap)
-                        shareBitmap(outputFile)
-                    }
+                    finishCapture(success = true, recycle = bitmap)
+                    shareBitmap(outputFile)
                 },
                 {
                     finishCapture(success = false, recycle = bitmap)
