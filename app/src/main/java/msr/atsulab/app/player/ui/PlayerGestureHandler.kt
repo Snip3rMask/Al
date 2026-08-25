@@ -28,7 +28,7 @@ internal class PlayerGestureHandler(
 
             override fun onDoubleTap(event: MotionEvent): Boolean {
                 val half = context.resources.displayMetrics.widthPixels / 2f
-                callbacks.onSeek(event.x < half)
+                callbacks.onSeek(event.x >= half)
                 return true
             }
         }
