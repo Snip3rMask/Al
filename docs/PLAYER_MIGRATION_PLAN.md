@@ -721,6 +721,14 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - Added persisted capture-enabled preference, saving/saved/failure feedback, repeated-capture guarding, rotation-safe controller ownership, and disposal-safe bitmap handling.
 - Covered filename sanitization and segment limits with focused unit tests. GitHub Actions completed unit tests, the debug APK build, and Release `139` with green status at `cec345e3`.
 
+#### Capture Pipeline Hardening — 2026-08-25
+
+- Fixed the primary save bug where a successful SurfaceView `PixelCopy` result showed success without handing its bitmap to the PNG writer.
+- Restored the Anifux-style fallback path: direct SurfaceView capture is tried first, then a window-level capture of the same video-content rectangle.
+- Checked compression results, removed partial files after write/compression failures, and kept bitmap release on every success, failure, fallback, and release path.
+- Suppressed share launch while the activity is stopped/destroyed, added explicit URI clip grant flags, and handled missing chooser targets safely.
+- Kept TextureView capture available on all supported APIs while requiring Android 8 or newer for SurfaceView/window `PixelCopy`.
+
 ## Part 8 — Episode Panel & Navigation
 
 **Goal:** Provide full episode browsing inside the player.

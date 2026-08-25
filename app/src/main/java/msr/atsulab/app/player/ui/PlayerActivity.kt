@@ -269,11 +269,13 @@ class PlayerActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
         if (engineAttached) playbackEngine.onForeground()
+        frameCaptureManager.start()
         startProgressLoop()
     }
 
     override fun onStop() {
         stopProgressLoop()
+        frameCaptureManager.stop()
         cancelControlsAutoHide()
         speedMenu.dismiss(notifyCallbacks = false)
         dismissSubtitleMenus()
