@@ -749,7 +749,7 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - Removed the automatic system share sheet after frame saves so repeated captures are not interrupted.
 - Kept silent background saving and the saved/failed toast as the completion signal.
 
-## Part 8 — Episode Panel & Navigation [~]
+## Part 8 — Episode Panel & Navigation [x]
 
 **Goal:** Provide full episode browsing inside the player.
 
@@ -771,6 +771,7 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - Episode switches now clear stale source, quality, retry, more-server, and skip state; they intentionally reset playback position while retaining persisted speed and subtitle preferences.
 - Refreshed the portrait watching row after an episode change and covered range snapping/bounds/filtering plus explicit navigator selection with focused unit tests.
 - GitHub Actions completed unit tests, the debug APK build, and Release `152` with green status at `ef14c42b`.
+- User validated the episode grid, range selection, manual navigation, auto-next behavior, and overall flow on a real device.
 
 ## Part 9 — Source Selection Screen
 
@@ -992,11 +993,11 @@ Append dated entries here. Do not delete history.
 - Removed the automatic post-capture share sheet so repeated frame captures are not interrupted.
 - Fixed the first Capture Settings CI failure and published green Release `146` from commit `a48a14c6`.
 - Kept Part 7 open pending real-device validation of quality, servers, skip controls, and the completed capture flow.
+- Closed Part 8 after the user confirmed the episode panel and navigation flow on a real device.
 
 ## Next Action
 
-1. Install Release `152` and confirm AUTO/manual quality switching keeps position and speed stable.
-2. Confirm Audio owns SUB/DUB switching while the server pill opens Select Server, background servers merge, and retry/failure recovery remains stable.
-3. Play an anime with known AniSkip data and verify markers plus Skip Intro/Skip Outro seek exactly to interval ends across rotation/backgrounding.
-4. Validate Capture Settings toggles, SAF folder selection, anime-named saves, private fallback, and uninterrupted repeated captures.
-5. After this Part 7 regression pass, start **Part 8 — Episode Panel & Navigation** with the episode grid and range selector.
+1. Start **Part 9 — Source Selection Screen**: port the standalone source-mapping skeleton and candidate selection UI.
+2. Persist safe manual mappings by AniList ID while preserving automatic source fallback.
+3. Support single-server mode plus loading, empty, error, retry, and cancel-without-change states.
+4. In parallel, finish the remaining Part 7 real-device regression for quality switching, server merging/retry, skip controls, and capture settings.
