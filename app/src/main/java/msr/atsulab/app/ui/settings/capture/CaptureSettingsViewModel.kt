@@ -45,4 +45,6 @@ class CaptureSettingsViewModel(
     fun resetButtonPosition() {
         playbackPreferencesStore.clearFrameCapturePosition()
     }
+
+    override fun loadData(param: Unit) = Unit
 }

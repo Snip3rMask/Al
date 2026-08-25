@@ -9,6 +9,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import msr.atsulab.app.R
 import msr.atsulab.app.databinding.FragmentCaptureSettingsBinding
 import msr.atsulab.app.helper.extensions.applyBottomPaddingInsets
+import msr.atsulab.app.helper.extensions.applyTopPaddingInsets
 import msr.atsulab.app.helper.extensions.clicks
 import msr.atsulab.app.ui.base.BaseFragment
 import org.koin.androidx.viewmodel.ext.android.viewModel
