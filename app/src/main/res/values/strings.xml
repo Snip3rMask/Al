@@ -614,5 +614,6 @@
     <string name="player_capture_share">Share frame</string>
     <string name="player_capture_enabled">Frame capture enabled</string>
     <string name="player_capture_disabled">Frame capture disabled</string>
+    <string name="player_capture_always_visible">Always show capture button</string>
     <string name="retry">Retry</string>
 </resources>

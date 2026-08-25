@@ -11,6 +11,16 @@ interface PlaybackPreferencesStore {
 
     fun setFrameCaptureEnabled(enabled: Boolean)
 
+    fun isFrameCaptureAlwaysVisible(): Boolean
+
+    fun setFrameCaptureAlwaysVisible(enabled: Boolean)
+
+    fun getFrameCapturePositionX(): Float
+
+    fun getFrameCapturePositionY(): Float
+
+    fun setFrameCapturePosition(xFraction: Float, yFraction: Float)
+
     fun getSubtitleStyle(): SubtitleStyle
 
     fun setSubtitleStyle(style: SubtitleStyle)

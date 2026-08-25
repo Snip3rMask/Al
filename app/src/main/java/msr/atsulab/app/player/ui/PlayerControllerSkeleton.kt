@@ -41,7 +41,6 @@ internal class PlayerControllerSkeleton(
         fun onEpisodeClicked()
         fun onSettingsClicked()
         fun onFrameCaptureClicked()
-        fun onFrameCaptureToggleClicked()
         fun onVolumeClicked()
         fun onRewindClicked()
         fun onForwardClicked()
@@ -90,6 +89,9 @@ internal class PlayerControllerSkeleton(
     var isFrameCaptureEnabled: Boolean = true
         private set
 
+    var isFrameCaptureAlwaysVisible: Boolean = false
+        private set
+
     var isControlsLocked: Boolean = false
         private set
 
@@ -129,6 +131,7 @@ internal class PlayerControllerSkeleton(
             topBar.visibility = View.GONE
             statusControls.visibility = View.GONE
             transportControls.visibility = View.GONE
+            updateCaptureButtonVisibility()
             showUnlockOverlayTemporarily()
             return
         }
@@ -144,6 +147,7 @@ internal class PlayerControllerSkeleton(
         topBar.visibility = if (restoreChrome) View.VISIBLE else View.GONE
         statusControls.visibility = if (statusRetryVisible) View.VISIBLE else View.GONE
         transportControls.visibility = if (restoreChrome) View.VISIBLE else View.GONE
+        updateCaptureButtonVisibility()
     }
 
     fun release() {
@@ -174,8 +178,7 @@ internal class PlayerControllerSkeleton(
         val effectiveVisible = isVisible && controlsShown && !isControlsLocked
         topBar.visibility = if (effectiveVisible) View.VISIBLE else View.GONE
         transportControls.visibility = if (effectiveVisible) View.VISIBLE else View.GONE
-        captureButton?.visibility =
-            if (effectiveVisible && isFrameCaptureEnabled) View.VISIBLE else View.GONE
+        updateCaptureButtonVisibility()
         playPauseButton.setImageResource(
             if (isPlaying) R.drawable.ic_player_pause_modern else R.drawable.ic_player_play_modern
         )
@@ -203,9 +206,31 @@ internal class PlayerControllerSkeleton(
 
     fun setFrameCaptureEnabled(enabled: Boolean) {
         isFrameCaptureEnabled = enabled
+        updateCaptureButtonVisibility()
+    }
+
+    fun setFrameCaptureAlwaysVisible(alwaysVisible: Boolean) {
+        isFrameCaptureAlwaysVisible = alwaysVisible
+        updateCaptureButtonVisibility()
+    }
+
+    fun setCaptureButton(button: ImageView?) {
+        captureButton = button
+        updateCaptureButtonVisibility()
+    }
+
+    private fun updateCaptureButtonVisibility() {
         val effectiveVisible = transportVisible && controlsVisible && !isControlsLocked
         captureButton?.visibility =
-            if (effectiveVisible && enabled) View.VISIBLE else View.GONE
+            if (
+                transportVisible &&
+                isFrameCaptureEnabled &&
+                (isFrameCaptureAlwaysVisible || effectiveVisible)
+            ) {
+                View.VISIBLE
+            } else {
+                View.GONE
+            }
     }
 
     private fun progressFraction(positionMs: Long, durationMs: Long): Int {
@@ -308,17 +333,6 @@ internal class PlayerControllerSkeleton(
                 )
             }
 
-            addView(
-                createPlayerIcon(R.drawable.ic_player_capture_modern, R.string.player_capture_frame) {
-                    callbacks.onFrameCaptureClicked()
-                }.apply {
-                    setOnLongClickListener {
-                        callbacks.onFrameCaptureToggleClicked()
-                        true
-                    }
-                }.also { captureButton = it },
-                topIconParams(density)
-            )
             addView(
                 createPlayerIcon(R.drawable.ic_player_audio_modern, R.string.player_audio) {
                     callbacks.onAudioClicked()

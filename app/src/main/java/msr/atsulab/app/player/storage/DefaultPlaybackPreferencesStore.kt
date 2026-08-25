@@ -34,6 +34,31 @@ class DefaultPlaybackPreferencesStore(
         }
     }
 
+    override fun isFrameCaptureAlwaysVisible(): Boolean {
+        return preferences.getBoolean(FRAME_CAPTURE_ALWAYS_VISIBLE_KEY, false)
+    }
+
+    override fun setFrameCaptureAlwaysVisible(enabled: Boolean) {
+        preferences.edit {
+            putBoolean(FRAME_CAPTURE_ALWAYS_VISIBLE_KEY, enabled)
+        }
+    }
+
+    override fun getFrameCapturePositionX(): Float {
+        return preferences.getFloat(FRAME_CAPTURE_POSITION_X_KEY, -1f).coerceIn(-1f, 1f)
+    }
+
+    override fun getFrameCapturePositionY(): Float {
+        return preferences.getFloat(FRAME_CAPTURE_POSITION_Y_KEY, -1f).coerceIn(-1f, 1f)
+    }
+
+    override fun setFrameCapturePosition(xFraction: Float, yFraction: Float) {
+        preferences.edit {
+            putFloat(FRAME_CAPTURE_POSITION_X_KEY, xFraction.coerceIn(0f, 1f))
+            putFloat(FRAME_CAPTURE_POSITION_Y_KEY, yFraction.coerceIn(0f, 1f))
+        }
+    }
+
     override fun getSubtitleStyle(): SubtitleStyle {
         return SubtitleStyleOptions.normalize(
             SubtitleStyle(
@@ -84,6 +109,9 @@ class DefaultPlaybackPreferencesStore(
         const val PREFERENCES_NAME = "atsu_playback_preferences"
         const val SPEED_KEY = "playback_speed"
         const val FRAME_CAPTURE_ENABLED_KEY = "frame_capture_enabled"
+        const val FRAME_CAPTURE_ALWAYS_VISIBLE_KEY = "frame_capture_always_visible"
+        const val FRAME_CAPTURE_POSITION_X_KEY = "frame_capture_pos_x"
+        const val FRAME_CAPTURE_POSITION_Y_KEY = "frame_capture_pos_y"
         const val FONT_SIZE_KEY = "subtitle_font_size"
         const val FONT_COLOR_KEY = "subtitle_font_color"
         const val FONT_STYLE_KEY = "subtitle_font_style"

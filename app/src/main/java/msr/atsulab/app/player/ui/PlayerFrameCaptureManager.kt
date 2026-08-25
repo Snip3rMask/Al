@@ -11,9 +11,12 @@ import android.os.Build
 import android.os.Environment
 import android.os.Handler
 import android.os.Looper
+import android.view.MotionEvent
 import android.view.PixelCopy
+import android.view.View
 import android.view.SurfaceView
 import android.view.TextureView
+import android.widget.FrameLayout
 import android.widget.Toast
 import androidx.core.content.FileProvider
 import androidx.annotation.RequiresApi
@@ -38,6 +41,11 @@ internal class PlayerFrameCaptureManager(
     private var isCapturing = false
     private var isReleased = false
     private var isStarted = false
+    private var dragStartRawX = 0f
+    private var dragStartRawY = 0f
+    private var dragStartX = 0f
+    private var dragStartY = 0f
+    private var isDragging = false
 
     fun start() {
         isStarted = true
@@ -46,6 +54,82 @@ internal class PlayerFrameCaptureManager(
     fun stop() {
         isStarted = false
     }
+
+    fun attachCaptureButton(
+        host: FrameLayout,
+        button: View,
+        onCaptureClicked: () -> Unit
+    ) {
+        button.setOnClickListener { onCaptureClicked() }
+        button.setOnTouchListener { view, event ->
+            when (event.actionMasked) {
+                MotionEvent.ACTION_DOWN -> {
+                    dragStartRawX = event.rawX
+                    dragStartRawY = event.rawY
+                    dragStartX = view.x
+                    dragStartY = view.y
+                    isDragging = false
+                    host.requestDisallowInterceptTouchEvent(true)
+                    true
+                }
+                MotionEvent.ACTION_MOVE -> {
+                    val deltaX = event.rawX - dragStartRawX
+                    val deltaY = event.rawY - dragStartRawY
+                    if (abs(deltaX) > 6f || abs(deltaY) > 6f) {
+                        isDragging = true
+                        moveControl(host, view, dragStartX + deltaX, dragStartY + deltaY)
+                    }
+                    true
+                }
+                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                    host.requestDisallowInterceptTouchEvent(false)
+                    if (isDragging) {
+                        saveControlPosition(host, view)
+                    } else if (event.actionMasked == MotionEvent.ACTION_UP) {
+                        view.performClick()
+                    }
+                    true
+                }
+                else -> true
+            }
+        }
+        host.post { positionCaptureButton(host, button) }
+    }
+
+    private fun positionCaptureButton(host: FrameLayout, button: View) {
+        val savedX = playbackPreferencesStore.getFrameCapturePositionX()
+        val savedY = playbackPreferencesStore.getFrameCapturePositionY()
+        if (savedX >= 0f && savedY >= 0f) {
+            moveControl(
+                host,
+                button,
+                savedX * maxOf(0f, (host.width - button.width).toFloat()),
+                savedY * maxOf(0f, (host.height - button.height).toFloat())
+            )
+            return
+        }
+
+        val density = host.resources.displayMetrics.density
+        moveControl(
+            host,
+            button,
+            host.width - button.width - 24.dpToPixels(density),
+            86.dpToPixels(density)
+        )
+    }
+
+    private fun moveControl(host: FrameLayout, button: View, targetX: Float, targetY: Float) {
+        button.x = targetX.coerceIn(0f, maxOf(0f, (host.width - button.width).toFloat()))
+        button.y = targetY.coerceIn(0f, maxOf(0f, (host.height - button.height).toFloat()))
+    }
+
+    private fun saveControlPosition(host: FrameLayout, button: View) {
+        val maxX = maxOf(1f, (host.width - button.width).toFloat())
+        val maxY = maxOf(1f, (host.height - button.height).toFloat())
+        playbackPreferencesStore.setFrameCapturePosition(button.x / maxX, button.y / maxY)
+    }
+
+    private fun Int.dpToPixels(density: Float): Float = this * density
 
     fun captureCurrentFrame(
         playerView: PlayerView,

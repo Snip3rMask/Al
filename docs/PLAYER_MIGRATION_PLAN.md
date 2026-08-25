@@ -714,8 +714,8 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 
 #### Part 7.9 — Frame Capture — 2026-08-25
 
-- Added a player capture control in both orientations. Tapping captures the active video surface; long-pressing toggles whether frame capture is available.
-- Reused the landscape settings control as a frame-capture toggle while dedicated player settings remain deferred.
+- Added a landscape-only draggable capture control matching Anifux placement and gesture handling.
+- Reused the landscape settings control as the player-settings entry point with “Frame capture” and “Always show capture button” switches.
 - Captured `TextureView` frames directly on all supported APIs and used `PixelCopy` for `SurfaceView` output on Android 8+, with an explicit unsupported message for older SurfaceView combinations.
 - Saved sanitized PNG files under the app-private `Pictures/AtsuLab/{anime title}` directory and exposed them through a scoped FileProvider share chooser, avoiding broad storage permissions.
 - Added persisted capture-enabled preference, saving/saved/failure feedback, repeated-capture guarding, rotation-safe controller ownership, and disposal-safe bitmap handling.
@@ -728,6 +728,14 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - Checked compression results, removed partial files after write/compression failures, and kept bitmap release on every success, failure, fallback, and release path.
 - Suppressed share launch while the activity is stopped/destroyed, added explicit URI clip grant flags, and handled missing chooser targets safely.
 - Kept TextureView capture available on all supported APIs while requiring Android 8 or newer for SurfaceView/window `PixelCopy`.
+
+#### Capture Settings & Drag Fix — 2026-08-25
+
+- Rebuilt the landscape capture control as a floating view so it can be dragged anywhere within the video frame without activating seek/brightness gestures.
+- Persisted the dropped position as normalized X/Y fractions and restored it after rotation or a later player session; first-run placement matches Anifux.
+- Added persisted `frame_capture_always_visible` support: normal mode keeps the button tied to visible controls, while Always Show leaves it on top of the video even when chrome is hidden.
+- Added a right-side player settings panel with dedicated Frame Capture and Always Show switches; both apply immediately and survive backgrounding.
+- Kept capture disabled in portrait, matching Anifux's current player behavior.
 
 ## Part 8 — Episode Panel & Navigation
 

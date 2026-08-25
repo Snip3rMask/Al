@@ -6,6 +6,7 @@ import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
 import android.view.Gravity
 import android.view.View
+import android.widget.ImageView
 import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.ProgressBar
@@ -23,7 +24,8 @@ internal data class PlayerShellViews(
     val controller: PlayerControllerSkeleton,
     val loadingIndicator: ProgressBar,
     val gestureHudView: PlayerGestureHudView,
-    val skipButton: TextView
+    val skipButton: TextView,
+    val captureButton: ImageView?
 )
 
 internal class PlayerShellLayoutBuilder(
@@ -220,7 +222,8 @@ internal class PlayerShellLayoutBuilder(
             controller,
             loadingIndicator,
             gestureHudView,
-            skipButton
+            skipButton,
+            null
         )
     }
 
@@ -304,6 +307,25 @@ internal class PlayerShellLayoutBuilder(
             }
         )
 
+        val captureButton = ImageView(context).apply {
+            setImageResource(R.drawable.ic_player_capture_modern)
+            contentDescription = context.getString(R.string.player_capture_frame)
+            scaleType = ImageView.ScaleType.FIT_CENTER
+            setBackgroundResource(R.drawable.ripple_circle)
+            setPadding(dp(8, density), dp(8, density), dp(8, density), dp(8, density))
+        }
+        videoFrame.addView(
+            captureButton,
+            FrameLayout.LayoutParams(
+                dp(42, density),
+                dp(42, density),
+                Gravity.TOP or Gravity.END
+            ).apply {
+                setMargins(0, dp(86, density), dp(24, density), 0)
+            }
+        )
+        controller.setCaptureButton(captureButton)
+
         val root = FrameLayout(context).apply { setBackgroundColor(PlayerShellMetrics.PRIMARY_DARK_COLOR) }
         root.addView(videoFrame, FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT))
         return PlayerShellViews(
@@ -314,7 +336,8 @@ internal class PlayerShellLayoutBuilder(
             controller,
             loadingIndicator,
             gestureHudView,
-            skipButton
+            skipButton,
+            captureButton
         )
     }
 

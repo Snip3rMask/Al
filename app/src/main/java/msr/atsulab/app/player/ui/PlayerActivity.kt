@@ -162,6 +162,35 @@ class PlayerActivity : AppCompatActivity() {
             }
         )
     }
+    private val frameCaptureSettingsMenu by lazy {
+        PlayerFrameCaptureSettingsMenu(
+            this,
+            object : PlayerFrameCaptureSettingsMenu.Callbacks {
+                override fun isEnabled(): Boolean =
+                    playbackPreferencesStore.isFrameCaptureEnabled()
+
+                override fun isAlwaysVisible(): Boolean =
+                    playbackPreferencesStore.isFrameCaptureAlwaysVisible()
+
+                override fun onEnabledChanged(enabled: Boolean) {
+                    playbackPreferencesStore.setFrameCaptureEnabled(enabled)
+                    if (::shell.isInitialized) shell.controller.setFrameCaptureEnabled(enabled)
+                }
+
+                override fun onAlwaysVisibleChanged(enabled: Boolean) {
+                    playbackPreferencesStore.setFrameCaptureAlwaysVisible(enabled)
+                    if (::shell.isInitialized) {
+                        shell.controller.setFrameCaptureAlwaysVisible(enabled)
+                    }
+                }
+
+                override fun onSettingsDismissed() {
+                    applySystemBars()
+                    scheduleControlsAutoHide()
+                }
+            }
+        )
+    }
     private val qualityMenu: PlayerQualityMenu by lazy {
         PlayerQualityMenu(
             this,
@@ -278,6 +307,7 @@ class PlayerActivity : AppCompatActivity() {
         frameCaptureManager.stop()
         cancelControlsAutoHide()
         speedMenu.dismiss(notifyCallbacks = false)
+        frameCaptureSettingsMenu.dismiss(notifyCallbacks = false)
         dismissSubtitleMenus()
         serverMenu.dismiss(notifyCallbacks = false)
         if (engineAttached) playbackEngine.onBackground()
@@ -288,6 +318,7 @@ class PlayerActivity : AppCompatActivity() {
         progressHandler.removeCallbacks(progressRunnable)
         controlsHandler.removeCallbacks(hideControlsRunnable)
         speedMenu.dismiss(notifyCallbacks = false)
+        frameCaptureSettingsMenu.dismiss(notifyCallbacks = false)
         dismissSubtitleMenus()
         serverMenu.dismiss(notifyCallbacks = false)
         qualityMenu.dismiss(notifyCallbacks = false)
@@ -354,6 +385,7 @@ class PlayerActivity : AppCompatActivity() {
 
     private fun rebuildShell() {
         speedMenu.dismiss(notifyCallbacks = false)
+        frameCaptureSettingsMenu.dismiss(notifyCallbacks = false)
         dismissSubtitleMenus()
         serverMenu.dismiss(notifyCallbacks = false)
         qualityMenu.dismiss(notifyCallbacks = false)
@@ -415,15 +447,11 @@ class PlayerActivity : AppCompatActivity() {
             override fun onEpisodeClicked() = Unit
 
             override fun onSettingsClicked() {
-                toggleFrameCapture()
+                showFrameCaptureSettings()
             }
 
             override fun onFrameCaptureClicked() {
                 captureCurrentFrame()
-            }
-
-            override fun onFrameCaptureToggleClicked() {
-                toggleFrameCapture()
             }
 
             override fun onVolumeClicked() = Unit
@@ -453,6 +481,14 @@ class PlayerActivity : AppCompatActivity() {
         shell.controller.setFrameCaptureEnabled(
             playbackPreferencesStore.isFrameCaptureEnabled()
         )
+        shell.controller.setFrameCaptureAlwaysVisible(
+            playbackPreferencesStore.isFrameCaptureAlwaysVisible()
+        )
+        shell.captureButton?.let { captureButton ->
+            frameCaptureManager.attachCaptureButton(shell.videoFrame, captureButton) {
+                captureCurrentFrame()
+            }
+        }
         shell.skipButton.setOnClickListener { skipActiveSection() }
         val gestureHandler = PlayerGestureHandler(
             this,
@@ -784,19 +820,15 @@ class PlayerActivity : AppCompatActivity() {
         updateTransportControls()
     }
 
-    private fun toggleFrameCapture() {
-        val isEnabled = !playbackPreferencesStore.isFrameCaptureEnabled()
-        playbackPreferencesStore.setFrameCaptureEnabled(isEnabled)
-        if (::shell.isInitialized) {
-            shell.controller.setFrameCaptureEnabled(isEnabled)
-        }
-        showToast(
-            if (isEnabled) R.string.player_capture_enabled else R.string.player_capture_disabled
-        )
+    private fun showFrameCaptureSettings() {
+        if (!transportVisible || controlsLocked) return
+        cancelControlsAutoHide()
+        frameCaptureSettingsMenu.show()
     }
 
     private fun captureCurrentFrame() {
-        if (!transportVisible || controlsLocked) return
+        val allowWhileLocked = playbackPreferencesStore.isFrameCaptureAlwaysVisible()
+        if (!transportVisible || (controlsLocked && !allowWhileLocked)) return
         val anime = currentAnime ?: return
         val episode = episodeNavigator.currentEpisode
         frameCaptureManager.captureCurrentFrame(
