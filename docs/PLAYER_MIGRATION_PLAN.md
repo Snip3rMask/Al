@@ -24,7 +24,7 @@ Check this document before starting migration work. Update it after every comple
 - Repository: `Snip3rMask/Al`
 - Branch: `main`
 - Latest pre-plan migration commit: `57b5777f`
-- Latest successful release: `21`
+- Latest successful release: `121` (`33aafb36be9efbac921b117af3ab42a97c23d7d4`)
 - App ID: `msr.atsulab.app`
 - Debug App ID: `msr.atsulab.app.debug`
 - Min SDK: `23`
@@ -592,8 +592,15 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - Added an AtsuLab player-side style panel with Anifux's `380dp` side-panel behavior, sliders, segment chips, color swatches, no-background toggle, and reset action.
 - Applied styles through Media3's `CaptionStyleCompat`, fractional text size, edge shadow, typeface mapping, and subtitle-view bottom margin without reattaching playback.
 - Saved every change immediately in the existing playback preference store and reapplied the normalized style after rotation or shell rebuild.
-- Custom `.ttf` file selection remains the final Part 7.5 follow-up because it needs document/file-picker lifecycle handling.
+- Custom `.ttf` selection was deferred during Slice C and completed in Slice D.
 - Fixed the real-device style-panel crash by attaching each slider value label only to its slider row instead of first adding it to both the panel and row.
+
+#### Subtitle Validation & Crash Fix — Releases 119–121 — 2026-08-25
+
+- Release `119` exposed a real-device crash when opening Style Settings because a slider value label received two parents.
+- Commit `9d0083d83d641f0570865f74a5f409c4a198fcaf` removed the duplicate attachment and published Release `120`.
+- User confirmed that the Style Settings flow no longer crashes after Release `120`.
+- Release `121` (`33aafb36be9efbac921b117af3ab42a97c23d7d4`) added custom font import/clearing and passed CI; device validation is pending.
 
 #### Part 7.5 Slice D — Custom Font — 2026-08-25
 
@@ -844,7 +851,13 @@ Append dated entries here. Do not delete history.
 - Fixed Release `119` subtitle-style-panel crash caused by a duplicate parent attachment in slider rows.
 - Completed Part 7.5 Slice D: permission-free custom font import, persistence, validation, clearing, and Media3 caption application.
 
+### 2026-08-25
+
+- Completed player chrome parity, subtitle selection/toggle, persisted live styling, and permission-free custom font support.
+- Published green releases through Release `121`; the latest documented stable smoke point is Release `120`, where the user confirmed Style Settings no longer crashes.
+- Set next executable phase: **Part 7.6 Quality Selector**, beginning with HLS variant detection after Release `121` device validation.
+
 ## Next Action
 
-1. Install the latest GitHub Release and verify subtitle track selection, Off toggle, live styling, custom font import/clearing, chrome positions/icons, speed controls, gestures, lock behavior, rotation persistence, and HLS playback.
+1. Install Release `121` and verify subtitle track selection, Off toggle, live styling, custom font import/clearing/restart persistence, chrome positions/icons, speed controls, gestures, lock behavior, rotation persistence, and HLS playback.
 2. After validation, start Part 7.6 Quality Selector with HLS variant detection.
