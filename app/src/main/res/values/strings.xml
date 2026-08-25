@@ -611,7 +611,6 @@
     <string name="player_capture_saved">Frame saved</string>
     <string name="player_capture_failed">Frame capture failed</string>
     <string name="player_capture_unsupported">Frame capture is not supported on this Android version</string>
-    <string name="player_capture_share">Share frame</string>
     <string name="player_capture_enabled">Frame capture enabled</string>
     <string name="player_capture_disabled">Frame capture disabled</string>
     <string name="player_capture_always_visible">Always show capture button</string>

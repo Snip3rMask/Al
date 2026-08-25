@@ -1,10 +1,7 @@
 package msr.atsulab.app.player.ui
 
 import android.app.Activity
-import android.content.ActivityNotFoundException
-import android.content.ClipData
 import android.content.Context
-import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Rect
 import android.database.Cursor
@@ -21,7 +18,6 @@ import android.view.SurfaceView
 import android.view.TextureView
 import android.widget.FrameLayout
 import android.widget.Toast
-import androidx.core.content.FileProvider
 import androidx.annotation.RequiresApi
 import androidx.media3.ui.PlayerView
 import io.reactivex.rxjava3.core.Maybe
@@ -202,9 +198,8 @@ internal class PlayerFrameCaptureManager(
             .doOnDispose { bitmap.recycle() }
             .observeOn(io.reactivex.rxjava3.android.schedulers.AndroidSchedulers.mainThread())
             .subscribe(
-                { outputFile ->
+                { _ ->
                     finishCapture(success = true, recycle = bitmap)
-                    shareBitmap(outputFile)
                 },
                 {
                     finishCapture(success = false, recycle = bitmap)
@@ -351,33 +346,6 @@ internal class PlayerFrameCaptureManager(
     private fun hasWriteAccess(selectedFolderUri: Uri): Boolean {
         return context.contentResolver.persistedUriPermissions.any { permission ->
             permission.isWritePermission && permission.uri == selectedFolderUri
-        }
-    }
-
-    private fun shareBitmap(outputUri: Uri) {
-        if (isReleased || !isStarted || context !is Activity) return
-        val activity = context as Activity
-        if (activity.isFinishing || activity.isDestroyed) return
-        val contentUri = if (outputUri.scheme == "content") {
-            outputUri
-        } else {
-            FileProvider.getUriForFile(
-                activity,
-                "${activity.packageName}.player.capture",
-                File(requireNotNull(outputUri.path))
-            )
-        }
-        val shareIntent = Intent(Intent.ACTION_SEND).apply {
-            type = "image/png"
-            putExtra(Intent.EXTRA_STREAM, contentUri)
-            clipData = ClipData.newRawUri("frame", contentUri)
-            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        }
-        try {
-            activity.startActivity(
-                Intent.createChooser(shareIntent, activity.getString(R.string.player_capture_share))
-            )
-        } catch (_: ActivityNotFoundException) {
         }
     }
 

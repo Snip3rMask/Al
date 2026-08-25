@@ -737,6 +737,11 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - Added a right-side player settings panel with dedicated Frame Capture and Always Show switches; both apply immediately and survive backgrounding.
 - Kept capture disabled in portrait, matching Anifux's current player behavior.
 
+#### Continuous Capture Fix — 2026-08-26
+
+- Removed the automatic system share sheet after frame saves so repeated captures are not interrupted.
+- Kept silent background saving and the saved/failed toast as the completion signal.
+
 ## Part 8 — Episode Panel & Navigation
 
 **Goal:** Provide full episode browsing inside the player.
