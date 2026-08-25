@@ -24,7 +24,7 @@ internal class PlayerFrameCaptureNamingTest {
     fun `file name contains sanitized episode and png extension`() {
         val fileName = PlayerFrameCaptureNaming.fileName("Episode 1/?")
 
-        assertTrue(fileName.startsWith("AtsuLab_Episode_1__"))
+        assertTrue(fileName.startsWith("AtsuLab_Episode 1_"))
         assertTrue(fileName.endsWith(".png"))
         assertFalse(fileName.contains('?'))
     }
