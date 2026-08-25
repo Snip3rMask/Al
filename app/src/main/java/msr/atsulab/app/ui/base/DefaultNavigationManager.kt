@@ -55,6 +55,7 @@ import msr.atsulab.app.ui.search.SearchFragment
 import msr.atsulab.app.ui.seasonal.SeasonalFragment
 import msr.atsulab.app.ui.settings.SettingsFragment
 import msr.atsulab.app.ui.settings.about.AboutFragment
+import msr.atsulab.app.ui.settings.capture.CaptureSettingsFragment
 import msr.atsulab.app.ui.settings.account.AccountSettingsFragment
 import msr.atsulab.app.ui.settings.anilist.AniListSettingsFragment
 import msr.atsulab.app.ui.settings.app.AppSettingsFragment
@@ -193,6 +194,10 @@ class DefaultNavigationManager(
 
     override fun navigateToAppSettings() {
         stackPage(AppSettingsFragment.newInstance())
+    }
+
+    override fun navigateToCaptureSettings() {
+        stackPage(CaptureSettingsFragment.newInstance())
     }
 
     override fun navigateToAniListSettings() {

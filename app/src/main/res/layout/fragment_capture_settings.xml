@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.appcompat.widget.LinearLayoutCompat xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?themeBackgroundColor"
+    android:focusable="true"
+    android:clickable="true"
+    tools:context=".ui.settings.capture.CaptureSettingsFragment">
+
+    <include
+        android:id="@+id/defaultToolbar"
+        layout="@layout/toolbar_default" />
+
+    <ScrollView
+        android:id="@+id/captureScroll"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="@dimen/marginPageBig"
+            android:paddingTop="@dimen/marginNormal">
+
+            <androidx.appcompat.widget.LinearLayoutCompat
+                android:id="@+id/captureEnabledLayout"
+                android:gravity="center_vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:text="@string/player_capture_frame"
+                    style="?themeRegularFont"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"/>
+
+                <com.google.android.material.checkbox.MaterialCheckBox
+                    android:id="@+id/captureEnabledCheckBox"
+                    style="?themeRegularCheckBox"
+                    android:layout_width="@dimen/iconSize"
+                    android:layout_height="@dimen/iconSize"/>
+
+            </androidx.appcompat.widget.LinearLayoutCompat>
+
+            <androidx.appcompat.widget.LinearLayoutCompat
+                android:id="@+id/captureAlwaysVisibleLayout"
+                android:gravity="center_vertical"
+                android:layout_marginTop="@dimen/marginNormal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:text="@string/always_show_capture_button"
+                    style="?themeRegularFont"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"/>
+
+                <com.google.android.material.checkbox.MaterialCheckBox
+                    android:id="@+id/captureAlwaysVisibleCheckBox"
+                    style="?themeRegularCheckBox"
+                    android:layout_width="@dimen/iconSize"
+                    android:layout_height="@dimen/iconSize"/>
+
+            </androidx.appcompat.widget.LinearLayoutCompat>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/captureChooseFolderButton"
+                android:text="@string/choose_save_folder"
+                android:layout_marginTop="@dimen/marginPageBig"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+            <androidx.appcompat.widget.LinearLayoutCompat
+                android:id="@+id/captureSaveLocationLayout"
+                android:orientation="vertical"
+                android:foreground="?selectableItemBackground"
+                android:paddingVertical="@dimen/marginNormal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:text="@string/save_location"
+                    style="?themeSmallFont"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/captureLocationValue"
+                    tools:text="@string/default_app_folder"
+                    style="?themeRegularFont"
+                    android:layout_marginTop="@dimen/marginClose"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+
+            </androidx.appcompat.widget.LinearLayoutCompat>
+
+            <include layout="@layout/divider"/>
+
+            <androidx.appcompat.widget.LinearLayoutCompat
+                android:id="@+id/captureResetPositionLayout"
+                android:foreground="?selectableItemBackground"
+                android:paddingVertical="@dimen/marginNormal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:text="@string/reset_capture_button_position"
+                    style="?themeRegularFont"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+
+            </androidx.appcompat.widget.LinearLayoutCompat>
+
+        </androidx.appcompat.widget.LinearLayoutCompat>
+
+    </ScrollView>
+
+</androidx.appcompat.widget.LinearLayoutCompat>

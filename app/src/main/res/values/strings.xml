@@ -615,5 +615,14 @@
     <string name="player_capture_enabled">Frame capture enabled</string>
     <string name="player_capture_disabled">Frame capture disabled</string>
     <string name="player_capture_always_visible">Always show capture button</string>
+    <string name="capture_settings">Capture settings</string>
+    <string name="configure_frame_capture_and_save_location">Configure frame capture, button visibility, and save location</string>
+    <string name="always_show_capture_button">Always show capture button</string>
+    <string name="save_location">Save location</string>
+    <string name="default_app_folder">Default app folder (private)</string>
+    <string name="choose_save_folder">Choose save folder</string>
+    <string name="reset_capture_button_position">Reset capture button position</string>
+    <string name="capture_button_position_reset">Capture button position reset</string>
+    <string name="capture_save_folder_failed">Could not use the selected folder</string>
     <string name="retry">Retry</string>
 </resources>

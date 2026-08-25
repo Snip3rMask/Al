@@ -21,6 +21,12 @@ interface PlaybackPreferencesStore {
 
     fun setFrameCapturePosition(xFraction: Float, yFraction: Float)
 
+    fun getFrameCaptureDirectoryUri(): String
+
+    fun setFrameCaptureDirectoryUri(uri: String)
+
+    fun clearFrameCapturePosition()
+
     fun getSubtitleStyle(): SubtitleStyle
 
     fun setSubtitleStyle(style: SubtitleStyle)

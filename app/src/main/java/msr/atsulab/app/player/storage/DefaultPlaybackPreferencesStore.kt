@@ -59,6 +59,23 @@ class DefaultPlaybackPreferencesStore(
         }
     }
 
+    override fun getFrameCaptureDirectoryUri(): String {
+        return preferences.getString(FRAME_CAPTURE_DIRECTORY_KEY, "").orEmpty()
+    }
+
+    override fun setFrameCaptureDirectoryUri(uri: String) {
+        preferences.edit {
+            putString(FRAME_CAPTURE_DIRECTORY_KEY, uri)
+        }
+    }
+
+    override fun clearFrameCapturePosition() {
+        preferences.edit {
+            remove(FRAME_CAPTURE_POSITION_X_KEY)
+            remove(FRAME_CAPTURE_POSITION_Y_KEY)
+        }
+    }
+
     override fun getSubtitleStyle(): SubtitleStyle {
         return SubtitleStyleOptions.normalize(
             SubtitleStyle(
@@ -112,6 +129,7 @@ class DefaultPlaybackPreferencesStore(
         const val FRAME_CAPTURE_ALWAYS_VISIBLE_KEY = "frame_capture_always_visible"
         const val FRAME_CAPTURE_POSITION_X_KEY = "frame_capture_pos_x"
         const val FRAME_CAPTURE_POSITION_Y_KEY = "frame_capture_pos_y"
+        const val FRAME_CAPTURE_DIRECTORY_KEY = "frame_dir_uri"
         const val FONT_SIZE_KEY = "subtitle_font_size"
         const val FONT_COLOR_KEY = "subtitle_font_color"
         const val FONT_STYLE_KEY = "subtitle_font_style"

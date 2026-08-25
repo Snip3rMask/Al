@@ -28,6 +28,10 @@ class SettingsFragment : BaseFragment<FragmentSettingsBinding, SettingsViewModel
                 navigation.navigateToAppSettings()
             }
 
+            captureSettingsLayout.clicks {
+                navigation.navigateToCaptureSettings()
+            }
+
             aniListSettingsLayout.clicks {
                 navigation.navigateToAniListSettings()
             }

@@ -62,6 +62,7 @@ import msr.atsulab.app.ui.settings.SettingsViewModel
 import msr.atsulab.app.ui.settings.account.AccountSettingsViewModel
 import msr.atsulab.app.ui.settings.anilist.AniListSettingsViewModel
 import msr.atsulab.app.ui.settings.app.AppSettingsViewModel
+import msr.atsulab.app.ui.settings.capture.CaptureSettingsViewModel
 import msr.atsulab.app.ui.settings.list.ListSettingsViewModel
 import msr.atsulab.app.ui.settings.notifications.NotificationsSettingsViewModel
 import msr.atsulab.app.ui.social.SocialViewModel
@@ -190,6 +191,7 @@ class ALchanApplication : Application() {
 
         viewModel { SettingsViewModel() }
         viewModel { AppSettingsViewModel(get(), get()) }
+        viewModel { CaptureSettingsViewModel(get()) }
         viewModel { AniListSettingsViewModel(get()) }
         viewModel { ListSettingsViewModel(get()) }
         viewModel { NotificationsSettingsViewModel(get()) }

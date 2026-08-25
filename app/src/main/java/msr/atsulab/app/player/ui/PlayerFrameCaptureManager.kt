@@ -7,7 +7,10 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Rect
+import android.database.Cursor
 import android.os.Build
+import android.net.Uri
+import android.provider.DocumentsContract
 import android.os.Environment
 import android.os.Handler
 import android.os.Looper
@@ -194,26 +197,7 @@ internal class PlayerFrameCaptureManager(
     ) {
         saveDisposable?.dispose()
         saveDisposable = Maybe
-            .fromCallable {
-                val outputDirectory = outputDirectory(animeTitle)
-                val directory = outputDirectory
-                    ?: throw IOException("Frame capture pictures directory is unavailable")
-                val outputFile = File(
-                    directory,
-                    PlayerFrameCaptureNaming.fileName(episodeLabel)
-                )
-                try {
-                    outputFile.outputStream().use { stream ->
-                        if (!bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)) {
-                            throw IOException("Frame bitmap compression failed")
-                        }
-                    }
-                } catch (error: Throwable) {
-                    outputFile.delete()
-                    throw error
-                }
-                outputFile
-            }
+            .fromCallable { saveFrame(bitmap, animeTitle, episodeLabel) }
             .subscribeOn(Schedulers.io())
             .doOnDispose { bitmap.recycle() }
             .observeOn(io.reactivex.rxjava3.android.schedulers.AndroidSchedulers.mainThread())
@@ -228,6 +212,74 @@ internal class PlayerFrameCaptureManager(
             )
     }
 
+    private fun saveFrame(bitmap: Bitmap, animeTitle: String, episodeLabel: String): Uri {
+        val selectedFolderUri = playbackPreferencesStore.getFrameCaptureDirectoryUri()
+            .takeIf { it.isNotBlank() }
+            ?.let(Uri::parse)
+
+        if (selectedFolderUri != null && hasWriteAccess(selectedFolderUri)) {
+            try {
+                return saveToSelectedFolder(selectedFolderUri, bitmap, animeTitle, episodeLabel)
+            } catch (_: Exception) {
+                // The selected provider can disappear between granting access and saving.
+            }
+        }
+        return saveToAppFolder(bitmap, animeTitle, episodeLabel)
+    }
+
+    private fun saveToSelectedFolder(
+        selectedFolderUri: Uri,
+        bitmap: Bitmap,
+        animeTitle: String,
+        episodeLabel: String
+    ): Uri {
+        val resolver = context.contentResolver
+        val animeFolder = findOrCreateAnimeFolder(selectedFolderUri, animeTitle)
+            ?: throw IOException("Frame capture SAF folder is unavailable")
+        val frameUri = DocumentsContract.createDocument(
+            resolver,
+            animeFolder,
+            "image/png",
+            PlayerFrameCaptureNaming.fileName(episodeLabel)
+        ) ?: throw IOException("Frame capture document creation failed")
+
+        try {
+            resolver.openOutputStream(frameUri)?.use { stream ->
+                if (!bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)) {
+                    throw IOException("Frame bitmap compression failed")
+                }
+            } ?: throw IOException("Frame capture output stream is unavailable")
+        } catch (error: Throwable) {
+            runCatching { DocumentsContract.deleteDocument(resolver, frameUri) }
+            throw error
+        }
+        return frameUri
+    }
+
+    private fun saveToAppFolder(
+        bitmap: Bitmap,
+        animeTitle: String,
+        episodeLabel: String
+    ): Uri {
+        val outputDirectory = outputDirectory(animeTitle)
+            ?: throw IOException("Frame capture pictures directory is unavailable")
+        val outputFile = File(
+            outputDirectory,
+            PlayerFrameCaptureNaming.fileName(episodeLabel)
+        )
+        try {
+            outputFile.outputStream().use { stream ->
+                if (!bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)) {
+                    throw IOException("Frame bitmap compression failed")
+                }
+            }
+        } catch (error: Throwable) {
+            outputFile.delete()
+            throw error
+        }
+        return Uri.fromFile(outputFile)
+    }
+
     private fun outputDirectory(animeTitle: String): File? {
         val picturesDirectory = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES) ?: return null
         return File(picturesDirectory, "AtsuLab")
@@ -236,15 +288,85 @@ internal class PlayerFrameCaptureManager(
             .takeIf { it.isDirectory }
     }
 
-    private fun shareBitmap(outputFile: File) {
+    private fun findOrCreateAnimeFolder(selectedFolderUri: Uri, animeTitle: String): Uri? {
+        val parentDocumentId = DocumentsContract.getTreeDocumentId(selectedFolderUri)
+        val folderName = PlayerFrameCaptureNaming.safeSegment(animeTitle)
+        findChildDirectory(selectedFolderUri, parentDocumentId, folderName)?.let { return it }
+
+        return runCatching {
+            DocumentsContract.createDocument(
+                context.contentResolver,
+                DocumentsContract.buildDocumentUriUsingTree(selectedFolderUri, parentDocumentId),
+                DocumentsContract.Document.MIME_TYPE_DIR,
+                folderName
+            )
+        }.getOrNull()
+    }
+
+    private fun findChildDirectory(
+        selectedFolderUri: Uri,
+        parentDocumentId: String,
+        displayName: String
+    ): Uri? {
+        val childrenUri = DocumentsContract.buildChildDocumentsUriUsingTree(
+            selectedFolderUri,
+            parentDocumentId
+        )
+        val projection = arrayOf(
+            DocumentsContract.Document.COLUMN_DOCUMENT_ID,
+            DocumentsContract.Document.COLUMN_DISPLAY_NAME,
+            DocumentsContract.Document.COLUMN_MIME_TYPE
+        )
+
+        return runCatching {
+            context.contentResolver.query(childrenUri, projection, null, null, null)?.use { cursor ->
+                readMatchingDirectory(cursor, selectedFolderUri, displayName)
+            }
+        }.getOrNull()
+    }
+
+    private fun readMatchingDirectory(
+        cursor: Cursor,
+        selectedFolderUri: Uri,
+        displayName: String
+    ): Uri? {
+        while (cursor.moveToNext()) {
+            val nameIndex = cursor.getColumnIndex(DocumentsContract.Document.COLUMN_DISPLAY_NAME)
+            val mimeIndex = cursor.getColumnIndex(DocumentsContract.Document.COLUMN_MIME_TYPE)
+            val idIndex = cursor.getColumnIndex(DocumentsContract.Document.COLUMN_DOCUMENT_ID)
+            val matches = nameIndex >= 0 &&
+                cursor.getString(nameIndex) == displayName &&
+                mimeIndex >= 0 &&
+                cursor.getString(mimeIndex) == DocumentsContract.Document.MIME_TYPE_DIR
+            if (matches && idIndex >= 0) {
+                return DocumentsContract.buildDocumentUriUsingTree(
+                    selectedFolderUri,
+                    cursor.getString(idIndex)
+                )
+            }
+        }
+        return null
+    }
+
+    private fun hasWriteAccess(selectedFolderUri: Uri): Boolean {
+        return context.contentResolver.persistedUriPermissions.any { permission ->
+            permission.isWritePermission && permission.uri == selectedFolderUri
+        }
+    }
+
+    private fun shareBitmap(outputUri: Uri) {
         if (isReleased || !isStarted || context !is Activity) return
         val activity = context as Activity
         if (activity.isFinishing || activity.isDestroyed) return
-        val contentUri = FileProvider.getUriForFile(
-            activity,
-            "${activity.packageName}.player.capture",
-            outputFile
-        )
+        val contentUri = if (outputUri.scheme == "content") {
+            outputUri
+        } else {
+            FileProvider.getUriForFile(
+                activity,
+                "${activity.packageName}.player.capture",
+                File(requireNotNull(outputUri.path))
+            )
+        }
         val shareIntent = Intent(Intent.ACTION_SEND).apply {
             type = "image/png"
             putExtra(Intent.EXTRA_STREAM, contentUri)
