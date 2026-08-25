@@ -597,6 +597,12 @@
     <string name="player_episodes">Episodes</string>
     <string name="player_watching_episode">You are watching %1$s — Episode %2$d</string>
     <string name="player_no_episodes_in_range">No episodes in this range</string>
+    <string name="player_loading_sources">Loading sources…</string>
+    <string name="player_loading_more_servers">Loading…</string>
+    <string name="player_no_sources">No sources</string>
+    <string name="player_list_of_episodes">List of episodes</string>
+    <string name="player_number_of_episode">Number of Ep</string>
+    <string name="player_comments_preview">Comments need a database to sync.</string>
     <string name="player_settings">Player settings</string>
     <string name="player_volume">Volume</string>
     <string name="player_mute">Mute</string>

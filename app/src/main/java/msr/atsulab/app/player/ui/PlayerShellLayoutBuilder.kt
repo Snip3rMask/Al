@@ -26,12 +26,15 @@ internal data class PlayerShellViews(
     val gestureHudView: PlayerGestureHudView,
     val skipButton: TextView,
     val captureButton: ImageView?,
-    val watchingView: TextView?
+    val watchingView: TextView?,
+    val portraitContent: PlayerPortraitContent?
 )
+
+internal interface PlayerShellCallbacks : PlayerControllerSkeleton.Callbacks, PlayerPortraitContent.Callbacks
 
 internal class PlayerShellLayoutBuilder(
     private val context: Context,
-    private val callbacks: PlayerControllerSkeleton.Callbacks
+    private val callbacks: PlayerShellCallbacks
 ) {
     fun build(title: String, episodeLabel: String): PlayerShellViews {
         val orientation = PlayerShellOrientation.fromConfiguration(context.resources.configuration)
@@ -203,6 +206,12 @@ internal class PlayerShellLayoutBuilder(
         val lowerPanel = LinearLayout(context).apply { orientation = LinearLayout.VERTICAL }
         lowerPanel.setPadding(dp(37, density), dp(28, density), dp(37, density), dp(28, density))
         lowerPanel.addView(controller.statusControls)
+        val portraitContent = if (controller.orientation == PlayerShellOrientation.PORTRAIT) {
+            PlayerPortraitContent(context, callbacks)
+        } else {
+            null
+        }
+        portraitContent?.let(lowerPanel::addView)
         lowerScroll.addView(lowerPanel)
 
         val page = LinearLayout(context).apply { orientation = LinearLayout.VERTICAL }
@@ -225,7 +234,8 @@ internal class PlayerShellLayoutBuilder(
             gestureHudView,
             skipButton,
             null,
-            watchingView
+            watchingView,
+            portraitContent
         )
     }
 
@@ -340,6 +350,7 @@ internal class PlayerShellLayoutBuilder(
             gestureHudView,
             skipButton,
             captureButton,
+            null,
             null
         )
     }

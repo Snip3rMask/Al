@@ -994,6 +994,8 @@ Append dated entries here. Do not delete history.
 - Fixed the first Capture Settings CI failure and published green Release `146` from commit `a48a14c6`.
 - Kept Part 7 open pending real-device validation of quality, servers, skip controls, and the completed capture flow.
 - Closed Part 8 after the user confirmed the episode panel and navigation flow on a real device.
+- Completed the portrait player parity pass with an inline Anifux-style lower panel: SUB/DUB tabs, horizontal server chips, source error text, episode tools/range selector, five-column episode grid, search, and comment preview.
+- Reused the tested range/grid model for portrait rendering, synchronized source-loading/error/server state after rotation, added focused portrait-state tests, and dismissed inline popups on lifecycle/rebuild.
 
 ## Next Action
 

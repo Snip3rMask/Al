@@ -117,6 +117,8 @@ class PlayerActivity : AppCompatActivity() {
     private var skipIntervals: List<SkipInterval> = emptyList()
     private var skipFetchKey = ""
     private var selectedQualityTrackId: String? = null
+    private var isLoadingVideoSources = true
+    private var sourceErrorMessage: String? = null
     private var episodeRangeStart = DEFAULT_INITIAL_EPISODE
     private var isAutoNextRequested = false
     private val customFontPicker = registerForActivityResult(
@@ -341,6 +343,7 @@ class PlayerActivity : AppCompatActivity() {
         dismissSubtitleMenus()
         serverMenu.dismiss(notifyCallbacks = false)
         episodePanel.dismiss(notifyCallbacks = false)
+        shell.portraitContent?.dismissPopups()
         if (engineAttached) playbackEngine.onBackground()
         super.onStop()
     }
@@ -354,6 +357,7 @@ class PlayerActivity : AppCompatActivity() {
         serverMenu.dismiss(notifyCallbacks = false)
         qualityMenu.dismiss(notifyCallbacks = false)
         episodePanel.dismiss(notifyCallbacks = false)
+        if (::shell.isInitialized) shell.portraitContent?.dismissPopups()
         if (::shell.isInitialized) shell.controller.release()
         playbackDisposable?.dispose()
         moreServersDisposable?.dispose()
@@ -417,13 +421,14 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     private fun rebuildShell() {
+        if (::shell.isInitialized) shell.portraitContent?.dismissPopups()
         speedMenu.dismiss(notifyCallbacks = false)
         frameCaptureSettingsMenu.dismiss(notifyCallbacks = false)
         episodePanel.dismiss(notifyCallbacks = false)
         dismissSubtitleMenus()
         serverMenu.dismiss(notifyCallbacks = false)
         qualityMenu.dismiss(notifyCallbacks = false)
-        val callbacks = object : PlayerControllerSkeleton.Callbacks {
+        val callbacks = object : PlayerShellCallbacks {
             override fun onBackClicked() {
                 finish()
             }
@@ -508,6 +513,39 @@ class PlayerActivity : AppCompatActivity() {
                 } else {
                     ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
                 }
+            }
+
+            override fun currentState(): PlayerPortraitUiState {
+                return PlayerPortraitUiState(
+                    episodes = episodeNavigator.episodes(),
+                    currentEpisode = episodeNavigator.currentEpisode,
+                    rangeStart = episodeRangeStart,
+                    showDub = showDubSources,
+                    sources = availableVideoSources,
+                    selectedSourceIndex = selectedSourceIndex,
+                    isLoadingSources = isLoadingVideoSources,
+                    isMoreServersLoading = areMoreServersLoading,
+                    hasAllServersFailed = hasAllServersFailed
+                )
+            }
+
+            override fun onLanguageModeSelected(showDub: Boolean) {
+                selectLanguageMode(showDub)
+                refreshPortraitContent()
+            }
+
+            override fun onServerSelected(sourceIndex: Int) {
+                selectVideoSource(sourceIndex)
+                refreshPortraitContent()
+            }
+
+            override fun onEpisodeSelected(episode: PlaybackEpisode) {
+                loadSelectedEpisode(episode)
+            }
+
+            override fun onRangeSelected(rangeStart: Int) {
+                episodeRangeStart = rangeStart
+                refreshPortraitContent()
             }
         }
         val title = currentAnime?.title.orEmpty()
@@ -602,6 +640,7 @@ class PlayerActivity : AppCompatActivity() {
         applyBrightnessScrim()
         loadingIndicator = shell.loadingIndicator
         setContentView(shell.root)
+        refreshPortraitContent()
         applySystemBars()
         shell.controller.setStatus(statusMessage, statusRetryVisible)
         shell.controller.setLocked(controlsLocked)
@@ -615,6 +654,7 @@ class PlayerActivity : AppCompatActivity() {
         updateTransportControls()
         if (controlsVisible) scheduleControlsAutoHide()
         updateSkipViews()
+        refreshPortraitContent()
     }
 
     private fun applySystemBars() {
@@ -647,6 +687,7 @@ class PlayerActivity : AppCompatActivity() {
         hasAllServersFailed = false
         failedSourceIndexes.clear()
         resetSkipTimes()
+        markSourcesLoading()
 
         playbackDisposable = episodeRepository.getEpisodes(anime)
             .flatMap { episodes ->
@@ -674,6 +715,8 @@ class PlayerActivity : AppCompatActivity() {
 
         val videoSource = sources.firstOrNull()
         isAutoNextRequested = false
+        isLoadingVideoSources = false
+        sourceErrorMessage = null
         availableVideoSources = sources
         areMoreServersLoading = false
         hasAllServersFailed = false
@@ -694,6 +737,8 @@ class PlayerActivity : AppCompatActivity() {
             PlayerServerMenuModel.controlLabel(sources, selectedSourceIndex)
         )
         shell.controller.updateQualityLabel("AUTO")
+        shell.portraitContent?.setSourceError(null)
+        refreshPortraitContent()
         playbackEngine.prepare(source)
         playbackEngine.setSpeed(playbackSpeed)
         playbackEngine.play()
@@ -912,6 +957,7 @@ class PlayerActivity : AppCompatActivity() {
         }
         areMoreServersLoading = false
         serverMenu.refreshIfShowing()
+        refreshPortraitContent()
 
         if (selectedSourceIndex in failedSourceIndexes) {
             tryRecoverFromFailedSource()
@@ -958,7 +1004,45 @@ class PlayerActivity : AppCompatActivity() {
         areMoreServersLoading = false
         transportVisible = false
         serverMenu.refreshIfShowing()
+        setSourceError(getString(R.string.player_no_working_source))
         showMessage(R.string.player_no_working_source, retryVisible = true)
+    }
+
+    private fun markSourcesLoading() {
+        isLoadingVideoSources = true
+        sourceErrorMessage = null
+        availableVideoSources = emptyList()
+        selectedSourceIndex = INVALID_SOURCE_INDEX
+        activeVideoSource = null
+        refreshPortraitContent()
+        shell.portraitContent?.setSourceError(null)
+    }
+
+    private fun setSourceError(message: String) {
+        sourceErrorMessage = message
+        shell.portraitContent?.setSourceError(message)
+        refreshPortraitContent()
+    }
+
+    private fun refreshPortraitContent() {
+        if (!::shell.isInitialized) return
+        val content = shell.portraitContent ?: return
+        content.render(portraitUiState())
+        content.setSourceError(sourceErrorMessage)
+    }
+
+    private fun portraitUiState(): PlayerPortraitUiState {
+        return PlayerPortraitUiState(
+            episodes = episodeNavigator.episodes(),
+            currentEpisode = episodeNavigator.currentEpisode,
+            rangeStart = episodeRangeStart,
+            showDub = showDubSources,
+            sources = availableVideoSources,
+            selectedSourceIndex = selectedSourceIndex,
+            isLoadingSources = isLoadingVideoSources,
+            isMoreServersLoading = areMoreServersLoading,
+            hasAllServersFailed = hasAllServersFailed
+        )
     }
 
     private fun showServerMenu(showLanguageTabs: Boolean) {
@@ -981,6 +1065,8 @@ class PlayerActivity : AppCompatActivity() {
         showDubSources = showDub
         if (preferredIndex != selectedSourceIndex) {
             selectVideoSource(preferredIndex)
+        } else {
+            refreshPortraitContent()
         }
     }
 
@@ -996,6 +1082,7 @@ class PlayerActivity : AppCompatActivity() {
         latestPlaybackState = PlaybackState(speed = playbackSpeed, positionMs = resumePositionMs)
         shell.controller.updateServerLabel(PlayerServerMenuModel.controlLabel(availableVideoSources, sourceIndex))
         shell.controller.updateQualityLabel("AUTO")
+        refreshPortraitContent()
         playbackEngine.prepare(source, resumePositionMs)
         playbackEngine.setSpeed(playbackSpeed)
         playbackEngine.play()
@@ -1199,6 +1286,7 @@ class PlayerActivity : AppCompatActivity() {
         hasAllServersFailed = false
         failedSourceIndexes.clear()
         resetSkipTimes()
+        markSourcesLoading()
         transportVisible = false
         showMessage(R.string.player_loading_episode, arguments = listOf(anime.title, requestedEpisode), loading = true)
         playbackDisposable?.dispose()
