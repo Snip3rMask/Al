@@ -637,7 +637,7 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - Blocked selections for missing track IDs and added focused coverage for option ordering, label mapping, engine delegation, and position preservation.
 - Marked Part 7.6 code-complete pending Release device validation.
 
-### 7.7 Server Selector [~]
+### 7.7 Server Selector [x]
 
 - [x] SUB/DUB tabs and server list.
 - [x] Active server indicator.
@@ -669,6 +669,13 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - Added automatic playback fallback: a failed source is remembered, the first usable same-language source is tried next, and other-language sources are used only when needed.
 - Added explicit “No working server” terminal state with retry, cleared failed state on successful READY/manual selection/new episode/reload, and refreshed an open panel when loading or failure state changes.
 - Covered remaining-provider merging, provider failure isolation, same-language fallback priority, and failed-index handling with focused tests.
+
+#### Part 7.7 Closure — 2026-08-25
+
+- Fixed the server-recovery compile errors by aligning failed-source index naming in `PlayerActivity`.
+- Strengthened retry recovery so a terminal failure re-queries all source providers instead of only secondary providers.
+- Preserved active playback indexes while appending background sources and added focused repository coverage for provider merging and recovery.
+- Closed Part 7.7 at code level with green CI (`aa07e863`); real-device validation remains required.
 
 ### 7.8 Skip Intro/Outro
 
