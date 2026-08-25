@@ -350,9 +350,6 @@ class PlayerActivity : AppCompatActivity() {
         dismissSubtitleMenus()
         serverMenu.dismiss(notifyCallbacks = false)
         qualityMenu.dismiss(notifyCallbacks = false)
-        if (::shell.isInitialized) {
-            shell.skipButton.setOnClickListener { skipActiveSection() }
-        }
         val callbacks = object : PlayerControllerSkeleton.Callbacks {
             override fun onBackClicked() {
                 finish()
@@ -436,6 +433,7 @@ class PlayerActivity : AppCompatActivity() {
         val episodeLabel = getString(R.string.player_shell_status_format, title, requestedEpisode)
 
         shell = PlayerShellLayoutBuilder(this, callbacks).build(title, episodeLabel)
+        shell.skipButton.setOnClickListener { skipActiveSection() }
         val gestureHandler = PlayerGestureHandler(
             this,
             object : PlayerGestureHandler.Callbacks {
@@ -768,7 +766,7 @@ class PlayerActivity : AppCompatActivity() {
 
     private fun updateSkipViews() {
         if (!::shell.isInitialized) return
-        shell.skipMarkerView.setData(skipIntervals, latestPlaybackState.durationMs)
+        shell.controller.skipMarkerView.setData(skipIntervals, latestPlaybackState.durationMs)
 
         val activeInterval = PlayerSkipController.activeInterval(
             skipIntervals,

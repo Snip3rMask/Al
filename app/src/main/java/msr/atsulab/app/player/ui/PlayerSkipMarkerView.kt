@@ -1,16 +1,16 @@
 package msr.atsulab.app.player.ui
 
 import android.content.Context
+import android.graphics.Color
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.view.View
 import msr.atsulab.app.player.domain.model.SkipInterval
-import msr.atsulab.app.player.ui.PlayerShellMetrics.ACCENT_COLOR
 
 internal class PlayerSkipMarkerView(context: Context) : View(context) {
 
     private val markerPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = ACCENT_COLOR
+        color = Color.WHITE
         alpha = 190
     }
 

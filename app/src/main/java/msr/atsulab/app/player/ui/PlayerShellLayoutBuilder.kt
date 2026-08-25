@@ -23,8 +23,7 @@ internal data class PlayerShellViews(
     val controller: PlayerControllerSkeleton,
     val loadingIndicator: ProgressBar,
     val gestureHudView: PlayerGestureHudView,
-    val skipButton: TextView,
-    val skipMarkerView: PlayerSkipMarkerView
+    val skipButton: TextView
 )
 
 internal class PlayerShellLayoutBuilder(
@@ -49,7 +48,6 @@ internal class PlayerShellLayoutBuilder(
         val loadingIndicator = ProgressBar(context).apply { visibility = View.GONE }
         val gestureHudView = PlayerGestureHudView(context).apply { visibility = View.GONE }
         val density = context.resources.displayMetrics.density
-        val skipMarkerView = PlayerSkipMarkerView(context).apply { visibility = View.GONE }
         val skipButton = TextView(context).apply {
             background = GradientDrawable().apply {
                 setColor(PlayerShellMetrics.ACCENT_COLOR)
@@ -92,7 +90,6 @@ internal class PlayerShellLayoutBuilder(
                 loadingIndicator,
                 gestureHudView,
                 skipButton,
-                skipMarkerView,
                 episodeLabel
             )
         } else {
@@ -104,7 +101,6 @@ internal class PlayerShellLayoutBuilder(
                 loadingIndicator,
                 gestureHudView,
                 skipButton,
-                skipMarkerView,
                 episodeLabel
             )
         }
@@ -118,7 +114,6 @@ internal class PlayerShellLayoutBuilder(
         loadingIndicator: ProgressBar,
         gestureHudView: PlayerGestureHudView,
         skipButton: TextView,
-        skipMarkerView: PlayerSkipMarkerView,
         episodeLabel: String
     ): PlayerShellViews {
         val density = context.resources.displayMetrics.density
@@ -225,8 +220,7 @@ internal class PlayerShellLayoutBuilder(
             controller,
             loadingIndicator,
             gestureHudView,
-            skipButton,
-            skipMarkerView
+            skipButton
         )
     }
 
@@ -238,7 +232,6 @@ internal class PlayerShellLayoutBuilder(
         loadingIndicator: ProgressBar,
         gestureHudView: PlayerGestureHudView,
         skipButton: TextView,
-        skipMarkerView: PlayerSkipMarkerView,
         episodeLabel: String
     ): PlayerShellViews {
         val density = context.resources.displayMetrics.density
@@ -321,8 +314,7 @@ internal class PlayerShellLayoutBuilder(
             controller,
             loadingIndicator,
             gestureHudView,
-            skipButton,
-            skipMarkerView
+            skipButton
         )
     }
 

@@ -694,6 +694,12 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - Added accent-colored seekbar markers that map each valid interval onto the current duration and hide automatically for empty or unknown-duration results.
 - Kept skip controls hidden while controls are hidden or playback is locked, and suppressed the button during the final second of its interval to avoid a useless tap.
 
+#### Skip UI Fix — 2026-08-25
+
+- Removed the detached duplicate marker view and updated the marker owned by the transport seekbar host.
+- Matched the Anifux marker layering, white translucent color, rounded shape, and compact marker height.
+- Attached the click listener after each shell rebuild so rotation cannot leave the visible skip button without an action handler.
+
 ### 7.9 Frame Capture
 
 - [ ] Capture current frame.

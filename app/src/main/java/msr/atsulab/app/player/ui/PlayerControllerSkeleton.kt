@@ -435,14 +435,14 @@ internal class PlayerControllerSkeleton(
             }
             val seekBarHost = FrameLayout(context).apply {
                 addView(
-                    seekBar,
+                    skipMarkerView,
                     FrameLayout.LayoutParams(
                         FrameLayout.LayoutParams.MATCH_PARENT,
                         FrameLayout.LayoutParams.MATCH_PARENT
                     )
                 )
                 addView(
-                    skipMarkerView,
+                    seekBar,
                     FrameLayout.LayoutParams(
                         FrameLayout.LayoutParams.MATCH_PARENT,
                         FrameLayout.LayoutParams.MATCH_PARENT
