@@ -23,7 +23,7 @@ class PlayerPortraitUiStateTest {
         )
 
         assertEquals((100..199).toList(), options.map { it.number })
-        assertEquals(150f, options.first { it.isSelected }.number)
+        assertEquals(150, options.first { it.isSelected }.number)
     }
 
     @Test
