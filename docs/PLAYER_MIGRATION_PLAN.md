@@ -595,6 +595,11 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - Custom `.ttf` selection was deferred during Slice C and completed in Slice D.
 - Fixed the real-device style-panel crash by attaching each slider value label only to its slider row instead of first adding it to both the panel and row.
 
+#### Subtitle Selection Fix — 2026-08-25
+
+- Fixed embedded subtitle switching by using Media3's track-type disable API instead of passing `C.TRACK_TYPE_TEXT` as a renderer index.
+- Cleared stale text-selection overrides before selecting another language or switching subtitles Off.
+
 #### Subtitle Validation & Crash Fix — Releases 119–121 — 2026-08-25
 
 - Release `119` exposed a real-device crash when opening Style Settings because a slider value label received two parents.
@@ -853,6 +858,7 @@ Append dated entries here. Do not delete history.
 
 ### 2026-08-25
 
+- Fixed subtitle language selection and Off behavior by clearing stale text-track overrides and disabling the correct Media3 track type.
 - Completed player chrome parity, subtitle selection/toggle, persisted live styling, and permission-free custom font support.
 - Published green releases through Release `121`; the latest documented stable smoke point is Release `120`, where the user confirmed Style Settings no longer crashes.
 - Set next executable phase: **Part 7.6 Quality Selector**, beginning with HLS variant detection after Release `121` device validation.

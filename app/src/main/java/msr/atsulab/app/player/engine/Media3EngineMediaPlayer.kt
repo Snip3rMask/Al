@@ -128,13 +128,14 @@ internal class Media3EngineMediaPlayer(
 
     override fun setSubtitleTrack(trackId: String?) {
         val parametersBuilder = trackSelector.buildUponParameters()
-            .setRendererDisabled(C.TRACK_TYPE_TEXT, trackId == null)
+            .setTrackTypeDisabled(C.TRACK_TYPE_TEXT, trackId == null)
+            .clearOverridesOfType(C.TRACK_TYPE_TEXT)
 
         if (trackId != null) {
             if (trackId == EXTERNAL_SUBTITLE_TRACK_ID) {
                 trackSelector.setParameters(
                     trackSelector.buildUponParameters()
-                        .setRendererDisabled(C.TRACK_TYPE_TEXT, false)
+                        .setTrackTypeDisabled(C.TRACK_TYPE_TEXT, false)
                         .clearOverridesOfType(C.TRACK_TYPE_TEXT)
                 )
                 return
