@@ -12,9 +12,9 @@ class PlayerEpisodePanelModelTest {
 
         val ranges = PlayerEpisodePanelModel.ranges(episodes, selectedRangeStart = 150)
 
-        assertEquals(listOf(50, 150, 250), ranges.map { it.start })
-        assertEquals(149, ranges[0].endInclusive)
-        assertEquals(249, ranges[1].endInclusive)
+        assertEquals(listOf(0, 100, 200), ranges.map { it.start })
+        assertEquals(99, ranges[0].endInclusive)
+        assertEquals(199, ranges[1].endInclusive)
         assertEquals(260, ranges[2].endInclusive)
     }
 

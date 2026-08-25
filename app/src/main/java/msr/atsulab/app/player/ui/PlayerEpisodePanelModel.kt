@@ -25,11 +25,9 @@ internal object PlayerEpisodePanelModel {
     }
 
     fun rangeStart(episodes: List<PlaybackEpisode>, currentEpisode: PlaybackEpisode?): Int {
-        if (episodes.isEmpty()) return 1
-        val minimum = minEpisodeNumber(episodes)
-        val requested = episodeNumber(currentEpisode)
-        val normalized = max(minimum, requested)
-        return ((normalized - minimum) / RANGE_SIZE) * RANGE_SIZE + minimum
+        if (episodes.isEmpty()) return 0
+        val number = episodeNumber(currentEpisode).coerceAtLeast(0)
+        return (number / RANGE_SIZE) * RANGE_SIZE
     }
 
     fun ranges(
@@ -37,10 +35,9 @@ internal object PlayerEpisodePanelModel {
         selectedRangeStart: Int
     ): List<PlayerEpisodeRangeOption> {
         if (episodes.isEmpty()) return emptyList()
-        val minimum = minEpisodeNumber(episodes)
         val maximum = maxEpisodeNumber(episodes)
-        val selected = max(minimum, selectedRangeStart)
-        return generateSequence(minimum) { start ->
+        val selected = max(0, selectedRangeStart)
+        return generateSequence(0) { start ->
             val next = start + RANGE_SIZE
             if (next <= maximum) next else null
         }.map { start ->
@@ -79,9 +76,6 @@ internal object PlayerEpisodePanelModel {
             }
         }
     }
-
-    private fun minEpisodeNumber(episodes: List<PlaybackEpisode>): Int =
-        episodes.minOfOrNull(::episodeNumber) ?: 1
 
     private fun maxEpisodeNumber(episodes: List<PlaybackEpisode>): Int =
         episodes.maxOfOrNull(::episodeNumber) ?: 0
