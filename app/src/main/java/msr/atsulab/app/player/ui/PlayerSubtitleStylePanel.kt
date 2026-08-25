@@ -304,7 +304,6 @@ internal class PlayerSubtitleStylePanel(
             setTextColor(PlayerShellMetrics.ACCENT_COLOR)
             gravity = Gravity.CENTER_VERTICAL or Gravity.END
         }
-        addView(valueView, linearWrapParams(density, topMargin = 4))
         addView(
             sliderRow(valueView, currentValue, minimum, maximum, suffix, density) { value ->
                 valueView.text = "$value$suffix"

@@ -593,6 +593,7 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - Applied styles through Media3's `CaptionStyleCompat`, fractional text size, edge shadow, typeface mapping, and subtitle-view bottom margin without reattaching playback.
 - Saved every change immediately in the existing playback preference store and reapplied the normalized style after rotation or shell rebuild.
 - Custom `.ttf` file selection remains the final Part 7.5 follow-up because it needs document/file-picker lifecycle handling.
+- Fixed the real-device style-panel crash by attaching each slider value label only to its slider row instead of first adding it to both the panel and row.
 
 ### 7.6 Quality Selector
 
@@ -832,6 +833,7 @@ Append dated entries here. Do not delete history.
 - Completed a player chrome parity pass with Anifux icon/order/offset restoration and corrected compact landscape top placement.
 - Completed Part 7.5 Slice B: embedded subtitle selection, Off toggle, external-subtitle fallback, and the exact Anifux right-side panel.
 - Completed Part 7.5 Slice C: persisted live subtitle styling controls with direct Media3 caption application.
+- Fixed Release `119` subtitle-style-panel crash caused by a duplicate parent attachment in slider rows.
 
 ## Next Action
 
