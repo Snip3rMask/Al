@@ -996,7 +996,7 @@ Append dated entries here. Do not delete history.
 - Closed Part 8 after the user confirmed the episode panel and navigation flow on a real device.
 - Completed the portrait player parity pass with an inline Anifux-style lower panel: SUB/DUB tabs, horizontal server chips, source error text, episode tools/range selector, five-column episode grid, search, and comment preview.
 - Reused the tested range/grid model for portrait rendering, synchronized source-loading/error/server state after rotation, added focused portrait-state tests, and dismissed inline popups on lifecycle/rebuild.
-- Fixed the first portrait parity CI failure by correcting Kotlin property syntax, local density conversion, string resolution, and the ambiguous view attachment call.
+- Fixed both portrait parity CI failures by correcting Kotlin property syntax, local density conversion, string resolution, and by attaching the wrapped portrait view rather than its container object.
 
 ## Next Action
 
