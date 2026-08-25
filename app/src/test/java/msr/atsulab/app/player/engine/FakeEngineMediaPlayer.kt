@@ -23,6 +23,9 @@ class FakeEngineMediaPlayer : EngineMediaPlayer {
     var speeds = mutableListOf<Float>()
         private set
 
+    var videoQualities = mutableListOf<String?>()
+        private set
+
     var subtitleTracks = mutableListOf<String?>()
         private set
 
@@ -56,6 +59,10 @@ class FakeEngineMediaPlayer : EngineMediaPlayer {
 
     override fun setSubtitleTrack(trackId: String?) {
         subtitleTracks += trackId
+    }
+
+    override fun setVideoQuality(trackId: String?) {
+        videoQualities += trackId
     }
 
     override fun setVideoView(videoView: Any?) {

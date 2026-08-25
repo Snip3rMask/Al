@@ -33,6 +33,7 @@ internal class PlayerControllerSkeleton(
         fun onLockClicked()
         fun onUnlockClicked()
         fun onSpeedClicked()
+        fun onQualityClicked()
         fun onServerClicked()
         fun onAudioClicked()
         fun onSubtitleClicked()
@@ -67,6 +68,9 @@ internal class PlayerControllerSkeleton(
         private set
 
     var speedButton: ImageView? = null
+        private set
+
+    var qualityButton: LinearLayout? = null
         private set
 
     var serverPill: TextView? = null
@@ -258,6 +262,31 @@ internal class PlayerControllerSkeleton(
                 }
                 speedButton = speedIcon
                 addView(speedIcon, topIconParams(density))
+
+                val qualityPill = TextView(context).apply {
+                    text = "AUTO"
+                    textSize = 12f
+                    minHeight = 0
+                    gravity = Gravity.CENTER
+                    typeface = Typeface.DEFAULT_BOLD
+                    setTextColor(Color.WHITE)
+                }
+                qualityButton = LinearLayout(context).apply {
+                    gravity = Gravity.CENTER
+                    setBackgroundResource(R.drawable.ripple_circle)
+                    setPadding(dp(10, density), 0, dp(10, density), 0)
+                    addView(qualityPill)
+                    setOnClickListener { callbacks.onQualityClicked() }
+                }
+                addView(
+                    qualityButton,
+                    LinearLayout.LayoutParams(
+                        dp(54, density),
+                        dp(42, density)
+                    ).apply {
+                        setMargins(0, 0, dp(8, density), 0)
+                    }
+                )
             }
 
             addView(
@@ -566,6 +595,10 @@ internal class PlayerControllerSkeleton(
 
     fun updateServerLabel(label: String) {
         serverPill?.text = label
+    }
+
+    fun updateQualityLabel(label: String) {
+        (qualityButton?.getChildAt(0) as? TextView)?.text = label
     }
 
     fun setVolumeMuted(isMuted: Boolean) {

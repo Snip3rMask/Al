@@ -71,6 +71,12 @@ internal class DefaultPlaybackEngine(
         emitState()
     }
 
+    override fun setVideoQuality(trackId: String?) {
+        if (released) return
+        mediaPlayer.setVideoQuality(trackId)
+        emitState()
+    }
+
     override fun setVideoView(videoView: Any?) {
         if (!released) mediaPlayer.setVideoView(videoView)
     }

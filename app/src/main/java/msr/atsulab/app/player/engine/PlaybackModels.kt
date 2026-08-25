@@ -63,6 +63,8 @@ interface PlaybackEngine {
 
     fun setSubtitleTrack(trackId: String?)
 
+    fun setVideoQuality(trackId: String?)
+
     fun setVideoView(videoView: Any?)
 
     fun onBackground()
@@ -88,6 +90,8 @@ internal interface EngineMediaPlayer {
     fun setSpeed(speed: Float)
 
     fun setSubtitleTrack(trackId: String?)
+
+    fun setVideoQuality(trackId: String?)
 
     fun setVideoView(videoView: Any?)
 

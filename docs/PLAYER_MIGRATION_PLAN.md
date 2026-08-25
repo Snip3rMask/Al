@@ -618,8 +618,8 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 ### 7.6 Quality Selector [~]
 
 - [x] Detect HLS quality variants.
-- [ ] Provide AUTO and manual options.
-- [ ] Preserve position on quality switch.
+- [x] Provide AUTO and manual options.
+- [x] Preserve position on quality switch.
 
 #### Part 7.6 Slice A — HLS Variant Detection — 2026-08-25
 
@@ -627,7 +627,15 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - Detected video variants directly from Media3 `Tracks` without a second HLS master-playlist request.
 - Restored Anifux label behavior: resolution height first, then Anifux's bitrate thresholds, followed by provider-provided labels.
 - Normalized variants into highest-to-lowest order by height, bitrate, and width; focused metadata tests were added.
-- AUTO/manual selection, quality UI, and reset-free switching remain deferred to the next slices.
+
+#### Part 7.6 Slice B — Selection & Reset-Free Switching — 2026-08-25
+
+- Added the Anifux-style 54×42dp landscape quality pill with AUTO/FHD/HD/SD labels.
+- Added a 380dp right-side “Choose quality” panel using Anifux row sizing, focus outlines, selected fill, AUTO-first ordering, and descending variants.
+- Connected quality selection through the playback engine seam so manual/AUTO changes use Media3 track overrides without re-preparing the media source or resetting position.
+- Cleared manual selection on episode/source reload while preserving it across rotation.
+- Blocked selections for missing track IDs and added focused coverage for option ordering, label mapping, engine delegation, and position preservation.
+- Marked Part 7.6 code-complete pending Release device validation.
 
 ### 7.7 Server Selector
 
@@ -872,8 +880,10 @@ Append dated entries here. Do not delete history.
 - Set next executable phase: **Part 7.6 Quality Selector**, beginning with HLS variant detection after Release `121` device validation.
 
 - Completed Part 7.6 Slice A: Media3 HLS video-quality detection with Anifux-compatible labels and descending normalization.
+- Completed Part 7.6 Slice B: AUTO/manual quality UI, Media3 track overrides, reset-free switching, rotation/source-reset handling, and focused unit tests.
 
 ## Next Action
 
-1. Install the latest GitHub Release and verify subtitle language switching, Off toggle, live styling, custom font import/clearing/restart persistence, chrome positions/icons, speed controls, gestures, lock behavior, rotation persistence, and HLS playback.
-2. After validation, continue Part 7.6 Quality Selector with the AUTO/manual selection panel and reset-free switching.
+1. Push Slice B, wait for green CI, install the resulting debug release, and verify quality pill placement/labels.
+2. On a real HLS stream, open Choose quality, switch AUTO/manual repeatedly, confirm position is preserved, rotate during selection, then change episodes and verify selection returns to AUTO.
+3. Re-check subtitle language/Off, styling/custom font, speed, gestures, locking, navigation, and baseline playback after the quality changes.

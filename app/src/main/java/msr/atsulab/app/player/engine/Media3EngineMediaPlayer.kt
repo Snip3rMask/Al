@@ -107,6 +107,7 @@ internal class Media3EngineMediaPlayer(
             MergingMediaSource(mediaSource, subtitleSource)
         }
 
+        setVideoQuality(null)
         player.setMediaSource(mergedSource, startPositionMs)
         player.prepare()
         player.playWhenReady = true
@@ -145,6 +146,25 @@ internal class Media3EngineMediaPlayer(
             val (groupIndex, trackIndex) = parseTrackId(trackId)
             val group = player.currentTracks.groups.getOrNull(groupIndex)
             if (group == null || group.type != C.TRACK_TYPE_TEXT || trackIndex >= group.length) {
+                return
+            }
+            parametersBuilder.setOverrideForType(
+                TrackSelectionOverride(group.mediaTrackGroup, trackIndex)
+            )
+        }
+
+        trackSelector.setParameters(parametersBuilder)
+    }
+
+    override fun setVideoQuality(trackId: String?) {
+        val parametersBuilder = trackSelector.buildUponParameters()
+            .setTrackTypeDisabled(C.TRACK_TYPE_VIDEO, false)
+            .clearOverridesOfType(C.TRACK_TYPE_VIDEO)
+
+        if (trackId != null) {
+            val (groupIndex, trackIndex) = parseTrackId(trackId)
+            val group = player.currentTracks.groups.getOrNull(groupIndex)
+            if (group == null || group.type != C.TRACK_TYPE_VIDEO || trackIndex >= group.length) {
                 return
             }
             parametersBuilder.setOverrideForType(

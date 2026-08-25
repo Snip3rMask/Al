@@ -87,6 +87,20 @@ class DefaultPlaybackEngineTest {
     }
 
     @Test
+    fun `video quality selection delegates without repreparing source`() {
+        val mediaPlayer = FakeEngineMediaPlayer()
+        val engine = DefaultPlaybackEngine(mediaPlayer)
+
+        engine.prepare(source)
+        engine.setVideoQuality("0:1")
+        engine.setVideoQuality(null)
+
+        assertEquals(1, mediaPlayer.preparedSources.size)
+        assertEquals(0, mediaPlayer.seekPositions.size)
+        assertEquals(listOf("0:1", null), mediaPlayer.videoQualities)
+    }
+
+    @Test
     fun `speed change does not reprepare or reset playback position`() {
         val mediaPlayer = FakeEngineMediaPlayer()
         val engine = DefaultPlaybackEngine(mediaPlayer)
