@@ -43,7 +43,7 @@ internal class PlayerEpisodePanel(
             )
         )
         val root = FrameLayout(activity).apply {
-            setBackgroundColor(0x88000000)
+            setBackgroundColor(0x88000000.toInt())
             setOnClickListener { dismiss() }
         }
         val scroll = ScrollView(activity).apply {

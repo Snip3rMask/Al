@@ -59,7 +59,7 @@ class PlayerActivity : AppCompatActivity() {
         PlayerFrameCaptureManager(this, playbackPreferencesStore)
     }
 
-    private val episodePanel by lazy {
+    private val episodePanel: PlayerEpisodePanel by lazy {
         PlayerEpisodePanel(
             this,
             object : PlayerEpisodePanel.Callbacks {
