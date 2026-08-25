@@ -37,7 +37,13 @@ class DefaultVideoSourceRepository(
         return Observable.fromIterable(remainingProviders)
             .flatMapSingle { provider -> resolveProviderSources(provider, anime, episode) }
             .toList()
-            .map { sources -> sortByPreferences(sources, preferredLanguage = null, preferredServer = null) }
+            .map { providerSources ->
+                sortByPreferences(
+                    providerSources.flatten(),
+                    preferredLanguage = null,
+                    preferredServer = null
+                )
+            }
     }
 
     private fun orderedProviders(providerId: String?): List<SourceProvider> {

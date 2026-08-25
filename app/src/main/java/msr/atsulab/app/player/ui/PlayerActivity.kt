@@ -315,7 +315,7 @@ class PlayerActivity : AppCompatActivity() {
                             playbackEngine.setSpeed(playbackSpeed)
                         }
                         hasAllServersFailed = false
-                        failedSourceIndices.remove(selectedSourceIndex)
+                        failedSourceIndexes.remove(selectedSourceIndex)
                         showMessage(R.string.player_playing)
                     }
                     PlaybackReadyState.ENDED -> {
@@ -543,7 +543,7 @@ class PlayerActivity : AppCompatActivity() {
         moreServersDisposable?.dispose()
         areMoreServersLoading = false
         hasAllServersFailed = false
-        failedSourceIndices.clear()
+        failedSourceIndexes.clear()
 
         playbackDisposable = episodeRepository.getEpisodes(anime)
             .flatMap { episodes ->
@@ -572,7 +572,7 @@ class PlayerActivity : AppCompatActivity() {
         availableVideoSources = sources
         areMoreServersLoading = false
         hasAllServersFailed = false
-        failedSourceIndices.clear()
+        failedSourceIndexes.clear()
         selectedSourceIndex = 0
         activeVideoSource = videoSource
         showDubSources = videoSource?.let(PlayerServerMenuModel::isDub) == true
@@ -688,7 +688,7 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     private fun loadMoreSources(episode: PlaybackEpisode) {
-        if (areMoreServersLoading && !force) return
+        if (areMoreServersLoading) return
         if (!engineAttached) return
         val anime = currentAnime ?: return
 
@@ -721,7 +721,7 @@ class PlayerActivity : AppCompatActivity() {
     private fun retryServerSources() {
         hasAllServersFailed = false
         areMoreServersLoading = false
-        failedSourceIndices.clear()
+        failedSourceIndexes.clear()
         loadPlayback()
     }
 
@@ -959,7 +959,7 @@ class PlayerActivity : AppCompatActivity() {
         moreServersDisposable?.dispose()
         areMoreServersLoading = false
         hasAllServersFailed = false
-        failedSourceIndices.clear()
+        failedSourceIndexes.clear()
         transportVisible = false
         showMessage(R.string.player_loading_episode, arguments = listOf(anime.title, requestedEpisode), loading = true)
         playbackDisposable?.dispose()

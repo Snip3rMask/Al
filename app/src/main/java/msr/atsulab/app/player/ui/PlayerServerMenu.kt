@@ -33,8 +33,10 @@ internal class PlayerServerMenu(
     }
 
     private var popup: PopupWindow? = null
+    private var lastShowLanguageTabs = false
 
     fun show(showLanguageTabs: Boolean) {
+        lastShowLanguageTabs = showLanguageTabs
         dismiss()
         val density = activity.resources.displayMetrics.density
         val root = FrameLayout(activity).apply {
@@ -204,6 +206,10 @@ internal class PlayerServerMenu(
         root.systemUiVisibility = activity.window.decorView.systemUiVisibility
         root.animate().alpha(1f).setDuration(120).start()
         scroll.animate().translationX(0f).setDuration(210).start()
+    }
+
+    fun refreshIfShowing() {
+        if (popup?.isShowing == true) show(lastShowLanguageTabs)
     }
 
     fun dismiss(notifyCallbacks: Boolean = true) {
