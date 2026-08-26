@@ -156,7 +156,8 @@ class DefaultDownloadQueueStore(
     }
 
     override fun isCancelRequested(jobId: String): Boolean {
-        return find(jobId)?.state == DownloadJobState.CANCELLING
+        val state = find(jobId)?.state
+        return state == DownloadJobState.CANCELLING || state == DownloadJobState.CANCELLED
     }
 
     override fun confirmPause(jobId: String) {
@@ -356,7 +357,8 @@ class InMemoryDownloadQueueStore(
     }
 
     override fun isCancelRequested(jobId: String): Boolean {
-        return find(jobId)?.state == DownloadJobState.CANCELLING
+        val state = find(jobId)?.state
+        return state == DownloadJobState.CANCELLING || state == DownloadJobState.CANCELLED
     }
 
     override fun confirmPause(jobId: String) {
