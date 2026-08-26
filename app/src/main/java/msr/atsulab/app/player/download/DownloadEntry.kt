@@ -50,7 +50,7 @@ class DefaultDownloadEntryStore(
 
     override fun all(): List<CompletedDownload> {
         val entries = preferences.getString(ENTRIES_KEY, null)
-            ?.let(gson::decodeEntries)
+            ?.let { raw -> gson.decodeEntries(raw) }
             .orEmpty()
             .filter { it.filePath.isNotBlank() }
             .sortedByDescending(CompletedDownload::completedAtEpochMs)

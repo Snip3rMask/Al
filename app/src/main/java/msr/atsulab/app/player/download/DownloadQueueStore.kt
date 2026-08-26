@@ -64,7 +64,7 @@ class InMemoryDownloadQueueStore(
                     job.copy(currentIndex = index, percent = 0, state = DownloadJobState.RUNNING, error = null)
                 else -> job
             }
-        }.state != DownloadJobState.CANCELLED
+        }?.state != DownloadJobState.CANCELLED
     }
 
     override fun updateProgress(jobId: String, index: Int, percent: Int) {

@@ -13,6 +13,7 @@ import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import java.util.concurrent.ExecutorService
+import kotlin.math.abs
 import java.util.concurrent.Executors
 import msr.atsulab.app.R
 import org.koin.android.ext.android.inject
@@ -182,6 +183,10 @@ class PlayerDownloadService : Service() {
             description = getString(R.string.download_channel_description)
         }
         (getSystemService(NOTIFICATION_SERVICE) as NotificationManager).createNotificationChannel(channel)
+    }
+
+    private fun notificationId(job: DownloadJob): Int {
+        return 4200 + (job.id.hashCode() % 1000).let(::abs)
     }
 
     private fun progressPercent(doneSegments: Int, totalSegments: Int): Int {
