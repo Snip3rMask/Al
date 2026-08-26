@@ -234,67 +234,75 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content">
 
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/mediaDownloadButton"
-                        style="?themePrimaryButton"
-                        android:text="@string/download"
-                        app:icon="@drawable/ic_download"
-                        app:iconGravity="textStart"
-                        app:iconPadding="@dimen/marginSmall"
-                        app:iconTint="?themeBackgroundColor"
-                        android:layout_weight="1"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"/>
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/mediaDownloadButton"
+                            style="?themePrimaryButton"
+                            android:text="@string/download"
+                            app:icon="@drawable/ic_download"
+                            app:iconGravity="textStart"
+                            app:iconPadding="@dimen/marginSmall"
+                            app:iconTint="?themeBackgroundColor"
+                            android:layout_weight="1"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"/>
 
-                    <FrameLayout
-                        android:id="@+id/mediaAddToListLayout"
-                        android:layout_marginHorizontal="@dimen/marginSmall"
-                        android:layout_width="@dimen/iconActionSize"
-                        android:layout_height="@dimen/iconActionSize">
+                        <FrameLayout
+                            android:id="@+id/mediaAddToListLayout"
+                            android:layout_marginHorizontal="@dimen/marginSmall"
+                            android:layout_width="@dimen/iconActionSize"
+                            android:layout_height="@dimen/iconActionSize">
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/mediaAddToListButton"
+                                style="?themePrimaryButton"
+                                android:contentDescription="@string/add_to_list"
+                                app:cornerRadius="@dimen/iconActionSize"
+                                app:icon="@drawable/ic_bookmark_add"
+                                app:iconGravity="textStart"
+                                app:iconPadding="0dp"
+                                app:iconSize="@dimen/iconSize"
+                                app:iconTint="?themeBackgroundColor"
+                                android:insetTop="0dp"
+                                android:insetBottom="0dp"
+                                android:insetLeft="0dp"
+                                android:insetRight="0dp"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"/>
+
+                            <com.google.android.material.textview.MaterialTextView
+                                android:id="@+id/mediaListStatusBadge"
+                                android:background="@drawable/shape_oval_solid"
+                                android:backgroundTint="#02A9FF"
+                                android:gravity="center"
+                                android:textSize="@dimen/fontTiny"
+                                android:textColor="@color/white"
+                                android:visibility="gone"
+                                android:layout_gravity="bottom|end"
+                                android:layout_width="20dp"
+                                android:layout_height="20dp"/>
+
+                        </FrameLayout>
 
                         <com.google.android.material.button.MaterialButton
-                            android:id="@+id/mediaAddToListButton"
+                            android:id="@+id/mediaPlayButton"
                             style="?themePrimaryButton"
-                            android:contentDescription="@string/add_to_list"
-                            app:cornerRadius="@dimen/iconActionSize"
-                            app:icon="@drawable/ic_bookmark_add"
+                            android:text="@string/play"
+                            app:icon="@drawable/ic_play_button"
                             app:iconGravity="textStart"
-                            app:iconPadding="0dp"
-                            app:iconSize="@dimen/iconSize"
+                            app:iconPadding="@dimen/marginSmall"
                             app:iconTint="?themeBackgroundColor"
-                            android:insetTop="0dp"
-                            android:insetBottom="0dp"
-                            android:insetLeft="0dp"
-                            android:insetRight="0dp"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"/>
-
-                        <com.google.android.material.textview.MaterialTextView
-                            android:id="@+id/mediaListStatusBadge"
-                            android:background="@drawable/shape_oval_solid"
-                            android:backgroundTint="#02A9FF"
-                            android:gravity="center"
-                            android:textSize="@dimen/fontTiny"
-                            android:textColor="@color/white"
-                            android:visibility="gone"
-                            android:layout_gravity="bottom|end"
-                            android:layout_width="20dp"
-                            android:layout_height="20dp"/>
-
-                    </FrameLayout>
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/mediaPlayButton"
-                        style="?themePrimaryButton"
-                        android:text="@string/play"
-                        app:icon="@drawable/ic_play_button"
-                        app:iconGravity="textStart"
-                        app:iconPadding="@dimen/marginSmall"
-                        app:iconTint="?themeBackgroundColor"
-                        android:layout_weight="1"
-                        android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"/>
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/mediaPlaybackProgressText"
+                        android:layout_marginTop="@dimen/marginSmall"
+                        android:gravity="center"
+                        android:textSize="@dimen/fontTiny"
+                        android:textColor="?android:attr/textColorSecondary"
+                        android:visibility="gone"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"/>
-
                 </androidx.appcompat.widget.LinearLayoutCompat>
 
             </com.google.android.material.card.MaterialCardView>

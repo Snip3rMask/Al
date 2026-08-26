@@ -642,6 +642,8 @@
     <string name="remove_recent_search">Remove recent search</string>
     <string name="continue_watching">CONTINUE WATCHING</string>
     <string name="continue_watching_episode">Episode %1$s • %2$d%%</string>
+    <string name="resume_episode">Resume Ep %1$s</string>
+    <string name="media_episode_progress">Episode %1$s • %2$d%% watched</string>
     <string name="remove_continue_watching_entry">Remove from Continue Watching</string>
     <string name="download_notification_title">Downloads</string>
     <string name="resume">Resume</string>

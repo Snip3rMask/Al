@@ -209,7 +209,7 @@ class ALchanApplication : Application() {
 
         viewModel { EditorViewModel(get(), get()) }
 
-        viewModel { MediaViewModel(get(), get(), get(), get()) }
+        viewModel { MediaViewModel(get(), get(), get(), get(), get()) }
         viewModel { MediaStatsViewModel(get()) }
         viewModel { MediaSocialViewModel(get(), get()) }
         viewModel { MediaCharacterListViewModel(get(), get()) }

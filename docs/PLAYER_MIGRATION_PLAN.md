@@ -881,7 +881,7 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - [x] Add Continue Watching section to Home.
 - [x] Add recent search history to Search.
 - [ ] Optionally add home row customization.
-- [ ] Show resume CTA and episode progress on Media Details.
+- [x] Show resume CTA and episode progress on Media Details.
 - [ ] Sync watching progress with AniList editor where sensible.
 - [ ] Improve playback loading/error states.
 - [ ] Update About page and remove obsolete AL-chan references.
@@ -910,6 +910,13 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - Added a Search history section for empty queries with query/category labels, one-tap repeat search, per-row removal, and clear-all behavior.
 - Recorded successful page-one searches only, restored the selected category with the query, and kept history hidden while active results are displayed.
 - Added focused normalization coverage for ranking, category separation, blank cleanup, and retention limits.
+
+#### Part 11 Slice B — Details Resume Progress — 2026-08-26
+
+- Added media-scoped reactive playback progress selection to Media Details.
+- Replaced the generic Play action with Resume Ep N when a partially watched episode exists.
+- Added visible episode/percentage progress and exact-episode player launch while preserving normal first-episode playback otherwise.
+- Added focused coverage for latest-entry selection, watched/zero-progress filtering, and fractional episode labels.
 
 ## Testing Checklist
 

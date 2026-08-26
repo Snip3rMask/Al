@@ -29,6 +29,7 @@ import msr.atsulab.app.helper.pojo.ListItem
 import msr.atsulab.app.helper.utils.ImageUtil
 import msr.atsulab.app.helper.utils.SpaceItemDecoration
 import msr.atsulab.app.helper.utils.TimeUtil
+import msr.atsulab.app.player.domain.model.PlaybackProgress
 import msr.atsulab.app.player.mapper.toPlaybackStart
 import msr.atsulab.app.type.MediaSeason
 import msr.atsulab.app.type.MediaListStatus
@@ -212,6 +213,9 @@ class MediaFragment : BaseFragment<FragmentMediaBinding, MediaViewModel>() {
             },
             viewModel.bannerImageUrlForPreview.subscribe {
                 ImageUtil.showFullScreenImage(requireContext(), it, binding.mediaBannerImage)
+            },
+            viewModel.resumeProgress.subscribe { progress ->
+                renderPlaybackProgress(progress)
             }
         )
 
@@ -233,7 +237,28 @@ class MediaFragment : BaseFragment<FragmentMediaBinding, MediaViewModel>() {
             return
         }
 
-        navigation.navigateToPlayer(anime, initialEpisode = 1)
+        val initialEpisode = viewModel.currentResumeProgress
+            ?.episodeNumber
+            ?.toInt()
+            ?.coerceAtLeast(1)
+            ?: 1
+        navigation.navigateToPlayer(anime, initialEpisode = initialEpisode)
+    }
+
+    private fun renderPlaybackProgress(progress: PlaybackProgress?) {
+        if (progress == null) {
+            binding.mediaPlayButton.setText(R.string.play)
+            binding.mediaPlaybackProgressText.show(false)
+            return
+        }
+
+        val episodeLabel = formatPlaybackEpisodeNumber(progress.episodeNumber)
+        binding.mediaPlayButton.setText(R.string.resume_episode)
+        binding.mediaPlaybackProgressText.apply {
+            text = getString(R.string.media_episode_progress, episodeLabel, progress.percent)
+            contentDescription = getString(R.string.media_episode_progress, episodeLabel, progress.percent)
+            show(true)
+        }
     }
 
     private fun getMediaListener(): MediaListener {

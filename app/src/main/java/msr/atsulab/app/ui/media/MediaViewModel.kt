@@ -19,6 +19,8 @@ import msr.atsulab.app.helper.extensions.getStringResource
 import msr.atsulab.app.helper.pojo.MediaItem
 import msr.atsulab.app.helper.pojo.NullableItem
 import msr.atsulab.app.helper.service.clipboard.ClipboardService
+import msr.atsulab.app.player.domain.model.PlaybackProgress
+import msr.atsulab.app.player.domain.repository.PlaybackProgressRepository
 import msr.atsulab.app.ui.base.BaseViewModel
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.subjects.BehaviorSubject
@@ -28,11 +30,27 @@ import msr.atsulab.app.type.MediaListStatus
 import msr.atsulab.app.type.MediaRelation
 import msr.atsulab.app.type.MediaStatus
 
+internal fun formatPlaybackEpisodeNumber(episodeNumber: Float): String {
+    return if (episodeNumber % 1f == 0f) episodeNumber.toInt().toString() else episodeNumber.toString()
+}
+
+internal fun selectResumableProgress(
+    aniListId: Int,
+    entries: List<PlaybackProgress>
+): PlaybackProgress? {
+    return entries.firstOrNull { progress ->
+        progress.aniListId == aniListId &&
+            progress.positionMs > 0L &&
+            !progress.isConsideredWatched()
+    }
+}
+
 class MediaViewModel(
     private val browseRepository: BrowseRepository,
     private val userRepository: UserRepository,
     private val mediaListRepository: MediaListRepository,
-    private val clipboardService: ClipboardService
+    private val clipboardService: ClipboardService,
+    private val playbackProgressRepository: PlaybackProgressRepository
 ) : BaseViewModel<MediaParam>() {
 
     private val _mediaAdapterComponent = PublishSubject.create<AppSetting>()
@@ -104,7 +122,17 @@ class MediaViewModel(
     val bannerImageUrlForPreview: Observable<String>
         get() = _bannerImageUrlForPreview
 
+    private val _resumeProgress =
+        BehaviorSubject.createDefault(null as PlaybackProgress?)
+    val resumeProgress: Observable<PlaybackProgress?>
+        get() = _resumeProgress
+
+    val currentResumeProgress: PlaybackProgress?
+        get() = _resumeProgress.value
+
     private var mediaId = 0
+    @Volatile
+    private var playbackProgressEntries = listOf<PlaybackProgress>()
 
     private var media = Media()
     private var appSetting = AppSetting()
@@ -142,6 +170,18 @@ class MediaViewModel(
                     }
             )
 
+            disposables.add(
+                playbackProgressRepository.observeAll()
+                    .applyScheduler()
+                    .subscribe(
+                        { entries ->
+                            playbackProgressEntries = entries
+                            publishResumeProgress()
+                        },
+                        { it.printStackTrace() }
+                    )
+            )
+
             if (media.getId() != 0)
                 checkMediaList()
 
@@ -158,6 +198,10 @@ class MediaViewModel(
 
     fun reloadData() {
         loadMedia()
+    }
+
+    private fun publishResumeProgress() {
+        _resumeProgress.onNext(selectResumableProgress(mediaId, playbackProgressEntries))
     }
 
     private fun checkMediaList() {
