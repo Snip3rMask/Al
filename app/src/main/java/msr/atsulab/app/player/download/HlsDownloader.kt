@@ -42,7 +42,7 @@ class HlsDownloader(
         check(temporaryDirectory.mkdirs()) { "Cannot create temporary download directory" }
 
         try {
-            downloadSegments(playlist.segmentUrls, temporaryDirectory, parallelSegments, cancelToken, onProgress)
+            downloadSegments(playlist.segmentUrls, temporaryDirectory, parallelSegments, request.referer, cancelToken, onProgress)
             val outputFile = File(outputDirectory, request.fileName)
             val partialFile = File(outputDirectory, request.fileName + PARTIAL_SUFFIX)
             merge(playlist.initializationUrl, temporaryDirectory, playlist.segmentUrls.size, partialFile, request.referer, cancelToken)
@@ -63,6 +63,7 @@ class HlsDownloader(
         segmentUrls: List<String>,
         temporaryDirectory: File,
         parallelSegments: Int,
+        referer: String,
         cancelToken: DownloadCancelToken,
         onProgress: DownloadProgressListener
     ) {
@@ -71,7 +72,7 @@ class HlsDownloader(
         val futures = segmentUrls.mapIndexed { index, segmentUrl ->
             executor.submit {
                 val target = File(temporaryDirectory, String.format(Locale.US, "%06d.seg", index))
-                downloadWithRetry(segmentUrl, target, cancelToken)
+                downloadWithRetry(segmentUrl, target, referer, cancelToken)
                 onProgress.onProgress(completed.incrementAndGet(), segmentUrls.size)
             }
         }
@@ -91,12 +92,12 @@ class HlsDownloader(
         return Executors.newFixedThreadPool(workerCount)
     }
 
-    private fun downloadWithRetry(url: String, target: File, cancelToken: DownloadCancelToken) {
+    private fun downloadWithRetry(url: String, target: File, referer: String, cancelToken: DownloadCancelToken) {
         var lastError: IOException? = null
         repeat(MAX_SEGMENT_ATTEMPTS) { attempt ->
             try {
                 check(!cancelToken.isCancelled()) { "Download cancelled" }
-                copyToFile(url, target)
+                copyToFile(url, target, referer)
                 return
             } catch (exception: IOException) {
                 lastError = exception
@@ -144,8 +145,8 @@ class HlsDownloader(
         } ?: throw IOException("HLS initialization download failed")
     }
 
-    private fun copyToFile(url: String, target: File) {
-        execute(newRequest(url, "")) { response ->
+    private fun copyToFile(url: String, target: File, referer: String) {
+        execute(newRequest(url, referer)) { response ->
             response.body?.byteStream()?.use { input ->
                 target.outputStream().use { output -> input.copyTo(output) }
             } ?: throw IOException("Empty segment response")
