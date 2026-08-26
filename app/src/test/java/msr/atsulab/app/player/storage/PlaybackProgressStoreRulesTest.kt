@@ -11,7 +11,7 @@ class PlaybackProgressStoreRulesTest {
 
     @Test
     fun `progress identity separates anime episode and source entry`() {
-        val first = progress(aniListId = 21, playbackId = "episode-1", episodeUrl = "episode-1")
+        val first = progress(positionMs = 1L, durationMs = 10_000L, aniListId = 21, playbackId = "episode-1", episodeUrl = "episode-1")
         val sameEpisodeDifferentAnime = first.copy(aniListId = 22)
         val differentEpisode = first.copy(playbackId = "episode-2", episodeUrl = "episode-2")
 
