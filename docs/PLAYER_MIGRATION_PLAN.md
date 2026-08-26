@@ -439,7 +439,7 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - Fixed the CI receiver-shadowing failures by capturing the shell orientation before `LinearLayout.apply {}` and assigning outer controller fields with explicit receiver labels.
 - Confirmed all ported chrome drawables, labels, callbacks, icon order, and frozen offsets exist; advanced chrome actions remain intentionally inert until their slices are connected.
 
-## Part 7 — Advanced Controls [~]
+## Part 7 — Advanced Controls [x]
 
 **Goal:** Port controls incrementally. Each group is an independent commit and test cycle.
 
@@ -615,7 +615,7 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - Applied the custom typeface through Media3 caption styling while safely falling back to the selected built-in style if a stored file becomes unreadable.
 - Closed Part 7.5 Subtitles.
 
-### 7.6 Quality Selector [~]
+### 7.6 Quality Selector [x]
 
 - [x] Detect HLS quality variants.
 - [x] Provide AUTO and manual options.
@@ -748,6 +748,12 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 
 - Removed the automatic system share sheet after frame saves so repeated captures are not interrupted.
 - Kept silent background saving and the saved/failed toast as the completion signal.
+
+#### Part 7 Closure — Release 158 — 2026-08-26
+
+- The user completed the remaining real-device regression across advanced controls.
+- Quality switching, SUB/DUB/server merging and recovery, skip controls, frame capture settings/saving, rotation/reopen behavior, and inline portrait player content were confirmed working.
+- Closed Part 7 at Release `158` from commit `fb34531a`; the latest CI run passed unit tests, debug build, and release publishing.
 
 ## Part 8 — Episode Panel & Navigation [x]
 
@@ -997,10 +1003,10 @@ Append dated entries here. Do not delete history.
 - Completed the portrait player parity pass with an inline Anifux-style lower panel: SUB/DUB tabs, horizontal server chips, source error text, episode tools/range selector, five-column episode grid, search, and comment preview.
 - Reused the tested range/grid model for portrait rendering, synchronized source-loading/error/server state after rotation, added focused portrait-state tests, and dismissed inline popups on lifecycle/rebuild.
 - Fixed all portrait parity CI failures by correcting Kotlin property syntax, local density conversion, string resolution, wrapped-view attachment, and the focused test’s numeric type expectation.
+- Closed Part 7 after the user confirmed its remaining device regression on Release `158`.
 
 ## Next Action
 
 1. Start **Part 9 — Source Selection Screen**: port the standalone source-mapping skeleton and candidate selection UI.
 2. Persist safe manual mappings by AniList ID while preserving automatic source fallback.
 3. Support single-server mode plus loading, empty, error, retry, and cancel-without-change states.
-4. In parallel, finish the remaining Part 7 real-device regression for quality switching, server merging/retry, skip controls, and capture settings.
