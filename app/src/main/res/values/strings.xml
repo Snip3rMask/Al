@@ -635,6 +635,17 @@
     <string name="reset_capture_button_position">Reset capture button position</string>
     <string name="capture_button_position_reset">Capture button position reset</string>
     <string name="download_notification_title">Downloads</string>
+    <string name="downloads">Downloads</string>
+    <string name="downloads_active">ACTIVE DOWNLOADS</string>
+    <string name="downloads_completed">COMPLETED</string>
+    <string name="downloads_empty">No downloads yet</string>
+    <string name="download_running">Running</string>
+    <string name="download_open">Open</string>
+    <string name="delete">Delete</string>
+    <string name="delete_download_title">Delete download?</string>
+    <string name="delete_download_message">%1$s and its downloaded file will be removed.</string>
+    <string name="downloads_missing_file">Download file is missing</string>
+    <string name="downloads_no_player">No video player found</string>
     <string name="download_channel_description">Episode download progress</string>
     <string name="download_running_format">Downloading %1$s</string>
     <string name="download_completed">Download completed</string>

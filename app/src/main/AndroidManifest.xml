@@ -55,6 +55,10 @@
             android:exported="false"
             android:theme="@style/Theme.MaterialComponents.DayNight.NoActionBar" />
         <activity
+            android:name=".player.download.DownloadsActivity"
+            android:exported="false"
+            android:theme="@style/AppTheme" />
+        <activity
             android:name=".player.ui.SourceSelectionActivity"
             android:configChanges="orientation|screenSize|keyboardHidden"
             android:exported="false"

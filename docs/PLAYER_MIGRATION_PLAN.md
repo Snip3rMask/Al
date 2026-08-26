@@ -841,6 +841,14 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - Covered queue lifecycle/cancellation and completed-download record creation with focused tests. Persistent restart recovery, pause/resume, the Downloads screen, storage settings, and offline playback remain for later slices.
 
 
+#### Part 10 Slice C — Downloads Management Screen — 2026-08-26
+
+- Added a standalone Downloads screen with auto-refreshing active progress, completed-download cards, size/quality details, empty state, and cancel actions.
+- Added file-backed open support through the existing player capture FileProvider, with stale-entry cleanup and missing-file/no-player feedback.
+- Added confirmation-gated delete that removes both the persisted record and private downloaded file.
+- Exposed Downloads from Settings and registered the themed activity; extended focused download lifecycle coverage.
+
+
 ## Part 11 — AtsuLab Integration Polish
 
 **Goal:** Blend playback naturally into the tracking app.

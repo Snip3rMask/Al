@@ -1,11 +1,13 @@
 package msr.atsulab.app.ui.settings
 
 import android.view.LayoutInflater
+import android.content.Intent
 import android.view.ViewGroup
 import msr.atsulab.app.R
 import msr.atsulab.app.databinding.FragmentSettingsBinding
 import msr.atsulab.app.helper.extensions.applyTopPaddingInsets
 import msr.atsulab.app.helper.extensions.clicks
+import msr.atsulab.app.player.download.DownloadsActivity
 import msr.atsulab.app.ui.base.BaseFragment
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
@@ -26,6 +28,10 @@ class SettingsFragment : BaseFragment<FragmentSettingsBinding, SettingsViewModel
 
             appSettingsLayout.clicks {
                 navigation.navigateToAppSettings()
+            }
+
+            downloadsLayout.clicks {
+                startActivity(Intent(requireContext(), DownloadsActivity::class.java))
             }
 
             captureSettingsLayout.clicks {
