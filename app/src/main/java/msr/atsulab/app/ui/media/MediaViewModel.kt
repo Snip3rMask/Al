@@ -123,12 +123,12 @@ class MediaViewModel(
         get() = _bannerImageUrlForPreview
 
     private val _resumeProgress =
-        BehaviorSubject.createDefault(null as PlaybackProgress?)
+        BehaviorSubject.createDefault(NullableItem<PlaybackProgress>(null))
     val resumeProgress: Observable<PlaybackProgress?>
-        get() = _resumeProgress
+        get() = _resumeProgress.map { it.data }
 
     val currentResumeProgress: PlaybackProgress?
-        get() = _resumeProgress.value
+        get() = _resumeProgress.value?.data
 
     private var mediaId = 0
     @Volatile
@@ -201,7 +201,7 @@ class MediaViewModel(
     }
 
     private fun publishResumeProgress() {
-        _resumeProgress.onNext(selectResumableProgress(mediaId, playbackProgressEntries))
+        _resumeProgress.onNext(NullableItem(selectResumableProgress(mediaId, playbackProgressEntries)))
     }
 
     private fun checkMediaList() {
