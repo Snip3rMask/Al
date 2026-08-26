@@ -1,6 +1,7 @@
 package msr.atsulab.app.player.download
 
 import java.io.File
+import java.util.concurrent.CopyOnWriteArrayList
 import okhttp3.Interceptor
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
@@ -20,7 +21,7 @@ class HlsDownloaderTest {
 
     @Test
     fun `downloads highest quality variant merges initialization and segments atomically`() {
-        val requests = mutableListOf<Pair<String, String?>>()
+        val requests = CopyOnWriteArrayList<Pair<String, String?>>()
         val httpClient = OkHttpClient.Builder()
             .addInterceptor(fakeHlsInterceptor(requests))
             .build()

@@ -26,7 +26,11 @@ internal fun normalizeRecentSearches(
     limit: Int = RECENT_SEARCH_LIMIT
 ): List<RecentSearch> {
     val query = incoming.query.trim()
-    if (query.isEmpty() || limit <= 0) return existing.filter { it.query.isNotBlank() }.take(limit.coerceAtLeast(0))
+    if (query.isEmpty() || limit <= 0) {
+        return existing.filter { it.query.isNotBlank() }
+            .sortedByDescending(RecentSearch::updatedAtEpochMs)
+            .take(limit.coerceAtLeast(0))
+    }
     val normalizedIncoming = incoming.copy(query = query)
     return (listOf(normalizedIncoming) + existing).distinctBy {
         it.query.trim().lowercase() to it.category
