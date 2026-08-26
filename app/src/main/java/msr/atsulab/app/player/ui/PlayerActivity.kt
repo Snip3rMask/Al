@@ -26,6 +26,10 @@ import androidx.media3.ui.PlayerView
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.disposables.Disposable
 import msr.atsulab.app.R
+import msr.atsulab.app.data.repository.MediaListRepository
+import msr.atsulab.app.data.repository.UserRepository
+import msr.atsulab.app.helper.enums.MediaType
+import msr.atsulab.app.helper.enums.Source
 import msr.atsulab.app.player.domain.PlaybackSpeedOptions
 import msr.atsulab.app.player.domain.SubtitleStyleOptions
 import msr.atsulab.app.player.domain.model.PlaybackAnime
@@ -53,6 +57,7 @@ import msr.atsulab.app.player.engine.PlaybackState
 import msr.atsulab.app.player.runtime.PlaybackEpisodeNavigator
 import msr.atsulab.app.player.storage.PlaybackPreferencesStore
 import msr.atsulab.app.player.storage.SourceMappingStore
+import msr.atsulab.app.type.MediaListStatus
 import org.koin.java.KoinJavaComponent.inject
 import kotlin.math.roundToInt
 
@@ -67,6 +72,8 @@ class PlayerActivity : AppCompatActivity() {
     private val sourceMappingStore: SourceMappingStore by inject(SourceMappingStore::class.java)
     private val downloadQueueStore: DownloadQueueStore by inject(DownloadQueueStore::class.java)
     private val downloadEntryStore: DownloadEntryStore by inject(DownloadEntryStore::class.java)
+    private val mediaListRepository: MediaListRepository by inject(MediaListRepository::class.java)
+    private val userRepository: UserRepository by inject(UserRepository::class.java)
 
     private val sourceSelectionLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -119,6 +126,7 @@ class PlayerActivity : AppCompatActivity() {
     private var playbackDisposable: Disposable? = null
     private var moreServersDisposable: Disposable? = null
     private var skipTimesDisposable: Disposable? = null
+    private var aniListSyncDisposable: Disposable? = null
     private var statusMessage = ""
     private var statusRetryVisible = false
     private var waitingForPlayback = true
@@ -406,6 +414,7 @@ class PlayerActivity : AppCompatActivity() {
         playbackDisposable?.dispose()
         moreServersDisposable?.dispose()
         skipTimesDisposable?.dispose()
+        aniListSyncDisposable?.dispose()
         if (engineAttached) {
             playbackEngine.release()
             engineAttached = false
@@ -1409,6 +1418,48 @@ class PlayerActivity : AppCompatActivity() {
         val progress = buildPlaybackProgress(state) ?: return
         lastProgressSaveTimeMs = System.currentTimeMillis()
         runCatching { playbackProgressRepository.upsert(progress).subscribe() }
+        if (progress.isConsideredWatched()) {
+            syncAniListProgress(progress.episodeNumber.toInt().coerceAtLeast(1))
+        }
+    }
+
+    private fun syncAniListProgress(watchedEpisode: Int) {
+        val anime = currentAnime ?: return
+        if (anime.aniListId <= 0 || watchedEpisode <= 0) return
+        aniListSyncDisposable?.dispose()
+        aniListSyncDisposable = userRepository.getViewer(Source.CACHE)
+            .flatMap { viewer ->
+                mediaListRepository.getMediaListCollection(Source.CACHE, viewer, MediaType.ANIME)
+            }
+            .map { collection ->
+                collection.lists.asSequence()
+                    .flatMap { it.entries.asSequence() }
+                    .firstOrNull { it.media.getId() == anime.aniListId }
+            }
+            .flatMap { entry ->
+                if (entry == null) {
+                    mediaListRepository.updateMediaListStatus(MediaType.ANIME, anime.aniListId, MediaListStatus.CURRENT)
+                } else {
+                    val current = entry.progress ?: 0
+                    if (watchedEpisode > current) {
+                        mediaListRepository.updateMediaListProgress(
+                            MediaType.ANIME,
+                            entry.id ?: 0,
+                            if (entry.status == MediaListStatus.PLANNING) MediaListStatus.CURRENT else null,
+                            null,
+                            watchedEpisode,
+                            null
+                        )
+                    } else {
+                        io.reactivex.rxjava3.core.Observable.just(entry)
+                    }
+                }
+            }
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(
+                {},
+                { it.printStackTrace() }
+            )
     }
 
     private fun buildPlaybackProgress(state: PlaybackState): PlaybackProgress? {

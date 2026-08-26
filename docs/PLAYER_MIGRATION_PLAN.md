@@ -882,10 +882,10 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - [x] Add recent search history to Search.
 - [ ] Optionally add home row customization.
 - [x] Show resume CTA and episode progress on Media Details.
-- [ ] Sync watching progress with AniList editor where sensible.
+- [x] Sync watching progress with AniList editor where sensible.
 - [ ] Improve playback loading/error states.
-- [ ] Update About page and remove obsolete AL-chan references.
-- [ ] Verify deep links still work after player navigation.
+- [x] Update About page and remove obsolete AL-chan references.
+- [x] Verify deep links still work after player navigation.
 
 **Exit gate:** Player feels integrated; tracking features, Home speed, navigation predictability, and existing flows remain intact.
 
@@ -917,6 +917,13 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - Replaced the generic Play action with Resume Ep N when a partially watched episode exists.
 - Added visible episode/percentage progress and exact-episode player launch while preserving normal first-episode playback otherwise.
 - Added focused coverage for latest-entry selection, watched/zero-progress filtering, and fractional episode labels.
+
+#### Part 11 Slice C — AniList Sync + Branding — 2026-08-26
+
+- Added automatic AniList episode progress sync when playback reaches the watched threshold.
+- Sync only advances (never regresses) existing list entries; creates CURRENT status when no entry exists.
+- Updated all user-facing AL-chan references to AtsuLab across strings.
+- Verified deep link routing remains intact after player navigation.
 
 ## Testing Checklist
 
