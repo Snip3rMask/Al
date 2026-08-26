@@ -32,9 +32,11 @@ class PlaybackProgressStoreRulesTest {
     @Test
     fun `completed threshold marks near finished episodes watched`() {
         val progress = progress(positionMs = 9_600L, durationMs = 10_000L)
+        val completed = progress(positionMs = 10_000L, durationMs = 10_000L)
 
         assertTrue(progress.isConsideredWatched())
-        assertEquals(PlaybackProgress.MAX_PERCENT, progress.percent)
+        assertEquals(96, progress.percent)
+        assertEquals(PlaybackProgress.MAX_PERCENT, completed.percent)
     }
 
     private fun progress(
