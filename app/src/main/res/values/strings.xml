@@ -641,7 +641,6 @@
     <string name="downloads_empty">No downloads yet</string>
     <string name="download_running">Running</string>
     <string name="download_open">Open</string>
-    <string name="delete">Delete</string>
     <string name="delete_download_title">Delete download?</string>
     <string name="delete_download_message">%1$s and its downloaded file will be removed.</string>
     <string name="downloads_missing_file">Download file is missing</string>
