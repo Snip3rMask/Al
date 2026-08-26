@@ -12,6 +12,8 @@ import msr.atsulab.app.helper.extensions.applyScheduler
 import msr.atsulab.app.helper.extensions.getStringResource
 import msr.atsulab.app.helper.pojo.HomeAdapterComponent
 import msr.atsulab.app.helper.pojo.HomeItem
+import msr.atsulab.app.player.domain.model.PlaybackProgress
+import msr.atsulab.app.player.domain.repository.PlaybackProgressRepository
 import msr.atsulab.app.helper.pojo.ListItem
 import msr.atsulab.app.helper.pojo.ReleasingTodayItem
 import msr.atsulab.app.type.MediaListStatus
@@ -21,10 +23,22 @@ import io.reactivex.rxjava3.subjects.BehaviorSubject
 import io.reactivex.rxjava3.subjects.PublishSubject
 import kotlin.math.abs
 
+internal fun applyContinueWatching(
+    items: List<HomeItem>,
+    entries: List<PlaybackProgress>
+): List<HomeItem> {
+    val index = items.indexOfFirst { it.viewType == HomeItem.VIEW_TYPE_CONTINUE_WATCHING }
+    if (index == -1) return items
+    return items.mapIndexed { position, item ->
+        if (position == index) item.copy(continueWatching = entries) else item
+    }
+}
+
 class HomeViewModel(
     private val contentRepository: ContentRepository,
     private val userRepository: UserRepository,
-    private val mediaListRepository: MediaListRepository
+    private val mediaListRepository: MediaListRepository,
+    private val playbackProgressRepository: PlaybackProgressRepository
 ) : BaseViewModel<Unit>() {
 
     private val _homeItemList = BehaviorSubject.createDefault(listOf<HomeItem>())
@@ -45,6 +59,14 @@ class HomeViewModel(
 
     override fun loadData(param: Unit) {
         loadOnce {
+            disposables.add(
+                playbackProgressRepository.observeAll()
+                    .applyScheduler()
+                    .subscribe(
+                        { updateContinueWatching(it) },
+                        { it.printStackTrace() }
+                    )
+            )
             disposables.add(
                 userRepository.getAppSetting()
                     .zipWith(userRepository.getViewer(Source.CACHE)) { appSetting, user ->
@@ -143,6 +165,18 @@ class HomeViewModel(
         getHomeData(true)
     }
 
+    fun removeContinueWatching(progress: PlaybackProgress) {
+        disposables.add(
+            playbackProgressRepository.remove(progress.aniListId, progress.playbackId, progress.episodeUrl)
+                .applyScheduler()
+                .subscribe({}, { it.printStackTrace() })
+        )
+    }
+
+    private fun updateContinueWatching(entries: List<PlaybackProgress>) {
+        _homeItemList.onNext(applyContinueWatching(_homeItemList.value ?: listOf(), entries))
+    }
+
     private fun getHomeData(isReloading: Boolean = false) {
         if (!isReloading && state == State.LOADED) return
 
@@ -153,6 +187,7 @@ class HomeViewModel(
                 listOf(
                     HomeItem(viewType = HomeItem.VIEW_TYPE_HEADER),
                     HomeItem(viewType = HomeItem.VIEW_TYPE_MENU),
+                    HomeItem(continueWatching = emptyList(), viewType = HomeItem.VIEW_TYPE_CONTINUE_WATCHING),
                     HomeItem(viewType = HomeItem.VIEW_TYPE_SOCIAL),
                     HomeItem(viewType = HomeItem.VIEW_TYPE_TRENDING_ANIME),
                     HomeItem(viewType = HomeItem.VIEW_TYPE_TRENDING_MANGA)

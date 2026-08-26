@@ -1,5 +1,6 @@
 package msr.atsulab.app.ui.home
 
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import msr.atsulab.app.R
@@ -10,8 +11,11 @@ import msr.atsulab.app.databinding.FragmentHomeBinding
 import msr.atsulab.app.helper.enums.MediaType
 import msr.atsulab.app.helper.extensions.applyTopPaddingInsets
 import msr.atsulab.app.ui.base.BaseFragment
+import msr.atsulab.app.player.domain.model.PlaybackProgress
+import msr.atsulab.app.player.ui.PlayerActivity
 import msr.atsulab.app.ui.main.SharedMainViewModel
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
+import kotlin.math.ceil
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 
@@ -82,6 +86,7 @@ class HomeFragment : BaseFragment<FragmentHomeBinding, HomeViewModel>() {
         return object : HomeListener {
             override val headerListener: HomeListener.HeaderListener = getHeaderListener()
             override val menuListener: HomeListener.MenuListener = getHomeMenuListener()
+            override val continueWatchingListener: HomeListener.ContinueWatchingListener = getContinueWatchingListener()
             override val releasingTodayListener: HomeListener.ReleasingTodayListener = getReleasingTodayListener()
             override val socialListener: HomeListener.SocialListener = getSocialListener()
             override val trendingMediaListener: HomeListener.TrendingMediaListener = getTrendingMediaListener()
@@ -114,6 +119,30 @@ class HomeFragment : BaseFragment<FragmentHomeBinding, HomeViewModel>() {
 
             override fun navigateToCalendar() {
                 navigation.navigateToCalendar()
+            }
+        }
+    }
+
+    private fun getContinueWatchingListener(): HomeListener.ContinueWatchingListener {
+        return object : HomeListener.ContinueWatchingListener {
+            override fun resumePlayback(progress: PlaybackProgress) {
+                startActivity(
+                    Intent(requireContext(), PlayerActivity::class.java).apply {
+                        putExtra(PlayerActivity.EXTRA_ANILIST_ID, progress.aniListId ?: 0)
+                        putExtra(PlayerActivity.EXTRA_MAL_ID, 0)
+                        putExtra(PlayerActivity.EXTRA_TITLE, progress.animeTitle)
+                        putExtra(PlayerActivity.EXTRA_COVER_IMAGE_URL, progress.thumbnailImageUrl)
+                        putExtra(PlayerActivity.EXTRA_BANNER_IMAGE_URL, progress.bannerImageUrl)
+                        putExtra(
+                            PlayerActivity.EXTRA_INITIAL_EPISODE,
+                            ceil(progress.episodeNumber).toInt().coerceAtLeast(1)
+                        )
+                    }
+                )
+            }
+
+            override fun removeProgress(progress: PlaybackProgress) {
+                viewModel.removeContinueWatching(progress)
             }
         }
     }

@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:foreground="?selectableItemBackground"
+    app:cardBackgroundColor="?themeCardColor"
+    app:cardCornerRadius="@dimen/marginNormal"
+    app:strokeColor="?themeDividerColor"
+    app:strokeWidth="1dp"
+    android:layout_margin="@dimen/marginClose"
+    android:layout_width="220dp"
+    android:layout_height="wrap_content">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/continueCoverImage"
+            android:scaleType="centerCrop"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_width="72dp"
+            android:layout_height="96dp"/>
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/continueTitleText"
+            style="?themeSmallFont"
+            android:maxLines="2"
+            android:ellipsize="end"
+            tools:text="AtsuLab Anime"
+            app:layout_constraintTop_toTopOf="@id/continueCoverImage"
+            app:layout_constraintStart_toEndOf="@id/continueCoverImage"
+            app:layout_constraintEnd_toStartOf="@id/continueRemoveButton"
+            android:layout_marginStart="@dimen/marginClose"
+            android:layout_marginEnd="@dimen/marginClose"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"/>
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/continueEpisodeText"
+            style="?themeSmallFont"
+            android:maxLines="1"
+            android:ellipsize="end"
+            tools:text="Episode 1 • 42%"
+            app:layout_constraintTop_toBottomOf="@id/continueTitleText"
+            app:layout_constraintStart_toEndOf="@id/continueCoverImage"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginStart="@dimen/marginClose"
+            android:layout_marginTop="@dimen/marginClose"
+            android:alpha=".72"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"/>
+
+        <ProgressBar
+            android:id="@+id/continueProgressBar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:max="100"
+            tools:progress="42"
+            app:layout_constraintTop_toBottomOf="@id/continueEpisodeText"
+            app:layout_constraintStart_toEndOf="@id/continueCoverImage"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginStart="@dimen/marginClose"
+            android:layout_marginTop="@dimen/marginClose"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"/>
+
+        <androidx.appcompat.widget.AppCompatImageButton
+            android:id="@+id/continueRemoveButton"
+            android:contentDescription="@string/remove_continue_watching_entry"
+            android:background="?selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_delete"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_width="34dp"
+            android:layout_height="34dp"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</com.google.android.material.card.MaterialCardView>

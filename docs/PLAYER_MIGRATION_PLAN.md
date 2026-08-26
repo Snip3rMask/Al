@@ -372,7 +372,7 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - [x] Save episode duration and source label/ID.
 - [x] Restore last position on reopen.
 - [x] Mark completed episodes appropriately.
-- [ ] Allow removing an entry.
+- [x] Allow removing an entry.
 - [x] Reject invalid/negative progress.
 
 **Exit gate:** Partial progress survives app kill/process death and resumes exactly once per episode.
@@ -387,6 +387,13 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - Saved progress on explicit pause, activity pause/stop/destruction, background transitions, periodic playback ticks, failed-source switching, and episode completion.
 - Restored the saved position exactly once when an episode starts, skipped positions at or above the watched threshold, removed those finished entries, and retained server switching within the same episode without restart.
 - Added focused coverage for stable episode identity, invalid/negative/impossible progress rejection, and completed-threshold handling. User-visible Continue Watching browsing/removal remains for the upcoming integration slice.
+
+#### Part 5 Slice B — Continue Watching Home Section — 2026-08-26
+
+- Added a Home section after quick actions with horizontal continue-watching cards showing cover art, anime/episode identity, completion percentage, and a progress bar.
+- Wired persisted progress updates into the existing Home item stream while preserving section placement and avoiding duplicate sections during async Home refreshes.
+- Card tap rebuilds PlayerActivity arguments from stored metadata and resumes through the existing once-per-episode restore path; the remove action deletes the exact anime/episode/source record and refreshes reactively.
+- Added focused reducer coverage for ordered section replacement and safe behavior when the section is absent.
 
 ## Part 6 — Player Shell UI [x]
 
@@ -871,7 +878,7 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 
 **Goal:** Blend playback naturally into the tracking app.
 
-- [ ] Add Continue Watching section to Home.
+- [x] Add Continue Watching section to Home.
 - [ ] Add recent search history to Search.
 - [ ] Optionally add home row customization.
 - [ ] Show resume CTA and episode progress on Media Details.
@@ -1066,9 +1073,11 @@ Append dated entries here. Do not delete history.
 - Started Part 9 with the standalone source-selection skeleton: grouped provider candidates, failure-isolated aggregation, single-server filtering, loading/empty/error states, and a read-only preview screen.
 - Completed Part 9 manual mapping at code level: selectable provider sections, persistent AniList-ID mappings, safe reset, single-server save, player recovery entry, and confirmed-candidate playback resolution.
 - Fixed manual-mapping CI failures by resolving nullable AniList keys safely, importing intent/storage seams, adding missing picker labels, correcting view-post/callable types, and deferring Android-bound storage resolution.
+- Completed the Continue Watching Home section: reactive persisted-progress cards, cover/title/percentage display, direct player resume, per-entry removal, ordered Home-state merging, and focused reducer coverage.
+
 
 ## Next Action
 
-1. Validate Part 5 Slice A on Release `184+`: seek away, pause/background/close, reopen the same episode, and confirm it resumes once near the saved timestamp.
-2. Confirm completed/near-finished episodes do not resume and that server/source switches preserve the current episode position.
-3. After CI passes, build the user-visible Continue Watching list and entry-removal flow, then close Part 5 when device regression passes.
+1. Wait for the GitHub Actions build for Continue Watching Slice B and resolve any failed-step error.
+2. Validate Release `188+`: play two episodes partially, return Home, resume each once near its saved timestamp, remove one card, and confirm it disappears without affecting the other.
+3. Confirm finished episodes do not reappear, then close **Part 5** after this regression passes.

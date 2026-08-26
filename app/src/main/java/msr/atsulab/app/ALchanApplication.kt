@@ -173,7 +173,7 @@ class ALchanApplication : Application() {
         viewModel { BottomSheetMediaListQuickDetailViewModel(get(), get()) }
         viewModel { BottomSheetMediaThemesViewModel(get()) }
 
-        viewModel { HomeViewModel(get(), get(), get()) }
+        viewModel { HomeViewModel(get(), get(), get(), get()) }
         viewModel { SearchViewModel(get(), get()) }
         viewModel { SeasonalViewModel(get(), get(), get()) }
         viewModel { ExploreViewModel(get(), get()) }

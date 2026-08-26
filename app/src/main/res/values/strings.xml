@@ -637,6 +637,9 @@
     <string name="choose_save_folder">Choose save folder</string>
     <string name="reset_capture_button_position">Reset capture button position</string>
     <string name="capture_button_position_reset">Capture button position reset</string>
+    <string name="continue_watching">CONTINUE WATCHING</string>
+    <string name="continue_watching_episode">Episode %1$s • %2$d%%</string>
+    <string name="remove_continue_watching_entry">Remove from Continue Watching</string>
     <string name="download_notification_title">Downloads</string>
     <string name="resume">Resume</string>
     <string name="download_paused">Paused</string>

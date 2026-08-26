@@ -10,6 +10,7 @@ import msr.atsulab.app.R
 import msr.atsulab.app.data.entity.AppSetting
 import msr.atsulab.app.data.response.anilist.Media
 import msr.atsulab.app.data.response.anilist.User
+import msr.atsulab.app.databinding.LayoutHomeContinueWatchingBinding
 import msr.atsulab.app.databinding.LayoutHomeHeaderBinding
 import msr.atsulab.app.databinding.LayoutHomeMenuBinding
 import msr.atsulab.app.databinding.LayoutHomeReleasingTodayBinding
@@ -40,6 +41,10 @@ class HomeRvAdapter(
             HomeItem.VIEW_TYPE_MENU -> {
                 val view = LayoutHomeMenuBinding.inflate(inflater, parent, false)
                 return MenuViewHolder(view)
+            }
+            HomeItem.VIEW_TYPE_CONTINUE_WATCHING -> {
+                val view = LayoutHomeContinueWatchingBinding.inflate(inflater, parent, false)
+                return ContinueWatchingViewHolder(view)
             }
             HomeItem.VIEW_TYPE_RELEASING_TODAY -> {
                 val view = LayoutHomeReleasingTodayBinding.inflate(inflater, parent, false)
@@ -95,6 +100,21 @@ class HomeRvAdapter(
                 exploreMenu.clicks { listener.menuListener.showExploreDialog() }
                 reviewsMenu.clicks { listener.menuListener.navigateToReview() }
                 calendarMenu.clicks { listener.menuListener.navigateToCalendar() }
+            }
+        }
+    }
+
+    inner class ContinueWatchingViewHolder(private val binding: LayoutHomeContinueWatchingBinding) : ViewHolder(binding) {
+        override fun bind(item: HomeItem, index: Int) {
+            with(binding) {
+                root.show(item.continueWatching.isNotEmpty())
+                if (item.continueWatching.isNotEmpty()) {
+                    continueWatchingRecyclerView.adapter = ContinueWatchingRvAdapter(
+                        context,
+                        item.continueWatching,
+                        listener.continueWatchingListener
+                    )
+                }
             }
         }
     }
