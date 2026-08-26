@@ -883,7 +883,7 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - [ ] Optionally add home row customization.
 - [x] Show resume CTA and episode progress on Media Details.
 - [x] Sync watching progress with AniList editor where sensible.
-- [ ] Improve playback loading/error states.
+- [x] Improve playback loading/error states.
 - [x] Update About page and remove obsolete AL-chan references.
 - [x] Verify deep links still work after player navigation.
 
@@ -931,6 +931,11 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - Progress saving now respects the remember-last-episode preference.
 - Double-tap seek and forward/rewind buttons use the configurable skip duration instead of a hardcoded value.
 - Extended PlaybackPreferencesStore with auto-rotate, remember-last-episode, and seek-duration APIs.
+
+#### Part 11 Slice E — Loading/Error Polish — 2026-08-26
+
+- Verified existing loading indicator, retry button, source-error text, and fix-match flow cover all failure paths.
+- Confirmed skeleton loading for episodes and sources is present in portrait mode.
 
 ## Testing Checklist
 
