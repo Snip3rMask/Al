@@ -204,7 +204,7 @@ class PlayerActivity : AppCompatActivity() {
             }
         )
     }
-    private val frameCaptureSettingsMenu by lazy {
+    private val frameCaptureSettingsMenu: PlayerFrameCaptureSettingsMenu by lazy {
         PlayerFrameCaptureSettingsMenu(
             this,
             object : PlayerFrameCaptureSettingsMenu.Callbacks {
