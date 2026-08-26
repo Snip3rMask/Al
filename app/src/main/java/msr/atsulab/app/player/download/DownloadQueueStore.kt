@@ -434,7 +434,7 @@ class InMemoryDownloadQueueStore(
 }
 
 
-private val DownloadJobState.isActive
+internal val DownloadJobState.isActive
     get() = this == DownloadJobState.QUEUED ||
         this == DownloadJobState.RUNNING ||
         this == DownloadJobState.PAUSE_REQUESTED ||

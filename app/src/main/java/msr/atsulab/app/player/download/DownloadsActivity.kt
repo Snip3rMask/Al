@@ -79,7 +79,7 @@ class DownloadsActivity : AppCompatActivity() {
             entries.forEach { entry -> content.addView(completedDownloadView(entry)) }
         }
 
-        addSectionTitle(getString(R.string.downloads_performance), topMargin = if (jobs.isNotEmpty() || entries.isNotEmpty()) 20.dp else 0)
+        addSectionTitle(getString(R.string.downloads_performance), spacingTop = if (jobs.isNotEmpty() || entries.isNotEmpty()) 20.dp else 0)
         content.addView(storageControlsView())
 
         if (jobs.isEmpty() && entries.isEmpty()) {

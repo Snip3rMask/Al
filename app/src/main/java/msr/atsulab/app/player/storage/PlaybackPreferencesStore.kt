@@ -1,6 +1,7 @@
 package msr.atsulab.app.player.storage
 
 import msr.atsulab.app.player.domain.model.SubtitleStyle
+import msr.atsulab.app.player.download.DownloadStorageLocation
 
 interface PlaybackPreferencesStore {
     fun getSpeed(): Float
