@@ -78,7 +78,7 @@ class HlsDownloaderTest {
         )
 
         assertEquals("AtsuLab Anime - 1.mp4", outputFile.name)
-        assertArrayEquals("INITIONETWO".toByteArray(), outputFile.readBytes())
+        assertArrayEquals("INITONETWO".toByteArray(), outputFile.readBytes())
         assertEquals(2, reportedTotal)
         assertEquals("/media.m3u8", server.takeRequest().path)
         assertEquals("https://example.com/", server.takeRequest().getHeader("Referer"))
