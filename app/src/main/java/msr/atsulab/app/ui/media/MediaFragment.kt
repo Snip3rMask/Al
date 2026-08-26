@@ -215,7 +215,7 @@ class MediaFragment : BaseFragment<FragmentMediaBinding, MediaViewModel>() {
                 ImageUtil.showFullScreenImage(requireContext(), it, binding.mediaBannerImage)
             },
             viewModel.resumeProgress.subscribe { progress ->
-                renderPlaybackProgress(progress)
+                renderPlaybackProgress(progress.data)
             }
         )
 

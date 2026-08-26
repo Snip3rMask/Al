@@ -124,8 +124,8 @@ class MediaViewModel(
 
     private val _resumeProgress =
         BehaviorSubject.createDefault(NullableItem<PlaybackProgress>(null))
-    val resumeProgress: Observable<PlaybackProgress?>
-        get() = _resumeProgress.map { it.data }
+    val resumeProgress: Observable<NullableItem<PlaybackProgress>>
+        get() = _resumeProgress
 
     val currentResumeProgress: PlaybackProgress?
         get() = _resumeProgress.value?.data
