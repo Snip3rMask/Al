@@ -874,13 +874,13 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - Added already-downloaded detection by AniList ID plus episode ID before queuing, and routed completed downloads into native `PlayerActivity` playback using Media3 `ProgressiveMediaSource`.
 - Extended focused queue lifecycle coverage for pause/resume, retry, process-death recovery, and direct paused-job cancellation.
 
-## Part 11 — AtsuLab Integration Polish
+## Part 11 — AtsuLab Integration Polish ✅
 
 **Goal:** Blend playback naturally into the tracking app.
 
 - [x] Add Continue Watching section to Home.
 - [x] Add recent search history to Search.
-- [ ] Optionally add home row customization.
+- [~] Optionally add home row customization. *(deferred — AtsuLab tracking home differs structurally from Anifux streaming home)*
 - [x] Show resume CTA and episode progress on Media Details.
 - [x] Sync watching progress with AniList editor where sensible.
 - [x] Improve playback loading/error states.
@@ -936,6 +936,19 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 
 - Verified existing loading indicator, retry button, source-error text, and fix-match flow cover all failure paths.
 - Confirmed skeleton loading for episodes and sources is present in portrait mode.
+
+### Part 11 — Anifux vs AtsuLab UI Comparison Notes
+
+| Area | Anifux | AtsuLab | Match |
+|---|---|---|---|
+| Colors | PRIMARY_DARK #0A0A0D, SURFACE #1F222A, ACCENT #0EA5E9 | Identical constants in PlayerShellMetrics | ✅ |
+| Portrait video height | max(460, screen × 0.30) | Identical formula | ✅ |
+| Language tabs | SUB/DUB + sliding indicator | Same pattern | ✅ |
+| Server row overflow | Fade + animated arrow hint | Same pattern | ✅ |
+| Episode grid | 5 columns, 58dp cells, rounded | Same | ✅ |
+| Comment preview | Present | Present | ✅ |
+| Player Settings | Auto-rotate, remember-last, seek duration | Added in Slice D | ✅ |
+| Source Selection | Provider sections, card previews, skeletons | Structurally identical | ✅ |
 
 ## Testing Checklist
 
