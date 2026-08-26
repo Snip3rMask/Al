@@ -42,6 +42,8 @@ import msr.atsulab.app.player.engine.PlaybackEngine
 import msr.atsulab.app.player.engine.PlaybackEngineListener
 import msr.atsulab.app.player.engine.PlaybackReadyState
 import msr.atsulab.app.player.engine.PlaybackError
+import msr.atsulab.app.player.download.CompletedDownload
+import msr.atsulab.app.player.download.DownloadEntryStore
 import msr.atsulab.app.player.download.DownloadQueueStore
 import msr.atsulab.app.player.download.DownloadRequest
 import msr.atsulab.app.player.download.PlayerDownloadService
@@ -61,6 +63,7 @@ class PlayerActivity : AppCompatActivity() {
     private val playbackPreferencesStore: PlaybackPreferencesStore by inject(PlaybackPreferencesStore::class.java)
     private val sourceMappingStore: SourceMappingStore by inject(SourceMappingStore::class.java)
     private val downloadQueueStore: DownloadQueueStore by inject(DownloadQueueStore::class.java)
+    private val downloadEntryStore: DownloadEntryStore by inject(DownloadEntryStore::class.java)
 
     private val sourceSelectionLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -123,6 +126,8 @@ class PlayerActivity : AppCompatActivity() {
     private var gestureHandler: PlayerGestureHandler? = null
     private var playbackBrightness = BRIGHTNESS_MAX
     private var activeVideoSource: VideoSource? = null
+    private var offlineFilePath: String? = null
+    private var offlineEpisodeName: String = ""
     private var availableVideoSources: List<VideoSource> = emptyList()
     private var selectedSourceIndex = INVALID_SOURCE_INDEX
     private var showDubSources = false
@@ -319,6 +324,8 @@ class PlayerActivity : AppCompatActivity() {
         val title = intent.getStringExtra(EXTRA_TITLE).orEmpty()
         requestedEpisode = intent.getIntExtra(EXTRA_INITIAL_EPISODE, DEFAULT_INITIAL_EPISODE)
             .coerceAtLeast(DEFAULT_INITIAL_EPISODE)
+        offlineFilePath = intent.getStringExtra(EXTRA_OFFLINE_FILE_PATH).orEmpty().takeIf { it.isNotBlank() }
+        offlineEpisodeName = intent.getStringExtra(EXTRA_OFFLINE_EPISODE_NAME).orEmpty()
         playbackSpeed = PlaybackSpeedOptions.normalize(playbackPreferencesStore.getSpeed())
 
         if (aniListId == INVALID_ANILIST_ID || title.isBlank()) {
@@ -705,6 +712,10 @@ class PlayerActivity : AppCompatActivity() {
 
     private fun loadPlayback() {
         val anime = currentAnime ?: return
+        if (offlineFilePath != null) {
+            startOfflinePlayback(anime)
+            return
+        }
         loadPlayback(anime)
     }
 
@@ -719,6 +730,11 @@ class PlayerActivity : AppCompatActivity() {
             quality = source.quality,
             referer = source.referer
         )
+        val existing = downloadEntryStore.findByEpisode(anime.aniListId, requestedEpisode.toString())
+        if (existing?.file?.exists() == true) {
+            Toast.makeText(this, R.string.download_already_exists, Toast.LENGTH_SHORT).show()
+            return
+        }
         PlayerDownloadService.start(this, downloadQueueStore, listOf(request))
         Toast.makeText(this, R.string.download_queued, Toast.LENGTH_SHORT).show()
     }
@@ -731,6 +747,40 @@ class PlayerActivity : AppCompatActivity() {
                 putExtra(SourceSelectionActivity.EXTRA_ANILIST_ID, anime.aniListId)
             }
         )
+    }
+
+    private fun startOfflinePlayback(anime: PlaybackAnime) {
+        val filePath = offlineFilePath ?: return
+        val file = File(filePath)
+        if (!file.exists()) {
+            showMessage(R.string.downloads_missing_file, retryVisible = false)
+            return
+        }
+
+        val source = VideoSource(
+            quality = "Offline",
+            url = Uri.fromFile(file).toString(),
+            displayName = "Offline"
+        )
+        activeVideoSource = source
+        selectedQualityTrackId = null
+        availableVideoSources = listOf(source)
+        latestPlaybackState = PlaybackState(speed = playbackSpeed)
+        transportVisible = false
+        val episodeLabel = offlineEpisodeName.ifBlank { getString(R.string.player_episode_number_format, requestedEpisode) }
+        showMessage(R.string.player_starting_playback, arguments = listOf(episodeLabel), loading = true)
+        shell.watchingView?.text = getString(
+            R.string.player_watching_episode,
+            anime.title,
+            requestedEpisode
+        )
+        shell.controller.updateServerLabel(getString(R.string.player_offline))
+        shell.controller.updateQualityLabel("MP4")
+        shell.portraitContent?.setSourceError(null)
+        refreshPortraitContent()
+        playbackEngine.prepare(source)
+        playbackEngine.setSpeed(playbackSpeed)
+        playbackEngine.play()
     }
 
     private fun loadPlayback(anime: PlaybackAnime) {
@@ -1403,6 +1453,19 @@ class PlayerActivity : AppCompatActivity() {
         const val EXTRA_BANNER_IMAGE_URL = "EXTRA_BANNER_IMAGE_URL"
         const val EXTRA_TOTAL_EPISODES = "EXTRA_TOTAL_EPISODES"
         const val EXTRA_INITIAL_EPISODE = "EXTRA_INITIAL_EPISODE"
+        fun offlineIntent(context: android.content.Context, entry: CompletedDownload): Intent {
+            val episodeNumber = entry.episodeId.toIntOrNull() ?: 1
+            return Intent(context, PlayerActivity::class.java).apply {
+                putExtra(EXTRA_ANILIST_ID, entry.aniListId)
+                putExtra(EXTRA_TITLE, entry.title)
+                putExtra(EXTRA_INITIAL_EPISODE, episodeNumber)
+                putExtra(EXTRA_OFFLINE_FILE_PATH, entry.filePath)
+                putExtra(EXTRA_OFFLINE_EPISODE_NAME, "Episode $episodeNumber")
+            }
+        }
+
+        const val EXTRA_OFFLINE_FILE_PATH = "EXTRA_OFFLINE_FILE_PATH"
+        const val EXTRA_OFFLINE_EPISODE_NAME = "EXTRA_OFFLINE_EPISODE_NAME"
 
         internal const val INVALID_ANILIST_ID = 0
         internal const val INVALID_MAL_ID = 0

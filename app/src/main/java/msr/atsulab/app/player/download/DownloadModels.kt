@@ -11,6 +11,9 @@ data class DownloadRequest(
     val fileName: String
         get() = "${displayName.sanitized()} - ${episodeId.sanitized()}.mp4"
 
+    val sessionKey: String
+        get() = "${aniListId}-${episodeId.sanitized()}-${url.hashCode()}"
+
     private fun String.sanitized(): String {
         return map { character ->
             if (character.isLetterOrDigit() || character in " -_.") character else ' '
@@ -49,3 +52,5 @@ fun interface DownloadCancelToken {
 fun interface DownloadProgressListener {
     fun onProgress(doneSegments: Int, totalSegments: Int)
 }
+
+class DownloadPausedException : Exception("Download paused")

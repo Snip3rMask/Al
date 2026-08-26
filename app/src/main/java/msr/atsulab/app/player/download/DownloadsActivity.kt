@@ -1,7 +1,5 @@
 package msr.atsulab.app.player.download
 
-import android.content.ActivityNotFoundException
-import android.content.Intent
 import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
@@ -17,8 +15,9 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.FileProvider
 import msr.atsulab.app.R
+import msr.atsulab.app.player.storage.PlaybackPreferencesStore
+import msr.atsulab.app.player.ui.PlayerActivity
 import msr.atsulab.app.data.repository.UserRepository
 import msr.atsulab.app.ui.base.BaseActivityViewModel
 import org.koin.android.ext.android.inject
@@ -27,6 +26,7 @@ class DownloadsActivity : AppCompatActivity() {
 
     private val queueStore: DownloadQueueStore by inject()
     private val entryStore: DownloadEntryStore by inject()
+    private val preferences: PlaybackPreferencesStore by inject()
     private val userRepository: UserRepository by inject()
 
     private lateinit var content: LinearLayout
@@ -79,8 +79,45 @@ class DownloadsActivity : AppCompatActivity() {
             entries.forEach { entry -> content.addView(completedDownloadView(entry)) }
         }
 
+        addSectionTitle(getString(R.string.downloads_performance), topMargin = if (jobs.isNotEmpty() || entries.isNotEmpty()) 20.dp else 0)
+        content.addView(storageControlsView())
+
         if (jobs.isEmpty() && entries.isEmpty()) {
             content.addView(emptyView())
+        }
+    }
+
+    private fun storageControlsView(): View {
+        return card {
+            addView(detailView(getString(R.string.download_storage_current, getString(preferences.getDownloadStorageLocation().labelResId))))
+            addView(actionButton(getString(R.string.choose_download_storage)) {
+                val next = when (preferences.getDownloadStorageLocation()) {
+                    DownloadStorageLocation.INTERNAL -> DownloadStorageLocation.EXTERNAL_APP
+                    DownloadStorageLocation.EXTERNAL_APP -> DownloadStorageLocation.INTERNAL
+                }
+                preferences.setDownloadStorageLocation(next)
+                render()
+            }, linearParams(FrameLayout.LayoutParams.MATCH_PARENT, 38.dp) { topMargin = 8.dp })
+
+            addView(
+                detailView(getString(R.string.download_parallel_current, preferences.getDownloadParallelSegments())),
+                linearParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.WRAP_CONTENT) { topMargin = 12.dp }
+            )
+            addView(actionButton(getString(R.string.change_parallel_segments)) {
+                val count = preferences.getDownloadParallelSegments()
+                preferences.setDownloadParallelSegments(nextParallelCount(count))
+                render()
+            }, linearParams(FrameLayout.LayoutParams.MATCH_PARENT, 38.dp) { topMargin = 8.dp })
+        }
+    }
+
+    private fun nextParallelCount(current: Int): Int {
+        return when (current) {
+            1 -> 2
+            2 -> 4
+            4 -> 8
+            8 -> 16
+            else -> 1
         }
     }
 
@@ -108,9 +145,34 @@ class DownloadsActivity : AppCompatActivity() {
                 progress = job.percent
                 isIndeterminate = false
             }, linearParams(FrameLayout.LayoutParams.MATCH_PARENT, 6.dp) { topMargin = 8.dp })
-            addView(actionButton(getString(R.string.download_cancel)) {
-                startService(PlayerDownloadService.cancelIntent(this@DownloadsActivity, job.id))
-            }, linearParams(FrameLayout.LayoutParams.MATCH_PARENT, 38.dp) { topMargin = 10.dp })
+
+            val actions = LinearLayout(this@DownloadsActivity).apply { orientation = LinearLayout.HORIZONTAL }
+            when (job.state) {
+                DownloadJobState.PAUSED -> actions.addView(actionButton(getString(R.string.resume)) {
+                    PlayerDownloadService.resume(this@DownloadsActivity, job.id)
+                })
+                DownloadJobState.FAILED, DownloadJobState.CANCELLED -> actions.addView(actionButton(getString(R.string.retry)) {
+                    PlayerDownloadService.retry(this@DownloadsActivity, job.id)
+                })
+                else -> Unit
+            }
+            if (
+                job.state == DownloadJobState.QUEUED ||
+                job.state == DownloadJobState.RUNNING ||
+                job.state == DownloadJobState.PAUSE_REQUESTED ||
+                job.state == DownloadJobState.PAUSED ||
+                job.state == DownloadJobState.CANCELLING
+            ) {
+                if (job.state != DownloadJobState.CANCELLING) {
+                    actions.addView(actionButton(getString(R.string.pause)) {
+                        PlayerDownloadService.pause(this@DownloadsActivity, job.id)
+                    })
+                }
+                actions.addView(actionButton(getString(R.string.cancel), destructive = true) {
+                    PlayerDownloadService.cancel(this@DownloadsActivity, job.id)
+                }, linearParams(FrameLayout.LayoutParams.WRAP_CONTENT, 38.dp) { leftMargin = 10.dp })
+            }
+            addView(actions, linearParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.WRAP_CONTENT) { topMargin = 10.dp })
         }
     }
 
@@ -205,20 +267,7 @@ class DownloadsActivity : AppCompatActivity() {
             return
         }
 
-        val uri = FileProvider.getUriForFile(
-            this,
-            "$packageName.player.capture",
-            file
-        )
-        val intent = Intent(Intent.ACTION_VIEW).apply {
-            setDataAndType(uri, "video/mp4")
-            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        }
-        try {
-            startActivity(intent)
-        } catch (_: ActivityNotFoundException) {
-            Toast.makeText(this, R.string.downloads_no_player, Toast.LENGTH_SHORT).show()
-        }
+        startActivity(PlayerActivity.offlineIntent(this, entry))
     }
 
     private fun confirmDelete(entry: CompletedDownload) {
@@ -260,6 +309,8 @@ private val DownloadJobState.labelResId: Int
     get() = when (this) {
         DownloadJobState.QUEUED -> R.string.download_queued
         DownloadJobState.RUNNING, DownloadJobState.CANCELLING -> R.string.download_running
+        DownloadJobState.PAUSE_REQUESTED -> R.string.download_pausing
+        DownloadJobState.PAUSED -> R.string.download_paused
         DownloadJobState.COMPLETED -> R.string.download_completed
         DownloadJobState.CANCELLED -> R.string.download_cancelled
         DownloadJobState.FAILED -> R.string.download_failed

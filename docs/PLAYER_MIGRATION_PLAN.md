@@ -816,12 +816,12 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - [x] Port download models and HLS downloader.
 - [x] Create foreground download service.
 - [x] Add queue and downloaded-entry stores.
-- [ ] Support queue, pause, resume, cancel, retry, and delete.
-- [ ] Show accurate notification progress.
-- [ ] Enforce concurrent-download limits.
-- [ ] Detect already-downloaded episodes.
-- [ ] Enable offline playback.
-- [ ] Respect storage settings.
+- [x] Support queue, pause, resume, cancel, retry, and delete.
+- [x] Show accurate notification progress.
+- [x] Enforce concurrent-download limits.
+- [x] Detect already-downloaded episodes.
+- [x] Enable offline playback.
+- [x] Respect storage settings.
 
 **Exit gate:** Airplane-mode playback works; app kill does not corrupt the queue; notifications and deletion behave correctly.
 
@@ -848,6 +848,15 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - Added confirmation-gated delete that removes both the persisted record and private downloaded file.
 - Exposed Downloads from Settings and registered the themed activity; extended focused download lifecycle coverage.
 
+
+#### Part 10 Slice D — Offline Playback & Queue Controls — 2026-08-26
+
+- Rebuilt the download queue as persistent SharedPreferences state with QUEUED, RUNNING, pause-requested/paused, cancelling, completed, cancelled, and failed states; running work now recovers safely after process death.
+- Added pause, resume, retry, and direct cancel controls to active download cards and notification actions. Running HLS workers observe pause/cancel tokens and preserve reusable segment sessions across pauses.
+- Made foreground notifications reflect current episode, percentage, paused, completed, failed, and cancelled outcomes while keeping control actions available from background.
+- Added internal versus external-app private storage selection and bounded parallel-segment preference cycling (1, 2, 4, 8, 16). Storage resolution is applied when downloader roots and session directories are created.
+- Added already-downloaded detection by AniList ID plus episode ID before queuing, and routed completed downloads into native `PlayerActivity` playback using Media3 `ProgressiveMediaSource`.
+- Extended focused queue lifecycle coverage for pause/resume, retry, process-death recovery, and direct paused-job cancellation.
 
 ## Part 11 — AtsuLab Integration Polish
 
@@ -1051,6 +1060,6 @@ Append dated entries here. Do not delete history.
 
 ## Next Action
 
-1. Validate Release `161` source-selection flow on a real device: wrong auto-match correction, persistence, reset, cancel-without-change, and player recovery reload.
-2. Confirm normal-mode Done/skip rules and single-server result behavior.
-3. After validation, close Part 9 and start **Part 10 — Downloads / Offline**.
+1. Wait for the GitHub Actions build for Slice D and resolve any CI failure from the failed-step log.
+2. Validate Part 10 on a real device after the release artifact publishes: start/download progress, pause/resume, cancel/retry, notification controls, already-downloaded detection, completed-download playback in airplane mode, deletion, and storage/parallel settings.
+3. Force-stop during an active download and confirm queue recovery without corrupt output; then close **Part 10** if all checks pass.

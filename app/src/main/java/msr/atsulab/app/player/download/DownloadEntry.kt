@@ -34,6 +34,7 @@ data class CompletedDownload(
 
 interface DownloadEntryStore {
     fun all(): List<CompletedDownload>
+    fun findByEpisode(aniListId: Int, episodeId: String): CompletedDownload?
     fun save(entry: CompletedDownload)
     fun remove(key: String)
     fun clear()
@@ -55,6 +56,10 @@ class DefaultDownloadEntryStore(
             .filter { it.filePath.isNotBlank() }
             .sortedByDescending(CompletedDownload::completedAtEpochMs)
         return entries
+    }
+
+    override fun findByEpisode(aniListId: Int, episodeId: String): CompletedDownload? {
+        return all().firstOrNull { it.aniListId == aniListId && it.episodeId == episodeId }
     }
 
     override fun save(entry: CompletedDownload) {

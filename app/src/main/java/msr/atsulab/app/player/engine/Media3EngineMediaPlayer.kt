@@ -16,6 +16,7 @@ import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.hls.HlsMediaSource
 import androidx.media3.exoplayer.source.MergingMediaSource
+import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import androidx.media3.exoplayer.source.SingleSampleMediaSource
 import androidx.media3.ui.PlayerView
 import msr.atsulab.app.player.domain.model.SubtitleTrack
@@ -89,8 +90,14 @@ internal class Media3EngineMediaPlayer(
 
     override fun prepare(source: VideoSource, startPositionMs: Long) {
         val dataSourceFactory = createDataSourceFactory(source)
-        val mediaSource = HlsMediaSource.Factory(dataSourceFactory)
-            .createMediaSource(MediaItem.fromUri(source.url))
+        val uri = Uri.parse(source.url)
+        val mediaSource = if (uri.scheme == "file") {
+            ProgressiveMediaSource.Factory(dataSourceFactory)
+                .createMediaSource(MediaItem.fromUri(uri))
+        } else {
+            HlsMediaSource.Factory(dataSourceFactory)
+                .createMediaSource(MediaItem.fromUri(uri))
+        }
 
         val subtitleUrl = source.subtitleUrl
         val mergedSource = if (subtitleUrl.isBlank()) {

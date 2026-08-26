@@ -30,4 +30,12 @@ interface PlaybackPreferencesStore {
     fun getSubtitleStyle(): SubtitleStyle
 
     fun setSubtitleStyle(style: SubtitleStyle)
+
+    fun getDownloadParallelSegments(): Int
+
+    fun setDownloadParallelSegments(count: Int)
+
+    fun getDownloadStorageLocation(): DownloadStorageLocation
+
+    fun setDownloadStorageLocation(location: DownloadStorageLocation)
 }

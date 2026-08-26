@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.core.content.edit
 import msr.atsulab.app.player.domain.PlaybackSpeedOptions
 import msr.atsulab.app.player.domain.SubtitleStyleOptions
+import msr.atsulab.app.player.download.DownloadStorageLocation
 import msr.atsulab.app.player.domain.model.SubtitleStyle
 
 class DefaultPlaybackPreferencesStore(
@@ -107,6 +108,28 @@ class DefaultPlaybackPreferencesStore(
         )
     }
 
+    override fun getDownloadParallelSegments(): Int {
+        return preferences.getInt(DOWNLOAD_PARALLEL_SEGMENTS_KEY, DEFAULT_DOWNLOAD_PARALLEL_SEGMENTS)
+    }
+
+    override fun setDownloadParallelSegments(count: Int) {
+        preferences.edit {
+            putInt(DOWNLOAD_PARALLEL_SEGMENTS_KEY, count.coerceIn(1, MAX_DOWNLOAD_PARALLEL_SEGMENTS))
+        }
+    }
+
+    override fun getDownloadStorageLocation(): DownloadStorageLocation {
+        return DownloadStorageLocation.from(
+            preferences.getString(DOWNLOAD_STORAGE_LOCATION_KEY, null)
+        )
+    }
+
+    override fun setDownloadStorageLocation(location: DownloadStorageLocation) {
+        preferences.edit {
+            putString(DOWNLOAD_STORAGE_LOCATION_KEY, location.storageValue)
+        }
+    }
+
     override fun setSubtitleStyle(style: SubtitleStyle) {
         val normalizedStyle = SubtitleStyleOptions.normalize(style)
         preferences.edit {
@@ -139,5 +162,9 @@ class DefaultPlaybackPreferencesStore(
         const val BOTTOM_PADDING_KEY = "subtitle_bottom_padding"
         const val SHADOW_KEY = "subtitle_shadow"
         const val CUSTOM_FONT_PATH_KEY = "subtitle_custom_font_path"
+        const val DOWNLOAD_PARALLEL_SEGMENTS_KEY = "download_parallel_segments"
+        const val DOWNLOAD_STORAGE_LOCATION_KEY = "download_storage_location"
+        const val DEFAULT_DOWNLOAD_PARALLEL_SEGMENTS = 8
+        const val MAX_DOWNLOAD_PARALLEL_SEGMENTS = 16
     }
 }

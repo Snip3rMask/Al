@@ -12,7 +12,7 @@ import okhttp3.Request
 
 class HlsDownloader(
     private val httpClient: OkHttpClient,
-    private val outputDirectory: File,
+    private val outputRootProvider: () -> File,
     private val maxParallelSegments: Int = DEFAULT_PARALLEL_SEGMENTS
 ) {
 
@@ -20,11 +20,16 @@ class HlsDownloader(
         request: DownloadRequest,
         parallelSegments: Int = DEFAULT_PARALLEL_SEGMENTS.coerceAtMost(maxParallelSegments),
         cancelToken: DownloadCancelToken = DownloadCancelToken.NEVER,
+        pauseToken: () -> Boolean = { false },
+        sessionDirectory: File? = null,
         onProgress: DownloadProgressListener = DownloadProgressListener { _, _ -> }
     ): File {
         check(!cancelToken.isCancelled()) { "Download cancelled" }
-        outputDirectory.mkdirs()
-        require(outputDirectory.isDirectory) { "Cannot create download directory" }
+        check(!pauseToken()) { "Download paused" }
+
+        val outputRoot = outputRootProvider()
+        outputRoot.mkdirs()
+        require(outputRoot.isDirectory) { "Cannot create download directory" }
 
         var playlistUrl = request.url
         val masterContent = getText(playlistUrl, request.referer, cancelToken)
@@ -38,13 +43,26 @@ class HlsDownloader(
         val playlist = HlsPlaylistParser.parseMedia(mediaContent, playlistUrl)
         if (playlist.isEmpty) throw IOException("No HLS segments found")
 
-        val temporaryDirectory = File(outputDirectory, ".tmp-${System.nanoTime()}")
-        check(temporaryDirectory.mkdirs()) { "Cannot create temporary download directory" }
+        val reusableSession = sessionDirectory != null
+        val temporaryDirectory = sessionDirectory
+            ?: File(outputRoot, ".tmp-${System.nanoTime()}")
+        check(temporaryDirectory.mkdirs() || temporaryDirectory.isDirectory) {
+            "Cannot create temporary download directory"
+        }
+        var preserveSessionOnPause = false
 
         try {
-            downloadSegments(playlist.segmentUrls, temporaryDirectory, parallelSegments, request.referer, cancelToken, onProgress)
-            val outputFile = File(outputDirectory, request.fileName)
-            val partialFile = File(outputDirectory, request.fileName + PARTIAL_SUFFIX)
+            downloadSegments(
+                playlist.segmentUrls,
+                temporaryDirectory,
+                parallelSegments,
+                request.referer,
+                cancelToken,
+                pauseToken,
+                onProgress
+            )
+            val outputFile = File(outputRoot, request.fileName)
+            val partialFile = File(outputRoot, request.fileName + PARTIAL_SUFFIX)
             merge(playlist.initializationUrl, temporaryDirectory, playlist.segmentUrls.size, partialFile, request.referer, cancelToken)
 
             if (outputFile.exists() && !outputFile.delete()) {
@@ -54,8 +72,13 @@ class HlsDownloader(
                 throw IOException("Could not finalize downloaded episode")
             }
             return outputFile
+        } catch (exception: DownloadPausedException) {
+            preserveSessionOnPause = reusableSession
+            throw exception
         } finally {
-            temporaryDirectory.deleteRecursively()
+            if (!preserveSessionOnPause) {
+                temporaryDirectory.deleteRecursively()
+            }
         }
     }
 
@@ -65,6 +88,7 @@ class HlsDownloader(
         parallelSegments: Int,
         referer: String,
         cancelToken: DownloadCancelToken,
+        pauseToken: () -> Boolean,
         onProgress: DownloadProgressListener
     ) {
         val executor = newExecutor(parallelSegments)
@@ -72,7 +96,9 @@ class HlsDownloader(
         val futures = segmentUrls.mapIndexed { index, segmentUrl ->
             executor.submit {
                 val target = File(temporaryDirectory, String.format(Locale.US, "%06d.seg", index))
-                downloadWithRetry(segmentUrl, target, referer, cancelToken)
+                if (!resumeExistingSegment(target)) {
+                    downloadWithRetry(segmentUrl, target, referer, cancelToken, pauseToken)
+                }
                 onProgress.onProgress(completed.incrementAndGet(), segmentUrls.size)
             }
         }
@@ -87,23 +113,40 @@ class HlsDownloader(
         }
     }
 
+    fun sessionRoot(): File {
+        val root = outputRootProvider().resolve(SESSION_ROOT_NAME)
+        root.mkdirs()
+        return root
+    }
+
     private fun newExecutor(parallelSegments: Int): ExecutorService {
         val workerCount = parallelSegments.coerceIn(MIN_PARALLEL_SEGMENTS, maxParallelSegments)
         return Executors.newFixedThreadPool(workerCount)
     }
 
-    private fun downloadWithRetry(url: String, target: File, referer: String, cancelToken: DownloadCancelToken) {
+    private fun resumeExistingSegment(target: File): Boolean {
+        return target.isFile && target.length() > 0
+    }
+
+    private fun downloadWithRetry(
+        url: String,
+        target: File,
+        referer: String,
+        cancelToken: DownloadCancelToken,
+        pauseToken: () -> Boolean
+    ) {
         var lastError: IOException? = null
         repeat(MAX_SEGMENT_ATTEMPTS) { attempt ->
             try {
                 check(!cancelToken.isCancelled()) { "Download cancelled" }
+                if (pauseToken()) throw DownloadPausedException()
                 copyToFile(url, target, referer)
                 return
             } catch (exception: IOException) {
                 lastError = exception
                 if (attempt < MAX_SEGMENT_ATTEMPTS - 1) {
                     try {
-                        Thread.sleep((RETRY_BACKOFF_MS * (attempt + 1)))
+                        Thread.sleep(RETRY_BACKOFF_MS * (attempt + 1))
                     } catch (interrupted: InterruptedException) {
                         Thread.currentThread().interrupt()
                         throw IOException("Download interrupted", interrupted)
@@ -146,15 +189,21 @@ class HlsDownloader(
     }
 
     private fun copyToFile(url: String, target: File, referer: String) {
-        execute(newRequest(url, referer)) { response ->
+        execute(newRequest(url, referer), read = { response ->
+            val partial = File(target.parentFile, target.name + PARTIAL_SUFFIX)
             response.body?.byteStream()?.use { input ->
-                target.outputStream().use { output -> input.copyTo(output) }
+                partial.outputStream().use { output -> input.copyTo(output) }
             } ?: throw IOException("Empty segment response")
+            if (!partial.renameTo(target)) throw IOException("Could not save segment")
             true
-        } ?: throw IOException("Segment download failed")
+        }) ?: throw IOException("Segment download failed")
     }
 
-    private inline fun <T> execute(request: Request, cancelToken: DownloadCancelToken = DownloadCancelToken.NEVER, read: (okhttp3.Response) -> T): T? {
+    private inline fun <T> execute(
+        request: Request,
+        cancelToken: DownloadCancelToken = DownloadCancelToken.NEVER,
+        read: (okhttp3.Response) -> T
+    ): T? {
         httpClient.newCall(request).execute().use { response ->
             if (!response.isSuccessful) throw IOException("HLS request failed with HTTP ${response.code}")
             check(!cancelToken.isCancelled()) { "Download cancelled" }
@@ -179,10 +228,12 @@ class HlsDownloader(
 
     companion object {
         const val DEFAULT_PARALLEL_SEGMENTS = 16
+        const val MAX_PARALLEL_LIMIT = 16
         const val MIN_PARALLEL_SEGMENTS = 1
         private const val MAX_SEGMENT_ATTEMPTS = 3
         private const val RETRY_BACKOFF_MS = 500L
         private const val PARTIAL_SUFFIX = ".part"
         private const val USER_AGENT = "Mozilla/5.0"
+        private const val SESSION_ROOT_NAME = ".sessions"
     }
 }

@@ -26,7 +26,7 @@ class HlsDownloaderTest {
             .build()
 
         var reportedTotal = 0
-        val outputFile = HlsDownloader(httpClient, outputDirectory).download(
+        val outputFile = HlsDownloader(httpClient, { outputDirectory }).download(
             request = DownloadRequest(
                 aniListId = 21,
                 episodeId = "1",
