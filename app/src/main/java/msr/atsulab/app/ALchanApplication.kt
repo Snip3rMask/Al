@@ -58,6 +58,8 @@ import msr.atsulab.app.ui.reorder.ReorderViewModel
 import msr.atsulab.app.ui.review.ReviewViewModel
 import msr.atsulab.app.ui.review.reader.ReaderViewModel
 import msr.atsulab.app.ui.search.SearchViewModel
+import msr.atsulab.app.ui.search.storage.DefaultRecentSearchStore
+import msr.atsulab.app.ui.search.storage.RecentSearchStore
 import msr.atsulab.app.ui.seasonal.SeasonalViewModel
 import msr.atsulab.app.ui.settings.SettingsViewModel
 import msr.atsulab.app.ui.settings.account.AccountSettingsViewModel
@@ -159,6 +161,8 @@ class ALchanApplication : Application() {
         single<ClipboardService> { DefaultClipboardService(this.androidContext()) }
         single<PushNotificationService> { DefaultPushNotificationService(this.androidContext(), get()) }
 
+        single<RecentSearchStore> { DefaultRecentSearchStore(androidContext()) }
+
         // view model
         viewModel { BaseActivityViewModel(get()) }
 
@@ -174,7 +178,7 @@ class ALchanApplication : Application() {
         viewModel { BottomSheetMediaThemesViewModel(get()) }
 
         viewModel { HomeViewModel(get(), get(), get(), get()) }
-        viewModel { SearchViewModel(get(), get()) }
+        viewModel { SearchViewModel(get(), get(), get()) }
         viewModel { SeasonalViewModel(get(), get(), get()) }
         viewModel { ExploreViewModel(get(), get()) }
         viewModel { CalendarViewModel(get(), get()) }

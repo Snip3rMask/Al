@@ -11,6 +11,8 @@ import msr.atsulab.app.helper.extensions.getStringResource
 import msr.atsulab.app.helper.pojo.ListItem
 import msr.atsulab.app.helper.pojo.SearchItem
 import msr.atsulab.app.ui.base.BaseViewModel
+import msr.atsulab.app.ui.search.storage.RecentSearch
+import msr.atsulab.app.ui.search.storage.RecentSearchStore
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.subjects.BehaviorSubject
 import io.reactivex.rxjava3.subjects.PublishSubject
@@ -18,7 +20,8 @@ import msr.atsulab.app.type.MediaType
 
 class SearchViewModel(
     private val userRepository: UserRepository,
-    private val contentRepository: ContentRepository
+    private val contentRepository: ContentRepository,
+    private val recentSearchStore: RecentSearchStore
 ) : BaseViewModel<SearchParam>() {
 
     private val _appSetting = PublishSubject.create<AppSetting>()
@@ -45,6 +48,14 @@ class SearchViewModel(
     val scrollToTopTrigger: Observable<Unit>
         get() = _scrollToTopTrigger
 
+    private val _recentSearches = BehaviorSubject.createDefault(recentSearchStore.all())
+    val recentSearches: Observable<List<RecentSearch>>
+        get() = _recentSearches
+
+    private val _recentSearchVisibility = BehaviorSubject.createDefault(_recentSearches.value?.isNotEmpty() == true)
+    val recentSearchVisibility: Observable<Boolean>
+        get() = _recentSearchVisibility
+
     private var currentSearchCategory = SearchCategory.ANIME
     private var currentSearchQuery = ""
 
@@ -55,6 +66,7 @@ class SearchViewModel(
         currentSearchCategory = param.searchCategory
 
         loadOnce {
+            refreshRecentSearches()
             updateSelectedSearchCategory(currentSearchCategory)
 
             disposables.add(
@@ -89,7 +101,13 @@ class SearchViewModel(
             hasNextPage = false
             currentPage = 0
             _searchItems.onNext(listOf())
+            refreshRecentSearches()
+            _recentSearchVisibility.onNext(_recentSearches.value?.isNotEmpty() == true)
             return
+        }
+
+        if (!isLoadingNextPage) {
+            _recentSearchVisibility.onNext(false)
         }
 
         if (searchQuery.isNotBlank() && !isLoadingNextPage)
@@ -141,6 +159,7 @@ class SearchViewModel(
                         } else {
                             _searchItems.onNext(newSearchItems)
                             _scrollToTopTrigger.onNext(Unit)
+                            recordRecentSearch(searchQuery)
                         }
 
                         state = State.LOADED
@@ -159,10 +178,46 @@ class SearchViewModel(
         )
     }
 
+    fun applyRecentSearch(search: RecentSearch) {
+        currentSearchQuery = search.query
+        currentSearchCategory = search.category
+        showSearchPlaceholder(currentSearchCategory)
+        doSearch(currentSearchQuery)
+    }
+
+    fun removeRecentSearch(search: RecentSearch) {
+        refreshRecentSearches(recentSearchStore.remove(search))
+        if (currentSearchQuery.isBlank()) {
+            _recentSearchVisibility.onNext(_recentSearches.value?.isNotEmpty() == true)
+        }
+    }
+
+    fun clearRecentSearches() {
+        refreshRecentSearches(recentSearchStore.clear())
+        if (currentSearchQuery.isBlank()) {
+            _recentSearchVisibility.onNext(false)
+        }
+    }
+
     fun updateSelectedSearchCategory(newSearchCategory: SearchCategory) {
         currentSearchCategory = newSearchCategory
+        showSearchPlaceholder(newSearchCategory)
+        reloadData()
+    }
+
+    private fun recordRecentSearch(query: String) {
+        refreshRecentSearches(
+            recentSearchStore.add(RecentSearch(query, currentSearchCategory, System.currentTimeMillis()))
+        )
+    }
+
+    private fun refreshRecentSearches(updated: List<RecentSearch>? = null) {
+        _recentSearches.onNext(updated ?: recentSearchStore.all())
+    }
+
+    private fun showSearchPlaceholder(category: SearchCategory) {
         _searchPlaceholderText.onNext(
-            when (newSearchCategory) {
+            when (category) {
                 SearchCategory.ANIME -> R.string.search_anime
                 SearchCategory.MANGA -> R.string.search_manga
                 SearchCategory.CHARACTER -> R.string.search_characters
@@ -171,7 +226,6 @@ class SearchViewModel(
                 SearchCategory.USER -> R.string.search_users
             }
         )
-        reloadData()
     }
 
     fun loadSearchCategories() {

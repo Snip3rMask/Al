@@ -1,6 +1,7 @@
 package msr.atsulab.app.ui.search
 
 import android.os.Bundle
+import android.view.View
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
@@ -14,6 +15,7 @@ import msr.atsulab.app.helper.extensions.applyTopPaddingInsets
 import msr.atsulab.app.helper.extensions.clicks
 import msr.atsulab.app.helper.extensions.show
 import msr.atsulab.app.ui.base.BaseFragment
+import msr.atsulab.app.ui.search.storage.RecentSearch
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.util.concurrent.TimeUnit
@@ -23,6 +25,7 @@ class SearchFragment : BaseFragment<FragmentSearchBinding, SearchViewModel>() {
     override val viewModel: SearchViewModel by viewModel()
 
     private var adapter: SearchRvAdapter? = null
+    private var recentSearchAdapter: RecentSearchRvAdapter? = null
 
     override fun generateViewBinding(
         inflater: LayoutInflater,
@@ -44,6 +47,13 @@ class SearchFragment : BaseFragment<FragmentSearchBinding, SearchViewModel>() {
 
             adapter = SearchRvAdapter(requireContext(), listOf(), AppSetting(), false, getSearchListener())
             searchRecyclerView.adapter = adapter
+
+            recentSearchAdapter = RecentSearchRvAdapter(requireContext(), listOf(), getRecentSearchListener())
+            recentSearchLayout.recentSearchRecyclerView.adapter = recentSearchAdapter
+
+            recentSearchLayout.recentSearchClearButton.clicks {
+                viewModel.clearRecentSearches()
+            }
 
             searchSwipeRefresh.setOnRefreshListener {
                 viewModel.reloadData()
@@ -113,11 +123,31 @@ class SearchFragment : BaseFragment<FragmentSearchBinding, SearchViewModel>() {
             },
             viewModel.scrollToTopTrigger.subscribe {
                 binding.searchRecyclerView.scrollToPosition(0)
+            },
+            viewModel.recentSearches.subscribe {
+                recentSearchAdapter?.updateData(it, true)
+            },
+            viewModel.recentSearchVisibility.subscribe {
+                binding.recentSearchLayout.root.show(it)
             }
         )
 
         arguments?.getString(SEARCH_CATEGORY)?.let {
             viewModel.loadData(SearchParam(SearchCategory.valueOf(it)))
+        }
+    }
+
+    private fun getRecentSearchListener(): RecentSearchRvAdapter.Listener {
+        return object : RecentSearchRvAdapter.Listener {
+            override fun onRecentSearchClicked(search: RecentSearch) {
+                binding.searchEditText.setText(search.query)
+                binding.searchEditText.setSelection(search.query.length)
+                viewModel.applyRecentSearch(search)
+            }
+
+            override fun onRecentSearchRemoved(search: RecentSearch) {
+                viewModel.removeRecentSearch(search)
+            }
         }
     }
 

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.appcompat.widget.LinearLayoutCompat
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:foreground="?selectableItemBackground"
+    android:gravity="center_vertical"
+    android:background="?attr/selectableItemBackground"
+    android:paddingVertical="@dimen/marginSmall"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:orientation="vertical"
+        android:layout_weight="1"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content">
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/recentSearchText"
+            style="?themeRegularFont"
+            android:maxLines="1"
+            android:ellipsize="end"
+            tools:text="AtsuLab Anime"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/recentSearchTypeText"
+            style="?themeSmallFont"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:alpha=".68"
+            tools:text="Anime"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+    </androidx.appcompat.widget.LinearLayoutCompat>
+
+    <androidx.appcompat.widget.AppCompatImageButton
+        android:id="@+id/recentSearchRemoveButton"
+        android:contentDescription="@string/remove_recent_search"
+        android:background="?selectableItemBackgroundBorderless"
+        android:src="@drawable/ic_delete"
+        android:layout_width="34dp"
+        android:layout_height="34dp"/>
+
+</androidx.appcompat.widget.LinearLayoutCompat>

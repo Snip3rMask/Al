@@ -879,7 +879,7 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 **Goal:** Blend playback naturally into the tracking app.
 
 - [x] Add Continue Watching section to Home.
-- [ ] Add recent search history to Search.
+- [x] Add recent search history to Search.
 - [ ] Optionally add home row customization.
 - [ ] Show resume CTA and episode progress on Media Details.
 - [ ] Sync watching progress with AniList editor where sensible.
@@ -903,6 +903,13 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - [ ] Update user-facing documentation and release notes.
 
 **Exit gate:** Full regression passes, CI is green, release artifact is generated directly in GitHub Releases, rollback path is known.
+
+### Part 11 Slice A — Recent Search History — 2026-08-26
+
+- Added category-aware persistent recent searches with case-insensitive deduplication, newest-first ordering, blank-query rejection, and a bounded twelve-entry store.
+- Added a Search history section for empty queries with query/category labels, one-tap repeat search, per-row removal, and clear-all behavior.
+- Recorded successful page-one searches only, restored the selected category with the query, and kept history hidden while active results are displayed.
+- Added focused normalization coverage for ranking, category separation, blank cleanup, and retention limits.
 
 ## Testing Checklist
 
@@ -1075,9 +1082,11 @@ Append dated entries here. Do not delete history.
 - Fixed manual-mapping CI failures by resolving nullable AniList keys safely, importing intent/storage seams, adding missing picker labels, correcting view-post/callable types, and deferring Android-bound storage resolution.
 - Completed the Continue Watching Home section: reactive persisted-progress cards, cover/title/percentage display, direct player resume, per-entry removal, ordered Home-state merging, and focused reducer coverage.
 
+- Added persistent, category-aware Search history with quick repeat, row deletion, clear-all, bounded retention, and focused normalization coverage.
+
 
 ## Next Action
 
-1. Wait for the GitHub Actions build for Continue Watching Slice B and resolve any failed-step error.
-2. Validate Release `188+`: play two episodes partially, return Home, resume each once near its saved timestamp, remove one card, and confirm it disappears without affecting the other.
-3. Confirm finished episodes do not reappear, then close **Part 5** after this regression passes.
+1. Wait for the GitHub Actions build for Recent Search History and resolve any failed-step error.
+2. Validate Part 5 on Release `190+`: resume two partial episodes once from Home, remove one card, and confirm finished episodes do not return.
+3. Validate Recent Search History: run searches in two categories, clear the query, tap/delete/clear entries, and confirm only successful queries persist.
