@@ -77,7 +77,7 @@ class DefaultPlaybackProgressRepository(
         }
     }
 
-    fun find(aniListId: Int?, playbackId: String, episodeUrl: String): PlaybackProgress? {
+    override fun find(aniListId: Int?, playbackId: String, episodeUrl: String): PlaybackProgress? {
         return synchronized(this) {
             readAllLocked().firstOrNull { progress ->
                 progress.aniListId == aniListId &&
