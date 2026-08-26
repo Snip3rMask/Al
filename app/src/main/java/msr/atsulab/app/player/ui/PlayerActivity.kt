@@ -44,6 +44,7 @@ import msr.atsulab.app.player.engine.PlaybackError
 import msr.atsulab.app.player.engine.PlaybackState
 import msr.atsulab.app.player.runtime.PlaybackEpisodeNavigator
 import msr.atsulab.app.player.storage.PlaybackPreferencesStore
+import msr.atsulab.app.player.storage.SourceMappingStore
 import org.koin.java.KoinJavaComponent.inject
 import kotlin.math.roundToInt
 
@@ -54,6 +55,15 @@ class PlayerActivity : AppCompatActivity() {
     private val skipTimeRepository: SkipTimeRepository by inject(SkipTimeRepository::class.java)
     private val playbackEngine: PlaybackEngine by inject(PlaybackEngine::class.java)
     private val playbackPreferencesStore: PlaybackPreferencesStore by inject(PlaybackPreferencesStore::class.java)
+    private val sourceMappingStore: SourceMappingStore by inject(SourceMappingStore::class.java)
+
+    private val sourceSelectionLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == RESULT_OK) {
+            loadPlayback()
+        }
+    }
 
     private val frameCaptureManager by lazy {
         PlayerFrameCaptureManager(this, playbackPreferencesStore)
@@ -437,6 +447,10 @@ class PlayerActivity : AppCompatActivity() {
                 loadPlayback()
             }
 
+            override fun onFixSourceMatchClicked() {
+                openSourceSelection()
+            }
+
             override fun onPlayPauseClicked() {
                 togglePlayback()
             }
@@ -677,6 +691,16 @@ class PlayerActivity : AppCompatActivity() {
     private fun loadPlayback() {
         val anime = currentAnime ?: return
         loadPlayback(anime)
+    }
+
+    private fun openSourceSelection() {
+        val anime = currentAnime ?: return
+        sourceSelectionLauncher.launch(
+            Intent(this, SourceSelectionActivity::class.java).apply {
+                putExtra(SourceSelectionActivity.EXTRA_TITLE, anime.title)
+                putExtra(SourceSelectionActivity.EXTRA_ANILIST_ID, anime.aniListId)
+            }
+        )
     }
 
     private fun loadPlayback(anime: PlaybackAnime) {

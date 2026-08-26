@@ -4,5 +4,6 @@ data class SourceCandidate(
     val id: String,
     val title: String,
     val thumbnailUrl: String = "",
-    val backendProvider: String = ""
+    val backendProvider: String = "",
+    val confirmedSourceSlug: String = ""
 )

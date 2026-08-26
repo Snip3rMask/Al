@@ -21,4 +21,10 @@ interface SourceMappingStore {
     fun has(aniListId: String): Boolean
 
     fun clear(aniListId: String)
+
+    fun replace(mapping: SourceMapping) {
+        val key = mapping.aniListId.trim()
+        if (key.isNotEmpty()) clear(key)
+        save(mapping)
+    }
 }

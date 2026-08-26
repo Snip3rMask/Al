@@ -581,6 +581,7 @@
     <string name="player_playing">Playing</string>
     <string name="player_ended">Playback ended</string>
     <string name="player_runtime_error">Playback could not be started.</string>
+    <string name="player_fix_source_match">Fix source match</string>
     <string name="player_trying_another_server">Trying another server…</string>
     <string name="player_no_working_source">No working server was found.</string>
     <string name="player_previous_episode">Previous episode</string>
@@ -640,6 +641,11 @@
     <string name="source_selection_error">Failed to load source candidates</string>
     <string name="source_selection_best">★ BEST</string>
     <string name="source_selection_missing_title">Anime title is missing</string>
+    <string name="source_selection_done">Done</string>
+    <string name="source_selection_saved">Source match saved</string>
+    <string name="source_selection_incomplete">Select an anime or skip each server</string>
+    <string name="source_selection_reset">Reset</string>
+    <string name="source_selection_reset_message">Clear the saved source matches for this anime?</string>
     <string name="navigate_back">Navigate back</string>
     <string name="unknown">Unknown</string>
     <string name="retry">Retry</string>

@@ -784,15 +784,24 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 **Goal:** Let users fix wrong automatic source matching.
 
 - [x] Port source selection skeleton.
-- [ ] Show candidates and support manual mapping.
-- [ ] Remember mapping by AniList ID.
-- [ ] Reset mapping safely.
-- [ ] Support single-server mode.
-- [ ] Show loading/skeleton, empty, and error/retry states.
+- [x] Show candidates and support manual mapping.
+- [x] Remember mapping by AniList ID.
+- [x] Reset mapping safely.
+- [x] Support single-server mode.
+- [x] Show loading/skeleton, empty, and error/retry states.
 
 **Exit gate:** Wrong auto-match can be corrected manually, mappings persist across restarts, and cancel changes nothing.
 
 #### Part 9 Slice A — Source Selection Skeleton — 2026-08-26
+#### Part 9 Slice B — Manual Mapping & Playback Resolution — 2026-08-26
+
+- Made source cards selectable with selected-state outlines, per-provider skip/undo, completion-gated Done, and scroll-preserving refreshes.
+- Saved confirmed picks by AniList ID through the existing mapping store, added atomic replacement for normal mode, merge-on-pick for single-server mode, and a confirmation-gated reset.
+- Passed the saved AniList mapping into episode resolution so a Daki pick selects its confirmed anidb candidate while a Nora pick supplies the confirmed anineko slug.
+- Kept stale or explicitly skipped mappings from silently replaying the wrong match; playback falls back to the next usable provider.
+- Added the player “Fix source match” entry point on retryable failures and reloaded playback only after a successful picker result.
+- Extended focused coverage for confirmed mappings, stale-match fallback, skipped providers, provider grouping, DI resolution, and failure isolation.
+
 
 - Added a grouped candidate contract on `SourceProvider` while preserving the existing flattened candidate API.
 - Added a failure-isolated candidate repository that merges provider sections, removes duplicate IDs by server, and filters single-server mode.
@@ -1012,10 +1021,10 @@ Append dated entries here. Do not delete history.
 - Fixed all portrait parity CI failures by correcting Kotlin property syntax, local density conversion, string resolution, wrapped-view attachment, and the focused test’s numeric type expectation.
 - Closed Part 7 after the user confirmed its remaining device regression on Release `158`.
 - Started Part 9 with the standalone source-selection skeleton: grouped provider candidates, failure-isolated aggregation, single-server filtering, loading/empty/error states, and a read-only preview screen.
+- Completed Part 9 manual mapping at code level: selectable provider sections, persistent AniList-ID mappings, safe reset, single-server save, player recovery entry, and confirmed-candidate playback resolution.
 
 ## Next Action
 
-1. Continue **Part 9 — Source Selection Screen**: connect manual card selection to the existing mapping store.
-2. Preserve automatic source fallback through confirmed mappings and add safe reset behavior.
-3. Complete single-server result flow plus loading, empty, error, retry, and cancel-without-change validation.
-4. Wire the selection entry points into player recovery and media playback navigation.
+1. Validate Release `161` source-selection flow on a real device: wrong auto-match correction, persistence, reset, cancel-without-change, and player recovery reload.
+2. Confirm normal-mode Done/skip rules and single-server result behavior.
+3. After validation, close Part 9 and start **Part 10 — Downloads / Offline**.

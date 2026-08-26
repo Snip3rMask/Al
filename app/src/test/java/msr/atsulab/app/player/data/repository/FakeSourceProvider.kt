@@ -13,6 +13,7 @@ class FakeSourceProvider(
     private val episodes: List<PlaybackEpisode> = emptyList(),
     private val sources: List<VideoSource> = emptyList(),
     private val candidateError: Boolean = false,
+    val candidateGroups: Map<String, List<SourceCandidate>> = emptyMap(),
     private val episodeError: Boolean = false,
     private val sourceError: Boolean = false
 ) : SourceProvider {
@@ -28,6 +29,17 @@ class FakeSourceProvider(
         candidateCalls++
         return if (candidateError) Single.error(IllegalStateException("$id candidates failed"))
         else Single.just(candidates)
+    }
+
+    override fun findCandidateGroups(
+        title: String,
+        aniListId: Int?
+    ): Single<Map<String, List<SourceCandidate>>> {
+        candidateCalls++
+        if (candidateError) return Single.error(IllegalStateException("$id candidates failed"))
+        if (candidateGroups.isNotEmpty()) return Single.just(candidateGroups)
+        return if (candidates.isEmpty()) Single.just(emptyMap())
+        else Single.just(mapOf(displayName to candidates))
     }
 
     override fun getEpisodes(candidate: SourceCandidate): Single<List<PlaybackEpisode>> {

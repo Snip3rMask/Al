@@ -26,6 +26,7 @@ internal class PlayerControllerSkeleton(
     interface Callbacks {
         fun onBackClicked()
         fun onRetryClicked()
+        fun onFixSourceMatchClicked()
         fun onPlayPauseClicked()
         fun onPreviousEpisodeClicked()
         fun onNextEpisodeClicked()
@@ -54,6 +55,9 @@ internal class PlayerControllerSkeleton(
         private set
 
     lateinit var retryButton: MaterialButton
+        private set
+
+    lateinit var fixMatchButton: MaterialButton
         private set
 
     lateinit var previousEpisodeButton: ImageView
@@ -120,6 +124,7 @@ internal class PlayerControllerSkeleton(
         statusRetryVisible = showRetry
         statusView.text = message
         retryButton.visibility = if (showRetry) View.VISIBLE else View.GONE
+        fixMatchButton.visibility = if (showRetry) View.VISIBLE else View.GONE
         statusControls.visibility = if (showRetry && !isControlsLocked) View.VISIBLE else View.GONE
     }
 
@@ -411,6 +416,12 @@ internal class PlayerControllerSkeleton(
             setOnClickListener { callbacks.onRetryClicked() }
         }
 
+        fixMatchButton = MaterialButton(context).apply {
+            setText(R.string.player_fix_source_match)
+            visibility = View.GONE
+            setOnClickListener { callbacks.onFixSourceMatchClicked() }
+        }
+
         return LinearLayout(context).apply {
             gravity = Gravity.CENTER
             orientation = LinearLayout.VERTICAL
@@ -418,6 +429,7 @@ internal class PlayerControllerSkeleton(
             setPadding(dp(16, density), dp(12, density), dp(16, density), dp(12, density))
             addView(statusView)
             addView(retryButton)
+            addView(fixMatchButton)
         }
     }
 

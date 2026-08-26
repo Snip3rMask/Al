@@ -9,6 +9,7 @@ import msr.atsulab.app.player.domain.repository.EpisodeRepository
 import msr.atsulab.app.player.domain.repository.SkipTimeRepository
 import msr.atsulab.app.player.domain.repository.SourceCandidateRepository
 import msr.atsulab.app.player.domain.repository.VideoSourceRepository
+import msr.atsulab.app.player.storage.SourceMappingStore
 import org.koin.dsl.module
 
 val playbackRepositoryModule = module {
@@ -19,7 +20,8 @@ val playbackRepositoryModule = module {
                 get<SourceProvider>(qualifier = PlaybackProviderQualifiers.anifuxSourceProvider),
                 get<SourceProvider>(qualifier = PlaybackProviderQualifiers.dakiSourceProvider)
             ),
-            diagnostics = get()
+            diagnostics = get(),
+            sourceMappingStore = get()
         )
     }
     single<SourceCandidateRepository> {

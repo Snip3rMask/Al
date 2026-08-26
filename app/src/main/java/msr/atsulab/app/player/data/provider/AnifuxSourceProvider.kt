@@ -61,7 +61,11 @@ class AnifuxSourceProvider(
                 return@fromCallable emptyList<PlaybackEpisode>()
             }
             val json = getText("$baseUrl/api/anime/${encode(candidate.id)}/episodes")
-            AnifuxResponseParser.parseEpisodes(candidate = candidate, json = json)
+            AnifuxResponseParser.parseEpisodes(
+                candidate = candidate,
+                json = json,
+                confirmedAninekoSlug = candidate.confirmedSourceSlug.takeIf(String::isNotEmpty)
+            )
         }.subscribeOn(ioScheduler)
     }
 
