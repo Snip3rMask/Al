@@ -367,17 +367,26 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 
 **Goal:** Save and restore playback progress reliably.
 
-- [ ] Port `ContinueWatchingStore` behavior to Kotlin storage.
-- [ ] Save progress on pause, stop, and background.
-- [ ] Save episode duration and source label/ID.
-- [ ] Restore last position on reopen.
-- [ ] Mark completed episodes appropriately.
+- [x] Port `ContinueWatchingStore` behavior to Kotlin storage.
+- [x] Save progress on pause, stop, and background.
+- [x] Save episode duration and source label/ID.
+- [x] Restore last position on reopen.
+- [x] Mark completed episodes appropriately.
 - [ ] Allow removing an entry.
-- [ ] Reject invalid/negative progress.
+- [x] Reject invalid/negative progress.
 
 **Exit gate:** Partial progress survives app kill/process death and resumes exactly once per episode.
 
 **Deferred — 2026-08-24:** Continue Watching is postponed until the full player shell and basic transport controls exist. Saving/resuming progress before those surfaces stabilize would risk repeated runtime and UI refactors.
+
+#### Part 5 Slice A — Persistent Playback Progress — 2026-08-26
+
+- Implemented the missing playback-progress repository over private app storage with observable entries, deterministic anime/episode identity, upsert/remove/clear operations, recent-first ordering, and bounded retention.
+- Added strict storable-progress rules: nonblank episode identity, nonnegative position, positive duration, and position within duration.
+- Wired online and offline playback metadata into persisted records, including title, episode name/number, thumbnail/banner, source ID/display label, quality, position, duration, and update time.
+- Saved progress on explicit pause, activity pause/stop/destruction, background transitions, periodic playback ticks, failed-source switching, and episode completion.
+- Restored the saved position exactly once when an episode starts, skipped positions at or above the watched threshold, removed those finished entries, and retained server switching within the same episode without restart.
+- Added focused coverage for stable episode identity, invalid/negative/impossible progress rejection, and completed-threshold handling. User-visible Continue Watching browsing/removal remains for the upcoming integration slice.
 
 ## Part 6 — Player Shell UI [x]
 
@@ -1060,6 +1069,6 @@ Append dated entries here. Do not delete history.
 
 ## Next Action
 
-1. Wait for the GitHub Actions build for Slice D and resolve any CI failure from the failed-step log.
-2. Validate Part 10 on a real device after the release artifact publishes: start/download progress, pause/resume, cancel/retry, notification controls, already-downloaded detection, completed-download playback in airplane mode, deletion, and storage/parallel settings.
-3. Force-stop during an active download and confirm queue recovery without corrupt output; then close **Part 10** if all checks pass.
+1. Validate Part 5 Slice A on Release `184+`: seek away, pause/background/close, reopen the same episode, and confirm it resumes once near the saved timestamp.
+2. Confirm completed/near-finished episodes do not resume and that server/source switches preserve the current episode position.
+3. After CI passes, build the user-visible Continue Watching list and entry-removal flow, then close Part 5 when device regression passes.

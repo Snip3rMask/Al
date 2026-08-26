@@ -7,6 +7,12 @@ import msr.atsulab.app.player.domain.model.PlaybackProgress
 interface PlaybackProgressRepository {
     fun observeAll(): Observable<List<PlaybackProgress>>
 
+    fun find(
+        aniListId: Int?,
+        playbackId: String,
+        episodeUrl: String
+    ): PlaybackProgress?
+
     fun upsert(progress: PlaybackProgress): Completable
 
     fun remove(

@@ -30,12 +30,14 @@ import msr.atsulab.app.player.domain.PlaybackSpeedOptions
 import msr.atsulab.app.player.domain.SubtitleStyleOptions
 import msr.atsulab.app.player.domain.model.PlaybackAnime
 import msr.atsulab.app.player.domain.model.PlaybackEpisode
+import msr.atsulab.app.player.domain.model.PlaybackProgress
 import msr.atsulab.app.player.domain.model.SkipInterval
 import msr.atsulab.app.player.domain.model.SubtitleStyle
 import msr.atsulab.app.player.domain.model.SubtitleTrack
 import msr.atsulab.app.player.domain.model.VideoQuality
 import msr.atsulab.app.player.domain.model.VideoSource
 import msr.atsulab.app.player.domain.repository.EpisodeRepository
+import msr.atsulab.app.player.domain.repository.PlaybackProgressRepository
 import msr.atsulab.app.player.domain.repository.SkipTimeRepository
 import msr.atsulab.app.player.domain.repository.VideoSourceRepository
 import msr.atsulab.app.player.engine.PlaybackEngine
@@ -59,6 +61,7 @@ class PlayerActivity : AppCompatActivity() {
     private val episodeRepository: EpisodeRepository by inject(EpisodeRepository::class.java)
     private val videoSourceRepository: VideoSourceRepository by inject(VideoSourceRepository::class.java)
     private val skipTimeRepository: SkipTimeRepository by inject(SkipTimeRepository::class.java)
+    private val playbackProgressRepository: PlaybackProgressRepository by inject(PlaybackProgressRepository::class.java)
     private val playbackEngine: PlaybackEngine by inject(PlaybackEngine::class.java)
     private val playbackPreferencesStore: PlaybackPreferencesStore by inject(PlaybackPreferencesStore::class.java)
     private val sourceMappingStore: SourceMappingStore by inject(SourceMappingStore::class.java)
@@ -120,6 +123,8 @@ class PlayerActivity : AppCompatActivity() {
     private var statusRetryVisible = false
     private var waitingForPlayback = true
     private var latestPlaybackState = PlaybackState()
+    private var pendingResumePositionMs = 0L
+    private var lastProgressSaveTimeMs = 0L
     private var transportVisible = false
     private var controlsVisible = false
     private var controlsLocked = false
@@ -359,6 +364,11 @@ class PlayerActivity : AppCompatActivity() {
         }
     }
 
+    override fun onPause() {
+        super.onPause()
+        savePlaybackProgress()
+    }
+
     override fun onStart() {
         super.onStart()
         if (engineAttached) playbackEngine.onForeground()
@@ -377,10 +387,12 @@ class PlayerActivity : AppCompatActivity() {
         episodePanel.dismiss(notifyCallbacks = false)
         shell.portraitContent?.dismissPopups()
         if (engineAttached) playbackEngine.onBackground()
+        savePlaybackProgress(force = true)
         super.onStop()
     }
 
     override fun onDestroy() {
+        savePlaybackProgress(force = true)
         progressHandler.removeCallbacks(progressRunnable)
         controlsHandler.removeCallbacks(hideControlsRunnable)
         speedMenu.dismiss(notifyCallbacks = false)
@@ -424,6 +436,11 @@ class PlayerActivity : AppCompatActivity() {
                     PlaybackReadyState.READY -> {
                         transportVisible = true
                         showControls()
+                        if (!state.playWhenReady) {
+                            savePlaybackProgress(force = true)
+                        } else {
+                            persistPlaybackProgressIfDue(state)
+                        }
                         if (!PlaybackSpeedOptions.isSelected(state.speed, playbackSpeed)) {
                             playbackEngine.setSpeed(playbackSpeed)
                         }
@@ -436,6 +453,7 @@ class PlayerActivity : AppCompatActivity() {
                         transportVisible = true
                         showControls()
                         showMessage(R.string.player_ended)
+                        savePlaybackProgress(force = true)
                         playNextEpisodeIfAvailable()
                     }
                     PlaybackReadyState.IDLE -> {
@@ -778,7 +796,13 @@ class PlayerActivity : AppCompatActivity() {
         shell.controller.updateQualityLabel("MP4")
         shell.portraitContent?.setSourceError(null)
         refreshPortraitContent()
-        playbackEngine.prepare(source)
+        pendingResumePositionMs = restoreResumePosition(
+            aniListId = anime.aniListId,
+            playbackId = "offline-$requestedEpisode",
+            episodeUrl = file.absolutePath,
+            episodeNumber = requestedEpisode.toFloat()
+        )
+        playbackEngine.prepare(source, pendingResumePositionMs)
         playbackEngine.setSpeed(playbackSpeed)
         playbackEngine.play()
     }
@@ -843,7 +867,8 @@ class PlayerActivity : AppCompatActivity() {
         shell.controller.updateQualityLabel("AUTO")
         shell.portraitContent?.setSourceError(null)
         refreshPortraitContent()
-        playbackEngine.prepare(source)
+        pendingResumePositionMs = restoreResumePosition(episode)
+        playbackEngine.prepare(source, pendingResumePositionMs)
         playbackEngine.setSpeed(playbackSpeed)
         playbackEngine.play()
         loadMoreSources(episode)
@@ -1178,6 +1203,7 @@ class PlayerActivity : AppCompatActivity() {
         val source = availableVideoSources.getOrNull(sourceIndex) ?: return
         if (sourceIndex == selectedSourceIndex || !engineAttached) return
 
+        savePlaybackProgress(force = true)
         val resumePositionMs = latestPlaybackState.positionMs.coerceAtLeast(0L)
         selectedSourceIndex = sourceIndex
         activeVideoSource = source
@@ -1338,7 +1364,96 @@ class PlayerActivity : AppCompatActivity() {
     private fun updatePlaybackProgress() {
         if (!transportVisible || !engineAttached) return
         latestPlaybackState = playbackEngine.currentState
+        persistPlaybackProgressIfDue(latestPlaybackState)
         updateTransportControls()
+    }
+
+    private fun restoreResumePosition(episode: PlaybackEpisode): Long {
+        val anime = currentAnime ?: return 0L
+        return restoreResumePosition(
+            aniListId = anime.aniListId,
+            playbackId = episode.playbackId.ifBlank { episode.url },
+            episodeUrl = episode.url,
+            episodeNumber = episode.number
+        )
+    }
+
+    private fun restoreResumePosition(
+        aniListId: Int,
+        playbackId: String,
+        episodeUrl: String,
+        episodeNumber: Float
+    ): Long {
+        val saved = runCatching {
+            playbackProgressRepository.find(aniListId, playbackId, episodeUrl)
+        }.getOrNull() ?: return 0L
+        if (saved.isConsideredWatched()) {
+            playbackProgressRepository.remove(aniListId, playbackId, episodeUrl).subscribe()
+            return 0L
+        }
+        return saved.positionMs.coerceIn(0L, maxOf(saved.durationMs - 1L, 0L))
+            .takeIf { position -> position > MIN_RESUME_POSITION_MS && episodeNumber >= 0f }
+            ?: 0L
+    }
+
+    private fun persistPlaybackProgressIfDue(state: PlaybackState) {
+        val now = System.currentTimeMillis()
+        if (!state.playWhenReady || state.durationMs <= 0L) return
+        if (now - lastProgressSaveTimeMs < PROGRESS_SAVE_INTERVAL_MS) return
+        savePlaybackProgress()
+    }
+
+    private fun savePlaybackProgress(force: Boolean = false) {
+        val state = latestPlaybackState
+        if (state.durationMs <= 0L || (!force && !engineAttached)) return
+        val progress = buildPlaybackProgress(state) ?: return
+        lastProgressSaveTimeMs = System.currentTimeMillis()
+        runCatching { playbackProgressRepository.upsert(progress).subscribe() }
+    }
+
+    private fun buildPlaybackProgress(state: PlaybackState): PlaybackProgress? {
+        val anime = currentAnime ?: return null
+        val source = activeVideoSource ?: return null
+        val episode = episodeNavigator.currentEpisode
+        val isOffline = offlineFilePath != null
+        val playbackId = if (isOffline) {
+            "offline-$requestedEpisode"
+        } else {
+            episode?.playbackId?.ifBlank { episode.url }.orEmpty()
+        }
+        val episodeUrl = if (isOffline) {
+            offlineFilePath.orEmpty()
+        } else {
+            episode?.url.orEmpty().ifBlank { source.url }
+        }
+        if (playbackId.isBlank() || episodeUrl.isBlank()) return null
+
+        return PlaybackProgress(
+            aniListId = anime.aniListId,
+            playbackId = playbackId,
+            episodeUrl = episodeUrl,
+            animeTitle = anime.title,
+            thumbnailImageUrl = episode?.thumbnailUrl ?: anime.coverImageUrl,
+            bannerImageUrl = anime.bannerImageUrl,
+            episodeName = if (isOffline) {
+                offlineEpisodeName.ifBlank { getString(R.string.player_episode_number_format, requestedEpisode) }
+            } else {
+                episode?.name.orEmpty().ifBlank {
+                    getString(R.string.player_episode_number_format, requestedEpisode)
+                }
+            },
+            episodeNumber = if (isOffline) {
+                requestedEpisode.toFloat()
+            } else {
+                episode?.number ?: requestedEpisode.toFloat()
+            },
+            sourceId = source.providerId ?: source.legacySourceId,
+            sourceDisplayName = source.displayName.ifBlank { source.server },
+            quality = source.quality,
+            positionMs = state.positionMs,
+            durationMs = state.durationMs,
+            updatedAtEpochMs = System.currentTimeMillis()
+        )
     }
 
     private fun showEpisodePanel() {
@@ -1473,6 +1588,8 @@ class PlayerActivity : AppCompatActivity() {
         internal const val DEFAULT_INITIAL_EPISODE = 1
         private const val INVALID_SOURCE_INDEX = -1
         private const val PROGRESS_UPDATE_INTERVAL_MS = 250L
+        private const val PROGRESS_SAVE_INTERVAL_MS = 5_000L
+        private const val MIN_RESUME_POSITION_MS = 1_000L
         internal const val CONTROLS_AUTO_HIDE_DELAY_MS = 4_000L
         private const val CUSTOM_SUBTITLE_FONT_DIRECTORY = "fonts"
         private const val CUSTOM_SUBTITLE_FONT_FILE_NAME = "custom_subtitle_font.ttf"

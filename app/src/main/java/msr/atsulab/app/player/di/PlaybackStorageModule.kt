@@ -1,10 +1,13 @@
 package msr.atsulab.app.player.di
 
+import com.google.gson.Gson
 import msr.atsulab.app.BuildConfig
 import msr.atsulab.app.player.diagnostics.AndroidLogPlaybackDiagnostics
 import msr.atsulab.app.player.diagnostics.NoOpPlaybackDiagnostics
 import msr.atsulab.app.player.diagnostics.PlaybackDiagnostics
+import msr.atsulab.app.player.domain.repository.PlaybackProgressRepository
 import msr.atsulab.app.player.storage.DefaultPlaybackPreferencesStore
+import msr.atsulab.app.player.storage.DefaultPlaybackProgressRepository
 import msr.atsulab.app.player.storage.DefaultSourceMappingStore
 import msr.atsulab.app.player.storage.PlaybackPreferencesStore
 import msr.atsulab.app.player.storage.SourceMappingStore
@@ -20,5 +23,8 @@ val playbackStorageModule = module {
     }
     single<PlaybackPreferencesStore> {
         DefaultPlaybackPreferencesStore(androidContext())
+    }
+    single<PlaybackProgressRepository> {
+        DefaultPlaybackProgressRepository(androidContext(), Gson())
     }
 }
