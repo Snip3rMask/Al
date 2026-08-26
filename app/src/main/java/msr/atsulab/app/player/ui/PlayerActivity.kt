@@ -226,6 +226,11 @@ class PlayerActivity : AppCompatActivity() {
                     }
                 }
 
+                override fun onFixSourceMatchClicked() {
+                    frameCaptureSettingsMenu.dismiss()
+                    openSourceSelection()
+                }
+
                 override fun onSettingsDismissed() {
                     applySystemBars()
                     scheduleControlsAutoHide()

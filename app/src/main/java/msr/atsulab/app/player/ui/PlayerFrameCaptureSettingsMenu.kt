@@ -25,6 +25,7 @@ internal class PlayerFrameCaptureSettingsMenu(
         fun isAlwaysVisible(): Boolean
         fun onEnabledChanged(enabled: Boolean)
         fun onAlwaysVisibleChanged(enabled: Boolean)
+        fun onFixSourceMatchClicked()
         fun onSettingsDismissed()
     }
 
@@ -81,6 +82,13 @@ internal class PlayerFrameCaptureSettingsMenu(
                 callbacks.isAlwaysVisible(),
                 density
             ) { enabled -> callbacks.onAlwaysVisibleChanged(enabled) },
+            rowParams(density)
+        )
+        panel.addView(
+            actionRow(
+                activity.getString(R.string.player_fix_source_match),
+                density
+            ) { callbacks.onFixSourceMatchClicked() },
             rowParams(density)
         )
 
@@ -152,6 +160,31 @@ internal class PlayerFrameCaptureSettingsMenu(
             addView(switch)
             setOnClickListener { switch.isChecked = !switch.isChecked }
             switch.setOnCheckedChangeListener { _, isChecked -> onChanged(isChecked) }
+        }
+    }
+
+    private fun actionRow(
+        title: String,
+        density: Float,
+        onClicked: () -> Unit
+    ): LinearLayout {
+        return LinearLayout(activity).apply {
+            gravity = Gravity.CENTER_VERTICAL
+            background = GradientDrawable().apply {
+                setColor(PlayerShellMetrics.SURFACE_COLOR)
+                cornerRadius = dp(12, density).toFloat()
+            }
+            setPadding(dp(16, density), 0, dp(16, density), 0)
+            addView(
+                TextView(activity).apply {
+                    text = title
+                    textSize = 17f
+                    typeface = Typeface.DEFAULT_BOLD
+                    setTextColor(Color.WHITE)
+                },
+                LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+            )
+            setOnClickListener { onClicked() }
         }
     }
 

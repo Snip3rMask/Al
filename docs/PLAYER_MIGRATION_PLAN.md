@@ -800,6 +800,7 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - Passed the saved AniList mapping into episode resolution so a Daki pick selects its confirmed anidb candidate while a Nora pick supplies the confirmed anineko slug.
 - Kept stale or explicitly skipped mappings from silently replaying the wrong same-server match; unconstrained providers retain normal automatic fallback.
 - Added the player “Fix source match” entry point on retryable failures and reloaded playback only after a successful picker result.
+- Added the same source-matching screen as a direct action in player settings so mappings can be checked or corrected without waiting for playback failure.
 - Extended focused coverage for confirmed mappings, stale-match fallback, skipped providers, provider grouping, DI resolution, and failure isolation.
 
 
