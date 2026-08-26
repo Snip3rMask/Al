@@ -37,4 +37,8 @@ class PlayerSettingsViewModel : BaseViewModel<Unit>() {
         preferencesStore.setSeekDurationMs(clamped * 1000)
         _seekDurationSeconds.onNext(clamped)
     }
+
+    override fun loadData(param: Unit) {
+        // Preferences are loaded eagerly via BehaviorSubject defaults.
+    }
 }
