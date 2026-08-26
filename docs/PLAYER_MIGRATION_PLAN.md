@@ -1022,7 +1022,7 @@ Append dated entries here. Do not delete history.
 - Closed Part 7 after the user confirmed its remaining device regression on Release `158`.
 - Started Part 9 with the standalone source-selection skeleton: grouped provider candidates, failure-isolated aggregation, single-server filtering, loading/empty/error states, and a read-only preview screen.
 - Completed Part 9 manual mapping at code level: selectable provider sections, persistent AniList-ID mappings, safe reset, single-server save, player recovery entry, and confirmed-candidate playback resolution.
-- Fixed the first manual-mapping CI failure by resolving nullable AniList keys safely, importing intent/storage seams, adding missing picker labels, and replacing ambiguous callable references.
+- Fixed manual-mapping CI failures by resolving nullable AniList/store keys safely, importing intent/storage seams, adding missing picker labels, and correcting view-post and callable-reference types.
 
 ## Next Action
 

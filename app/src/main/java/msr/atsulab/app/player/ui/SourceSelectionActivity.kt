@@ -221,7 +221,8 @@ class SourceSelectionActivity : AppCompatActivity() {
             )
         }
         if (preserveScroll) {
-            (content.parent as? ScrollView)?.post { scrollView -> scrollView.scrollTo(0, scrollY) }
+            val scrollView = content.parent as? ScrollView
+            scrollView?.post { scrollView.scrollTo(0, scrollY) }
         }
         updateDoneButton()
     }

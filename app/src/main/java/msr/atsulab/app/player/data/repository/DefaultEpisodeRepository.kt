@@ -20,7 +20,7 @@ class DefaultEpisodeRepository(
     override fun getEpisodes(anime: PlaybackAnime): Single<List<PlaybackEpisode>> {
         val mapping = anime.aniListId?.toString()
             ?.takeUnless(String::isBlank)
-            ?.let { aniListId -> sourceMappingStore.get(aniListId) }
+            ?.let { aniListId -> sourceMappingStore?.get(aniListId) }
         return loadFromProvider(0, anime, mapping)
     }
 
