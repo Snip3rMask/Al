@@ -9,6 +9,7 @@ import msr.atsulab.app.player.domain.model.SourceCandidate
 import msr.atsulab.app.player.domain.provider.SourceProvider
 import msr.atsulab.app.player.domain.repository.EpisodeRepository
 import msr.atsulab.app.player.storage.SourceMapping
+import msr.atsulab.app.player.storage.SourceMappingStore
 
 class DefaultEpisodeRepository(
     private val providers: List<SourceProvider>,
@@ -19,7 +20,7 @@ class DefaultEpisodeRepository(
     override fun getEpisodes(anime: PlaybackAnime): Single<List<PlaybackEpisode>> {
         val mapping = anime.aniListId?.toString()
             ?.takeUnless(String::isBlank)
-            ?.let(sourceMappingStore::get)
+            ?.let { aniListId -> sourceMappingStore.get(aniListId) }
         return loadFromProvider(0, anime, mapping)
     }
 

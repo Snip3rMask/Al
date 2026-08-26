@@ -73,7 +73,8 @@ class SourceSelectionActivity : AppCompatActivity() {
     }
 
     private fun loadSavedMapping() {
-        val mapping = sourceMappingStore.get(aniListId.toString())
+        val aniListKey = aniListId?.toString() ?: return
+        val mapping = sourceMappingStore.get(aniListKey)
         hasExistingMapping = mapping != null && mapping.picks.isNotEmpty()
         savedPicks.clear()
         savedPicks.putAll(mapping?.picks.orEmpty())
@@ -139,7 +140,7 @@ class SourceSelectionActivity : AppCompatActivity() {
         bar.addView(label, LinearLayout.LayoutParams(0, LINEAR_WRAP_CONTENT, 1f).apply { leftMargin = dp(8) })
 
         if (singleServerType == null && hasExistingMapping) {
-            resetButton = createBarButton(getString(R.string.source_selection_reset)) { confirmReset() }
+            resetButton = createBarButton(R.string.source_selection_reset) { confirmReset() }
             bar.addView(resetButton, LinearLayout.LayoutParams(LINEAR_WRAP_CONTENT, LINEAR_WRAP_CONTENT))
         }
         return bar
@@ -220,7 +221,7 @@ class SourceSelectionActivity : AppCompatActivity() {
             )
         }
         if (preserveScroll) {
-            (content.parent as? ScrollView)?.post { it.scrollTo(0, scrollY) }
+            (content.parent as? ScrollView)?.post { scrollView -> scrollView.scrollTo(0, scrollY) }
         }
         updateDoneButton()
     }
@@ -292,7 +293,7 @@ class SourceSelectionActivity : AppCompatActivity() {
 
         if (singleServerType == null) {
             val isSkipped = section.displayName in skippedProviders
-            header.addView(createBarButton(if (isSkipped) R.string.source_selection_undo else R.string.skip) {
+            header.addView(createBarButton(if (isSkipped) R.string.source_selection_undo else R.string.source_selection_skip) {
                 toggleSkip(section.displayName)
             })
         }
@@ -395,10 +396,10 @@ class SourceSelectionActivity : AppCompatActivity() {
     }
 
     private fun pickSingleServer(label: String, candidate: SourceCandidate) {
-        val id = aniListId.toString()
+        val aniListKey = aniListId?.toString() ?: return
         sourceMappingStore.save(
             SourceMapping(
-                aniListId = id,
+                aniListId = aniListKey,
                 picks = mapOf(label to SourcePick(candidate.id, candidate.title, candidate.thumbnailUrl)),
                 confirmedAt = System.currentTimeMillis()
             )
@@ -430,10 +431,10 @@ class SourceSelectionActivity : AppCompatActivity() {
     }
 
     private fun saveMapping(picks: Map<String, SourceCandidate>) {
-        val id = aniListId.toString()
+        val aniListKey = aniListId?.toString() ?: return
         sourceMappingStore.replace(
             SourceMapping(
-                aniListId = id,
+                aniListId = aniListKey,
                 picks = picks.mapValues { (_, candidate) ->
                     SourcePick(candidate.id, candidate.title, candidate.thumbnailUrl)
                 },
@@ -468,7 +469,7 @@ class SourceSelectionActivity : AppCompatActivity() {
     }
 
     private fun resetMapping() {
-        aniListId?.let(sourceMappingStore::clear)
+        aniListId?.let { key -> sourceMappingStore.clear(key.toString()) }
         selectedCandidates.clear()
         skippedProviders.clear()
         savedPicks.clear()

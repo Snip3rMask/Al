@@ -642,6 +642,8 @@
     <string name="source_selection_best">★ BEST</string>
     <string name="source_selection_missing_title">Anime title is missing</string>
     <string name="source_selection_done">Done</string>
+    <string name="source_selection_skip">Skip</string>
+    <string name="source_selection_undo">Undo</string>
     <string name="source_selection_saved">Source match saved</string>
     <string name="source_selection_incomplete">Select an anime or skip each server</string>
     <string name="source_selection_reset">Reset</string>
