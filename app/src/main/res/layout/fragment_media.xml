@@ -229,10 +229,15 @@
                 android:layout_height="wrap_content">
 
                 <androidx.appcompat.widget.LinearLayoutCompat
+                    android:orientation="vertical"
                     android:padding="@dimen/marginNormal"
-                    android:gravity="center_vertical"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content">
+
+                    <androidx.appcompat.widget.LinearLayoutCompat
+                        android:gravity="center_vertical"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
 
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/mediaDownloadButton"
@@ -294,6 +299,9 @@
                             android:layout_weight="1"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"/>
+
+                    </androidx.appcompat.widget.LinearLayoutCompat>
+
                     <com.google.android.material.textview.MaterialTextView
                         android:id="@+id/mediaPlaybackProgressText"
                         android:layout_marginTop="@dimen/marginSmall"
@@ -303,6 +311,7 @@
                         android:visibility="gone"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"/>
+
                 </androidx.appcompat.widget.LinearLayoutCompat>
 
             </com.google.android.material.card.MaterialCardView>
