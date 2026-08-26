@@ -925,6 +925,13 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - Updated all user-facing AL-chan references to AtsuLab across strings.
 - Verified deep link routing remains intact after player navigation.
 
+#### Part 11 Slice D — Player Settings Integration — 2026-08-26
+
+- Added Player Settings screen with auto-rotate, remember-last-episode, and skip-duration controls.
+- Progress saving now respects the remember-last-episode preference.
+- Double-tap seek and forward/rewind buttons use the configurable skip duration instead of a hardcoded value.
+- Extended PlaybackPreferencesStore with auto-rotate, remember-last-episode, and seek-duration APIs.
+
 ## Testing Checklist
 
 ### Existing AtsuLab Regression

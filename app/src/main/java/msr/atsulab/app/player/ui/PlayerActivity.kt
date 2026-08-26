@@ -133,6 +133,8 @@ class PlayerActivity : AppCompatActivity() {
     private var latestPlaybackState = PlaybackState()
     private var pendingResumePositionMs = 0L
     private var lastProgressSaveTimeMs = 0L
+    private val seekDurationMs: Long
+        get() = playbackPreferencesStore.getSeekDurationMs().toLong()
     private var transportVisible = false
     private var controlsVisible = false
     private var controlsLocked = false
@@ -561,11 +563,11 @@ class PlayerActivity : AppCompatActivity() {
             override fun onVolumeClicked() = Unit
 
             override fun onRewindClicked() {
-                seekBy(-GESTURE_SEEK_DURATION_MS)
+                seekBy(-seekDurationMs)
             }
 
             override fun onForwardClicked() {
-                seekBy(GESTURE_SEEK_DURATION_MS)
+                seekBy(seekDurationMs)
             }
 
             override fun onRotateClicked() {
@@ -641,7 +643,7 @@ class PlayerActivity : AppCompatActivity() {
                 }
 
                 override fun onSeek(isForward: Boolean) {
-                    seekBy(if (isForward) GESTURE_SEEK_DURATION_MS else -GESTURE_SEEK_DURATION_MS)
+                    seekBy(if (isForward) seekDurationMs else -seekDurationMs)
                 }
 
                 override fun onPlaybackTouchStarted() {
@@ -1413,6 +1415,7 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     private fun savePlaybackProgress(force: Boolean = false) {
+        if (!playbackPreferencesStore.isRememberLastEpisodeEnabled() && !force) return
         val state = latestPlaybackState
         if (state.durationMs <= 0L || (!force && !engineAttached)) return
         val progress = buildPlaybackProgress(state) ?: return
@@ -1605,7 +1608,6 @@ class PlayerActivity : AppCompatActivity() {
 
     companion object {
         const val EXTRA_ANILIST_ID = "EXTRA_ANILIST_ID"
-        const val GESTURE_SEEK_DURATION_MS = 10_000L
         const val GESTURE_HUD_SIDE_MARGIN_DP = PlayerShellMetrics.GESTURE_HUD_SIDE_MARGIN_DP
         const val GESTURE_HUD_HIDE_START_DELAY_MS = 420L
         const val GESTURE_HUD_FADE_DURATION_MS = 160L
