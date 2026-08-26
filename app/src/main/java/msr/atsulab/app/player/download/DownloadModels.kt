@@ -7,7 +7,7 @@ data class DownloadRequest(
     val url: String,
     val quality: String = DEFAULT_QUALITY,
     val referer: String = ""
-) {
+) : java.io.Serializable {
     val fileName: String
         get() = "${displayName.sanitized()} - ${episodeId.sanitized()}.mp4"
 

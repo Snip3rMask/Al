@@ -814,8 +814,8 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 **Goal:** Add reliable offline HLS downloads. Start only after online playback is stable.
 
 - [x] Port download models and HLS downloader.
-- [ ] Create foreground download service.
-- [ ] Add queue and downloaded-entry stores.
+- [x] Create foreground download service.
+- [x] Add queue and downloaded-entry stores.
 - [ ] Support queue, pause, resume, cancel, retry, and delete.
 - [ ] Show accurate notification progress.
 - [ ] Enforce concurrent-download limits.
@@ -831,6 +831,15 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - Added master-playlist parsing with resolution/bandwidth labels and automatic selection of the highest-bandwidth variant.
 - Added parallel segment downloads with bounded concurrency, per-segment retry/backoff, ordered merge, initialization segment support, atomic `.mp4` finalization, encrypted-stream rejection, and temporary-file cleanup.
 - Registered the downloader through the shared playback OkHttp client and added parser, filename, and MockWebServer integration coverage.
+
+#### Part 10 Slice B — Download Queue & Foreground Service — 2026-08-26
+
+- Added completed-download records persisted by file key with size, quality, AniList ID, episode ID, title, and completion time.
+- Added a synchronized in-memory job queue with queued/running/cancelling states, ordered multi-request execution support, progress updates, cancellation confirmation, failure messages, and active-job snapshots.
+- Ported foreground execution to a `dataSync` service using the shared HLS downloader, low-importance progress notifications, notification cancel actions, atomic completed-entry recording, and safe cleanup of cancelled output.
+- Registered the queue, completed-entry store, downloader, and foreground service; added a player-settings “Download episode” action for the active source.
+- Covered queue lifecycle/cancellation and completed-download record creation with focused tests. Persistent restart recovery, pause/resume, the Downloads screen, storage settings, and offline playback remain for later slices.
+
 
 ## Part 11 — AtsuLab Integration Polish
 

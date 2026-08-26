@@ -606,6 +606,8 @@
     <string name="player_comments_preview">Comments need a database to sync.</string>
     <string name="player_comments_title">Comments</string>
     <string name="player_settings">Player settings</string>
+    <string name="player_download_episode">Download episode</string>
+    <string name="download_queued">Download queued</string>
     <string name="player_volume">Volume</string>
     <string name="player_mute">Mute</string>
     <string name="player_rewind">Rewind</string>
@@ -632,6 +634,13 @@
     <string name="choose_save_folder">Choose save folder</string>
     <string name="reset_capture_button_position">Reset capture button position</string>
     <string name="capture_button_position_reset">Capture button position reset</string>
+    <string name="download_notification_title">Downloads</string>
+    <string name="download_channel_description">Episode download progress</string>
+    <string name="download_running_format">Downloading %1$s</string>
+    <string name="download_completed">Download completed</string>
+    <string name="download_cancelled">Download cancelled</string>
+    <string name="download_cancel">Cancel</string>
+    <string name="download_failed">Download failed</string>
     <string name="capture_save_folder_failed">Could not use the selected folder</string>
     <string name="source_selection_title">Choose Source</string>
     <string name="source_selection_server_title">Choose Server</string>

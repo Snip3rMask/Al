@@ -42,6 +42,9 @@ import msr.atsulab.app.player.engine.PlaybackEngine
 import msr.atsulab.app.player.engine.PlaybackEngineListener
 import msr.atsulab.app.player.engine.PlaybackReadyState
 import msr.atsulab.app.player.engine.PlaybackError
+import msr.atsulab.app.player.download.DownloadQueueStore
+import msr.atsulab.app.player.download.DownloadRequest
+import msr.atsulab.app.player.download.PlayerDownloadService
 import msr.atsulab.app.player.engine.PlaybackState
 import msr.atsulab.app.player.runtime.PlaybackEpisodeNavigator
 import msr.atsulab.app.player.storage.PlaybackPreferencesStore
@@ -57,6 +60,7 @@ class PlayerActivity : AppCompatActivity() {
     private val playbackEngine: PlaybackEngine by inject(PlaybackEngine::class.java)
     private val playbackPreferencesStore: PlaybackPreferencesStore by inject(PlaybackPreferencesStore::class.java)
     private val sourceMappingStore: SourceMappingStore by inject(SourceMappingStore::class.java)
+    private val downloadQueueStore: DownloadQueueStore by inject(DownloadQueueStore::class.java)
 
     private val sourceSelectionLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -224,6 +228,11 @@ class PlayerActivity : AppCompatActivity() {
                     if (::shell.isInitialized) {
                         shell.controller.setFrameCaptureAlwaysVisible(enabled)
                     }
+                }
+
+                override fun onDownloadEpisodeClicked() {
+                    frameCaptureSettingsMenu.dismiss()
+                    downloadActiveEpisode()
                 }
 
                 override fun onFixSourceMatchClicked() {
@@ -697,6 +706,21 @@ class PlayerActivity : AppCompatActivity() {
     private fun loadPlayback() {
         val anime = currentAnime ?: return
         loadPlayback(anime)
+    }
+
+    private fun downloadActiveEpisode() {
+        val anime = currentAnime ?: return
+        val source = activeVideoSource ?: return
+        val request = DownloadRequest(
+            aniListId = anime.aniListId,
+            episodeId = requestedEpisode.toString(),
+            displayName = anime.title,
+            url = source.url,
+            quality = source.quality,
+            referer = source.referer
+        )
+        PlayerDownloadService.start(this, downloadQueueStore, listOf(request))
+        Toast.makeText(this, R.string.download_queued, Toast.LENGTH_SHORT).show()
     }
 
     private fun openSourceSelection() {

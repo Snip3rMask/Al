@@ -25,6 +25,7 @@ internal class PlayerFrameCaptureSettingsMenu(
         fun isAlwaysVisible(): Boolean
         fun onEnabledChanged(enabled: Boolean)
         fun onAlwaysVisibleChanged(enabled: Boolean)
+        fun onDownloadEpisodeClicked()
         fun onFixSourceMatchClicked()
         fun onSettingsDismissed()
     }
@@ -82,6 +83,13 @@ internal class PlayerFrameCaptureSettingsMenu(
                 callbacks.isAlwaysVisible(),
                 density
             ) { enabled -> callbacks.onAlwaysVisibleChanged(enabled) },
+            rowParams(density)
+        )
+        panel.addView(
+            actionRow(
+                activity.getString(R.string.player_download_episode),
+                density
+            ) { callbacks.onDownloadEpisodeClicked() },
             rowParams(density)
         )
         panel.addView(
