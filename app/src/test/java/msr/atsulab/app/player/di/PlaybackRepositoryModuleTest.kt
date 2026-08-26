@@ -2,11 +2,9 @@ package msr.atsulab.app.player.di
 
 import msr.atsulab.app.player.data.repository.DefaultEpisodeRepository
 import msr.atsulab.app.player.data.repository.DefaultSkipTimeRepository
-import msr.atsulab.app.player.data.repository.DefaultSourceCandidateRepository
 import msr.atsulab.app.player.data.repository.DefaultVideoSourceRepository
 import msr.atsulab.app.player.domain.repository.EpisodeRepository
 import msr.atsulab.app.player.domain.repository.SkipTimeRepository
-import msr.atsulab.app.player.domain.repository.SourceCandidateRepository
 import msr.atsulab.app.player.domain.repository.VideoSourceRepository
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -50,7 +48,6 @@ class PlaybackRepositoryModuleTest {
         val koin = org.koin.core.context.GlobalContext.get()
 
         assertEquals(DefaultEpisodeRepository::class, koin.get<EpisodeRepository>()::class)
-        assertEquals(DefaultSourceCandidateRepository::class, koin.get<SourceCandidateRepository>()::class)
         assertEquals(DefaultVideoSourceRepository::class, koin.get<VideoSourceRepository>()::class)
     }
 }

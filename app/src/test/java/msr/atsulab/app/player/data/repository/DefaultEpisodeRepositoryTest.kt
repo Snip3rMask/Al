@@ -38,7 +38,7 @@ class DefaultEpisodeRepositoryTest {
 
         assertEquals(1, failed.candidateCalls)
         assertEquals(1, empty.candidateCalls)
-        assertEquals(0, empty.episodeCalls)
+        assertEquals(1, empty.episodeCalls)
         assertEquals(1, success.episodeCalls)
         assertEquals("daki", episodes.single().providerId)
         assertEquals("cover.jpg", episodes.single().thumbnailUrl)
@@ -118,7 +118,7 @@ class DefaultEpisodeRepositoryTest {
     }
 
     @Test
-    fun `stale confirmed primary falls back instead of selecting the wrong match`() {
+    fun `stale confirmed primary does not silently select another same-server match`() {
         val mapped = FakeSourceProvider(
             id = "anifux",
             candidateGroups = linkedMapOf(
@@ -145,8 +145,8 @@ class DefaultEpisodeRepositoryTest {
         val result = repository.getEpisodes(anime).test().await().values().single()
 
         assertEquals(0, mapped.episodeCalls)
-        assertEquals("correct-direct", fallback.requestedCandidates.single().id)
-        assertEquals("fallback-episode", result.single().url)
+        assertEquals(0, fallback.episodeCalls)
+        assertEquals(emptyList<PlaybackEpisode>(), result)
     }
 
     @Test
@@ -206,7 +206,7 @@ class DefaultEpisodeRepositoryTest {
         repository.getEpisodes(anime).test().await().values().single()
 
         assertEquals(listOf("episode:mkissa:0:21:IllegalStateException"), diagnostics.failures)
-        assertEquals(listOf("episode:anifux:1:21:no-compatible-candidate"), diagnostics.skipped)
+        assertEquals(listOf("episode:anifux:1:21:no-episodes"), diagnostics.skipped)
     }
 }
 
