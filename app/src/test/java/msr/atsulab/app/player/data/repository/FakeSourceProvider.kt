@@ -44,6 +44,7 @@ class FakeSourceProvider(
 
     override fun getEpisodes(candidate: SourceCandidate): Single<List<PlaybackEpisode>> {
         episodeCalls++
+        requestedCandidates += candidate
         return if (episodeError) Single.error(IllegalStateException("$id episodes failed"))
         else Single.just(episodes)
     }
@@ -60,4 +61,5 @@ class FakeSourceProvider(
     }
 
     val requestedEpisodes = mutableListOf<PlaybackEpisode>()
+    val requestedCandidates = mutableListOf<SourceCandidate>()
 }

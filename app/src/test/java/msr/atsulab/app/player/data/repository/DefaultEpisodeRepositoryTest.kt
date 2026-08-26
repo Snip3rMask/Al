@@ -89,8 +89,8 @@ class DefaultEpisodeRepositoryTest {
 
         val result = repository.getEpisodes(anime).test().await().values().single()
 
-        assertEquals("correct-anidb", anifux.requestedEpisodes.single().id)
-        assertEquals("confirmed-slug", anifux.requestedEpisodes.single().confirmedSourceSlug)
+        assertEquals("correct-anidb", anifux.requestedCandidates.single().id)
+        assertEquals("confirmed-slug", anifux.requestedCandidates.single().confirmedSourceSlug)
         assertEquals(1, result.size)
     }
 
@@ -113,7 +113,7 @@ class DefaultEpisodeRepositoryTest {
         val result = repository.getEpisodes(anime).test().await().values().single()
 
         assertEquals(0, mkissa.episodeCalls)
-        assertEquals("confirmed-anidb", anifux.requestedEpisodes.single().id)
+        assertEquals("confirmed-anidb", anifux.requestedCandidates.single().id)
         assertEquals(1, result.size)
     }
 
@@ -145,7 +145,7 @@ class DefaultEpisodeRepositoryTest {
         val result = repository.getEpisodes(anime).test().await().values().single()
 
         assertEquals(0, mapped.episodeCalls)
-        assertEquals("correct-direct", fallback.requestedEpisodes.single().id)
+        assertEquals("correct-direct", fallback.requestedCandidates.single().id)
         assertEquals("fallback-episode", result.single().url)
     }
 
