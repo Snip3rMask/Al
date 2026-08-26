@@ -84,7 +84,7 @@ class DownloadsActivity : AppCompatActivity() {
         }
     }
 
-    private fun addSectionTitle(text: String, topMargin: Int = 0) {
+    private fun addSectionTitle(text: String, spacingTop: Int = 0) {
         val title = TextView(this).apply {
             this.text = text
             textSize = 13f
@@ -93,7 +93,7 @@ class DownloadsActivity : AppCompatActivity() {
             setTextColor(resolveThemeColor(R.attr.themeContentTransparentColor))
         }
         content.addView(title, linearParams(width = FrameLayout.LayoutParams.MATCH_PARENT) {
-            topMargin = topMargin
+            topMargin = spacingTop
             bottomMargin = 10.dp
         })
     }
