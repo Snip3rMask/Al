@@ -14,6 +14,19 @@ interface SourceProvider {
         aniListId: Int?
     ): Single<List<SourceCandidate>>
 
+    fun findCandidateGroups(
+        title: String,
+        aniListId: Int?
+    ): Single<Map<String, List<SourceCandidate>>> {
+        return findCandidates(title, aniListId).map { candidates ->
+            if (candidates.isEmpty()) {
+                emptyMap()
+            } else {
+                mapOf(displayName to candidates)
+            }
+        }
+    }
+
     fun getEpisodes(candidate: SourceCandidate): Single<List<PlaybackEpisode>>
 
     fun getSources(

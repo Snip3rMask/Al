@@ -29,7 +29,7 @@ class AnifuxSourceProvider(
         return findGroupedCandidates(title, aniListId).map(AnifuxResponseParser::flattenCandidateGroups)
     }
 
-    fun findGroupedCandidates(
+    override fun findCandidateGroups(
         title: String,
         aniListId: Int?
     ): Single<Map<String, List<SourceCandidate>>> {
@@ -44,6 +44,12 @@ class AnifuxSourceProvider(
             AnifuxResponseParser.parseCandidateGroups(getText(url))
         }.subscribeOn(ioScheduler)
     }
+
+    fun findGroupedCandidates(
+        title: String,
+        aniListId: Int?
+    ): Single<Map<String, List<SourceCandidate>>> =
+        findCandidateGroups(title, aniListId)
 
     override fun getEpisodes(candidate: SourceCandidate): Single<List<PlaybackEpisode>> {
         return Single.fromCallable {

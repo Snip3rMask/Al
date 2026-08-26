@@ -779,11 +779,11 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - GitHub Actions completed unit tests, the debug APK build, and Release `152` with green status at `ef14c42b`.
 - User validated the episode grid, range selection, manual navigation, auto-next behavior, and overall flow on a real device.
 
-## Part 9 — Source Selection Screen
+## Part 9 — Source Selection Screen [~]
 
 **Goal:** Let users fix wrong automatic source matching.
 
-- [ ] Port source selection skeleton.
+- [x] Port source selection skeleton.
 - [ ] Show candidates and support manual mapping.
 - [ ] Remember mapping by AniList ID.
 - [ ] Reset mapping safely.
@@ -791,6 +791,13 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - [ ] Show loading/skeleton, empty, and error/retry states.
 
 **Exit gate:** Wrong auto-match can be corrected manually, mappings persist across restarts, and cancel changes nothing.
+
+#### Part 9 Slice A — Source Selection Skeleton — 2026-08-26
+
+- Added a grouped candidate contract on `SourceProvider` while preserving the existing flattened candidate API.
+- Added a failure-isolated candidate repository that merges provider sections, removes duplicate IDs by server, and filters single-server mode.
+- Added the standalone Anifux-style source-selection shell with top bar, per-provider loading skeletons, horizontal read-only candidate previews, empty/error/retry states, and safe cancel.
+- Registered the screen, repository, strings, and manifest configuration. Manual selection and persistent mapping application remain for the next slice.
 
 ## Part 10 — Downloads / Offline
 
@@ -1004,9 +1011,11 @@ Append dated entries here. Do not delete history.
 - Reused the tested range/grid model for portrait rendering, synchronized source-loading/error/server state after rotation, added focused portrait-state tests, and dismissed inline popups on lifecycle/rebuild.
 - Fixed all portrait parity CI failures by correcting Kotlin property syntax, local density conversion, string resolution, wrapped-view attachment, and the focused test’s numeric type expectation.
 - Closed Part 7 after the user confirmed its remaining device regression on Release `158`.
+- Started Part 9 with the standalone source-selection skeleton: grouped provider candidates, failure-isolated aggregation, single-server filtering, loading/empty/error states, and a read-only preview screen.
 
 ## Next Action
 
-1. Start **Part 9 — Source Selection Screen**: port the standalone source-mapping skeleton and candidate selection UI.
-2. Persist safe manual mappings by AniList ID while preserving automatic source fallback.
-3. Support single-server mode plus loading, empty, error, retry, and cancel-without-change states.
+1. Continue **Part 9 — Source Selection Screen**: connect manual card selection to the existing mapping store.
+2. Preserve automatic source fallback through confirmed mappings and add safe reset behavior.
+3. Complete single-server result flow plus loading, empty, error, retry, and cancel-without-change validation.
+4. Wire the selection entry points into player recovery and media playback navigation.

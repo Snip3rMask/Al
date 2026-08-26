@@ -632,5 +632,15 @@
     <string name="reset_capture_button_position">Reset capture button position</string>
     <string name="capture_button_position_reset">Capture button position reset</string>
     <string name="capture_save_folder_failed">Could not use the selected folder</string>
+    <string name="source_selection_title">Choose Source</string>
+    <string name="source_selection_server_title">Choose Server</string>
+    <string name="source_selection_instruction">Select the anime you want to watch from each server</string>
+    <string name="source_selection_loading">Loading sources…</string>
+    <string name="source_selection_empty">No matches found for \"%1$s\"</string>
+    <string name="source_selection_error">Failed to load source candidates</string>
+    <string name="source_selection_best">★ BEST</string>
+    <string name="source_selection_missing_title">Anime title is missing</string>
+    <string name="navigate_back">Navigate back</string>
+    <string name="unknown">Unknown</string>
     <string name="retry">Retry</string>
 </resources>

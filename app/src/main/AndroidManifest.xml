@@ -49,6 +49,11 @@
             android:exported="false"
             android:theme="@style/Theme.MaterialComponents.DayNight.NoActionBar" />
         <activity
+            android:name=".player.ui.SourceSelectionActivity"
+            android:configChanges="orientation|screenSize|keyboardHidden"
+            android:exported="false"
+            android:theme="@style/Theme.MaterialComponents.DayNight.NoActionBar" />
+        <activity
             android:name=".ui.deeplink.DeepLinkActivity"
             android:launchMode="singleTask"
             android:exported="true" >
