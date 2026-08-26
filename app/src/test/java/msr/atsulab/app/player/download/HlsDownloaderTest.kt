@@ -74,6 +74,7 @@ class HlsDownloaderTest {
                 url = masterUrl,
                 referer = "https://example.com/"
             ),
+            parallelSegments = 1,
             onProgress = { _, total -> reportedTotal = total }
         )
 
