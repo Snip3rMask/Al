@@ -1431,17 +1431,17 @@ class PlayerActivity : AppCompatActivity() {
             .flatMap { viewer ->
                 mediaListRepository.getMediaListCollection(Source.CACHE, viewer, MediaType.ANIME)
             }
-            .map { collection ->
-                collection.lists.asSequence()
+            .flatMap { collection ->
+                val entry = collection.lists.asSequence()
                     .flatMap { it.entries.asSequence() }
                     .firstOrNull { it.media.getId() == anime.aniListId }
-            }
-            .flatMap { entry ->
-                if (entry == null) {
-                    mediaListRepository.updateMediaListStatus(MediaType.ANIME, anime.aniListId, MediaListStatus.CURRENT)
-                } else {
-                    val current = entry.progress ?: 0
-                    if (watchedEpisode > current) {
+                when {
+                    entry == null -> {
+                        mediaListRepository.updateMediaListStatus(
+                            MediaType.ANIME, anime.aniListId, MediaListStatus.CURRENT
+                        )
+                    }
+                    (entry.progress ?: 0) < watchedEpisode -> {
                         mediaListRepository.updateMediaListProgress(
                             MediaType.ANIME,
                             entry.id ?: 0,
@@ -1450,9 +1450,8 @@ class PlayerActivity : AppCompatActivity() {
                             watchedEpisode,
                             null
                         )
-                    } else {
-                        io.reactivex.rxjava3.core.Observable.just(entry)
                     }
+                    else -> io.reactivex.rxjava3.core.Observable.just(entry)
                 }
             }
             .observeOn(AndroidSchedulers.mainThread())
