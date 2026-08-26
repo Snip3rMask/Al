@@ -200,6 +200,10 @@ class DefaultNavigationManager(
         stackPage(CaptureSettingsFragment.newInstance())
     }
 
+    override fun navigateToPlayerSettings() {
+        stackPage(msr.atsulab.app.ui.settings.player.PlayerSettingsFragment.newInstance())
+    }
+
     override fun navigateToAniListSettings() {
         stackPage(AniListSettingsFragment.newInstance())
     }

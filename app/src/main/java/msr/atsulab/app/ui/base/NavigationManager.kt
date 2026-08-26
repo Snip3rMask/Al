@@ -40,6 +40,8 @@ interface NavigationManager {
     fun navigateToSettings() {}
     fun navigateToAppSettings() {}
     fun navigateToCaptureSettings() {}
+
+    fun navigateToPlayerSettings() {}
     fun navigateToAniListSettings() {}
     fun navigateToListSettings() {}
     fun navigateToNotificationsSettings() {}

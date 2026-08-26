@@ -39,4 +39,16 @@ interface PlaybackPreferencesStore {
     fun getDownloadStorageLocation(): DownloadStorageLocation
 
     fun setDownloadStorageLocation(location: DownloadStorageLocation)
+
+    fun isAutoRotateEnabled(): Boolean
+
+    fun setAutoRotateEnabled(enabled: Boolean)
+
+    fun isRememberLastEpisodeEnabled(): Boolean
+
+    fun setRememberLastEpisodeEnabled(enabled: Boolean)
+
+    fun getSeekDurationMs(): Int
+
+    fun setSeekDurationMs(durationMs: Int)
 }

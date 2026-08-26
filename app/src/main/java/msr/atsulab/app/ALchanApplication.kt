@@ -197,6 +197,7 @@ class ALchanApplication : Application() {
         viewModel { SettingsViewModel() }
         viewModel { AppSettingsViewModel(get(), get()) }
         viewModel { CaptureSettingsViewModel(get()) }
+        viewModel { msr.atsulab.app.ui.settings.player.PlayerSettingsViewModel() }
         viewModel { AniListSettingsViewModel(get()) }
         viewModel { ListSettingsViewModel(get()) }
         viewModel { NotificationsSettingsViewModel(get()) }

@@ -124,6 +124,30 @@ class DefaultPlaybackPreferencesStore(
         )
     }
 
+    override fun isAutoRotateEnabled(): Boolean {
+        return preferences.getBoolean(AUTO_ROTATE_KEY, true)
+    }
+
+    override fun setAutoRotateEnabled(enabled: Boolean) {
+        preferences.edit { putBoolean(AUTO_ROTATE_KEY, enabled) }
+    }
+
+    override fun isRememberLastEpisodeEnabled(): Boolean {
+        return preferences.getBoolean(REMEMBER_LAST_EPISODE_KEY, false)
+    }
+
+    override fun setRememberLastEpisodeEnabled(enabled: Boolean) {
+        preferences.edit { putBoolean(REMEMBER_LAST_EPISODE_KEY, enabled) }
+    }
+
+    override fun getSeekDurationMs(): Int {
+        return preferences.getInt(SEEK_DURATION_MS_KEY, DEFAULT_SEEK_DURATION_MS)
+    }
+
+    override fun setSeekDurationMs(durationMs: Int) {
+        preferences.edit { putInt(SEEK_DURATION_MS_KEY, durationMs.coerceIn(MIN_SEEK_MS, MAX_SEEK_MS)) }
+    }
+
     override fun setDownloadStorageLocation(location: DownloadStorageLocation) {
         preferences.edit {
             putString(DOWNLOAD_STORAGE_LOCATION_KEY, location.storageValue)
@@ -164,6 +188,12 @@ class DefaultPlaybackPreferencesStore(
         const val CUSTOM_FONT_PATH_KEY = "subtitle_custom_font_path"
         const val DOWNLOAD_PARALLEL_SEGMENTS_KEY = "download_parallel_segments"
         const val DOWNLOAD_STORAGE_LOCATION_KEY = "download_storage_location"
+        const val AUTO_ROTATE_KEY = "player_auto_rotate"
+        const val REMEMBER_LAST_EPISODE_KEY = "player_remember_last_episode"
+        const val SEEK_DURATION_MS_KEY = "player_seek_duration_ms"
+        const val DEFAULT_SEEK_DURATION_MS = 10_000
+        const val MIN_SEEK_MS = 5_000
+        const val MAX_SEEK_MS = 30_000
         const val DEFAULT_DOWNLOAD_PARALLEL_SEGMENTS = 8
         const val MAX_DOWNLOAD_PARALLEL_SEGMENTS = 16
     }

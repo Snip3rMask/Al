@@ -162,6 +162,40 @@
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
+            <androidx.appcompat.widget.LinearLayoutCompat
+                android:id="@+id/playerSettingsLayout"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingHorizontal="@dimen/marginPageBig"
+                android:paddingVertical="@dimen/marginNormal"
+                android:foreground="?selectableItemBackground"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    app:srcCompat="@drawable/ic_player_play_modern"
+                    app:tint="?themeContentColor"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:text="@string/player_settings"
+                    style="?themeRegularFont"
+                    android:layout_marginHorizontal="@dimen/marginPageBig"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"/>
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    app:srcCompat="@drawable/ic_chevron_right"
+                    app:tint="?themeContentColor"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+            </androidx.appcompat.widget.LinearLayoutCompat>
+
+            <include layout="@layout/divider"/>
+
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/aniListSettingsLayout"
                 android:paddingHorizontal="@dimen/marginPageBig"
