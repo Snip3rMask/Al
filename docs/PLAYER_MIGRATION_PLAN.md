@@ -813,7 +813,7 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 
 **Goal:** Add reliable offline HLS downloads. Start only after online playback is stable.
 
-- [ ] Port download models and HLS downloader.
+- [x] Port download models and HLS downloader.
 - [ ] Create foreground download service.
 - [ ] Add queue and downloaded-entry stores.
 - [ ] Support queue, pause, resume, cancel, retry, and delete.
@@ -824,6 +824,13 @@ Status meanings: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blo
 - [ ] Respect storage settings.
 
 **Exit gate:** Airplane-mode playback works; app kill does not corrupt the queue; notifications and deletion behave correctly.
+
+#### Part 10 Slice A — HLS Download Core — 2026-08-26
+
+- Ported Anifux HLS behavior into focused Kotlin download models: stable sanitized episode filenames, variant metadata, media playlists, progress reporting, and cancellation.
+- Added master-playlist parsing with resolution/bandwidth labels and automatic selection of the highest-bandwidth variant.
+- Added parallel segment downloads with bounded concurrency, per-segment retry/backoff, ordered merge, initialization segment support, atomic `.mp4` finalization, encrypted-stream rejection, and temporary-file cleanup.
+- Registered the downloader through the shared playback OkHttp client and added parser, filename, and MockWebServer integration coverage.
 
 ## Part 11 — AtsuLab Integration Polish
 

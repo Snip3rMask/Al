@@ -20,6 +20,7 @@ import msr.atsulab.app.helper.service.clipboard.ClipboardService
 import msr.atsulab.app.helper.service.clipboard.DefaultClipboardService
 import msr.atsulab.app.helper.service.pushnotification.DefaultPushNotificationService
 import msr.atsulab.app.helper.service.pushnotification.PushNotificationService
+import msr.atsulab.app.player.di.playbackDownloadModule
 import msr.atsulab.app.player.di.playbackNetworkModule
 import msr.atsulab.app.player.di.playbackEngineModule
 import msr.atsulab.app.player.di.playbackProviderModule
@@ -232,6 +233,7 @@ class ALchanApplication : Application() {
             modules(
                 appModules,
                 playbackEngineModule,
+                playbackDownloadModule,
                 playbackNetworkModule,
                 playbackProviderModule,
                 playbackStorageModule,
