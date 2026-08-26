@@ -85,7 +85,7 @@ class DefaultEpisodeRepositoryTest {
                 )
             )
         }
-        val repository = DefaultEpisodeRepository(listOf(anifux), sourceMappingStore = store)
+        val repository = DefaultEpisodeRepository(listOf(anifux), sourceMappingStoreProvider = { store })
 
         val result = repository.getEpisodes(anime).test().await().values().single()
 
@@ -108,7 +108,7 @@ class DefaultEpisodeRepositoryTest {
                 picks = mapOf("Daki" to SourcePick("confirmed-anidb", "Correct"))
             )
         }
-        val repository = DefaultEpisodeRepository(listOf(mkissa, anifux), sourceMappingStore = store)
+        val repository = DefaultEpisodeRepository(listOf(mkissa, anifux), sourceMappingStoreProvider = { store })
 
         val result = repository.getEpisodes(anime).test().await().values().single()
 
@@ -140,7 +140,7 @@ class DefaultEpisodeRepositoryTest {
                 picks = mapOf("Daki" to SourcePick("removed-anidb", "Removed"))
             )
         }
-        val repository = DefaultEpisodeRepository(listOf(mapped, fallback), sourceMappingStore = store)
+        val repository = DefaultEpisodeRepository(listOf(mapped, fallback), sourceMappingStoreProvider = { store })
 
         val result = repository.getEpisodes(anime).test().await().values().single()
 
@@ -163,7 +163,7 @@ class DefaultEpisodeRepositoryTest {
         val store = RecordingSourceMappingStore().apply {
             mapping = SourceMapping(aniListId = "21", skipped = setOf("Daki"))
         }
-        val repository = DefaultEpisodeRepository(listOf(mapped, fallback), sourceMappingStore = store)
+        val repository = DefaultEpisodeRepository(listOf(mapped, fallback), sourceMappingStoreProvider = { store })
 
         val result = repository.getEpisodes(anime).test().await().values().single()
 

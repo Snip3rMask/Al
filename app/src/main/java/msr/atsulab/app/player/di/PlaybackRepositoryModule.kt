@@ -21,7 +21,7 @@ val playbackRepositoryModule = module {
                 get<SourceProvider>(qualifier = PlaybackProviderQualifiers.dakiSourceProvider)
             ),
             diagnostics = get(),
-            sourceMappingStore = get()
+            sourceMappingStoreProvider = { get<SourceMappingStore>() }
         )
     }
     single<SourceCandidateRepository> {
