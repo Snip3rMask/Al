@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import msr.atsulab.app.R
 import msr.atsulab.app.databinding.ListContinueWatchingBinding
 import msr.atsulab.app.helper.extensions.clicks
+import msr.atsulab.app.helper.extensions.show
 import msr.atsulab.app.helper.utils.ImageUtil
 import msr.atsulab.app.player.domain.model.PlaybackProgress
 import msr.atsulab.app.ui.base.BaseRecyclerViewAdapter
