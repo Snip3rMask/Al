@@ -29,7 +29,7 @@ class DownloadsActivity : AppCompatActivity() {
     private val preferences: PlaybackPreferencesStore by inject()
     private val userRepository: UserRepository by inject()
 
-    private lateinit var content: LinearLayout
+    private lateinit var content: androidx.appcompat.widget.LinearLayoutCompat
     private val refreshHandler = Handler(Looper.getMainLooper())
     private val refreshRunnable = object : Runnable {
         override fun run() {
