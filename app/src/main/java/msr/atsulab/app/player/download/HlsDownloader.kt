@@ -133,19 +133,19 @@ class HlsDownloader(
 
     private fun getText(url: String, referer: String, cancelToken: DownloadCancelToken): String {
         check(!cancelToken.isCancelled()) { "Download cancelled" }
-        return execute(request(url, referer), cancelToken) { response -> response.body?.string() }
+        return execute(newRequest(url, referer), cancelToken) { response -> response.body?.string() }
             ?: throw IOException("Empty HLS playlist response")
     }
 
     private fun appendRemote(url: String, referer: String, cancelToken: DownloadCancelToken, output: java.io.OutputStream) {
-        execute(request(url, referer), cancelToken) { response ->
+        execute(newRequest(url, referer), cancelToken) { response ->
             response.body?.byteStream()?.use { input -> input.copyTo(output) }
             true
         } ?: throw IOException("HLS initialization download failed")
     }
 
     private fun copyToFile(url: String, target: File) {
-        execute(request(url, "")) { response ->
+        execute(newRequest(url, "")) { response ->
             response.body?.byteStream()?.use { input ->
                 target.outputStream().use { output -> input.copyTo(output) }
             } ?: throw IOException("Empty segment response")
@@ -161,13 +161,14 @@ class HlsDownloader(
         }
     }
 
-    private fun request(url: String, referer: String): Request.Builder {
+    private fun newRequest(url: String, referer: String): Request {
         return Request.Builder()
             .url(url)
             .header("User-Agent", USER_AGENT)
             .apply {
                 if (referer.isNotBlank()) header("Referer", referer)
             }
+            .build()
     }
 
     private fun unwrapDownloadException(exception: Exception): Exception {
