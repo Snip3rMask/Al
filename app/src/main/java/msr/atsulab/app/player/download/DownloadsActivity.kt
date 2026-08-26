@@ -74,7 +74,7 @@ class DownloadsActivity : AppCompatActivity() {
         if (entries.isNotEmpty()) {
             addSectionTitle(
                 getString(R.string.downloads_completed),
-                topMargin = if (jobs.isNotEmpty()) 20.dp else 0
+                spacingTop = if (jobs.isNotEmpty()) 20.dp else 0
             )
             entries.forEach { entry -> content.addView(completedDownloadView(entry)) }
         }
